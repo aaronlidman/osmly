@@ -14,17 +14,18 @@ app = Flask(__name__)
 def poly():
 	polygon = next_polygon()
 	envelope = map(str, polygon.bounds)
-	print envelope
 	bbox = '[bbox=' + envelope[0] + ',' + envelope[1] + ',' + envelope[2] + ',' + envelope[3] + ']'
-	print bbox
 	osm_xml = get_osm(bbox)
 	from_osm = osm_polygons(osm_xml)
 	if polys_intersect(from_osm, polygon) == False:
-		print 'no overlap'
 		polygon = str(mapping(polygon))
-		print envelope[1] + ',' + envelope[0] + ',' + envelope[3] + ',' + envelope[2]
-		# start with the template + displaying polygon on the map
-		return render_template('poly.html', polygon = polygon)
+		polygon =  polygon.replace('(', '[').replace(')', ']').replace("'", '"')
+		polygon = polygon[:-3] + polygon[-2:]
+		print polygon
+		polygon = json.loads(polygon)
+		del polygon['coordinates'][0][-1]
+		bounds = '[[' + envelope[1] + ',' + envelope[0] + '],[' + envelope[3] + ',' + envelope[2] + ']]'		
+		return render_template('poly.html', polygon=json.dumps(polygon), bounds=bounds)
 		# this doesn't work, leaflet needs real geojson
 	else:
 		print 'overlap'
@@ -34,7 +35,7 @@ def poly():
 
 def next_polygon():
 	conn = sqlite3.connect('merged.sqlite')
-	row = conn.execute('SELECT GEOMETRY FROM merged WHERE OGC_FID="10022"')
+	row = conn.execute('SELECT GEOMETRY FROM merged WHERE OGC_FID="14341"')
 	poly_wkb = str(row.fetchone()[0])
 	geo = shapely.wkb.loads(poly_wkb)
 	return geo.simplify(0.0001)
