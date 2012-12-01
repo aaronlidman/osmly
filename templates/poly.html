@@ -1,207 +1,241 @@
-{% extends "layout.html" %}
+<!doctype html>
+<html>
+	<head>
+		<title>rawr</title>
+		<link rel="stylesheet" type="text/css" href="static/css.css" />
+		<link rel="stylesheet" type="text/css" href="static/leaflet0.4.css" />
+		<!--[if lte IE 8]>
+		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4/leaflet.ie.css" />
+		<![endif]-->
+		<script src="static/leaflet0.4.js"></script>
+		<script src="static/Bing.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+	</head>
+	<body>
+		<ul id="top_right">
+			<li id="title">Outline the nearby park</li>
+			<li id="instruct">Instructions</li>
+		</ul>
+		<!-- <span id="title">Outline the nearby park</span> -->
+		<!-- <span id="instruct">Instructions</span> -->
 
-{% block head %}
-	<link rel="stylesheet" href="http://127.0.0.1:5000/static/leaflet0.4.css" />
-	<!--[if lte IE 8]>
-	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4/leaflet.ie.css" />
-	<![endif]-->
-	<script src="http://127.0.0.1:5000/static/leaflet0.4.js"></script>
-	<script src="http://127.0.0.1:5000/static/Bing.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-	<script type="text/javascript">
-		$(function(){
-			$(document).ready(function(){
+		<div id="modal">
+			<div id="instruction">
+				<h3>Instructions</h3>
+				<li>Make a more accurate outline of the nearby park.</li>
+				<li>It's possible the data is out of date or just wrong; report problems accordingly.</li>
+				<li>Be careful to not include nearby schools, golf courses, or residential yards; just the park.</li>
+				<li>Do include small bodies of water, parking lots, and sidewalks that are obviously part of the park.</li>
+				<li>The park should be fairly obvious, if you're struggling to find anything nearby that looks like a public park it probably isn't right.</li>
 
-				$("#instruct").click(function(){
-					$("#modal").show();
-					$("#instruction").show();
+				<h3 style="margin-top: 15px;">Tips</h3>
+				<li>Click on the nodes (white dots) to delete them</li>
+				<li>Drag a transparent middle node to add a new node</li>
+				<li>If you want to edit from another editor, click the coordinates in the bottom right corner which will take you to osm.org</li>
+
+				<h3 style="margin-top: 15px;">About</h3>
+				<li>Data from TIGER 2011 area landmarks.</li>
+				<li>xx original parks, xx processed, xx new to OSM</li>
+				<a href="#" class="close">X</a> 
+			</div>
+		</div>
+
+		<div id="zwrap">
+			<div id="action-block">
+				<li id="problem">
+					<select name="problem" id="problem_selection">
+						<option value="problem" disabled selected>Problem</option>
+						<option value="no_park">Not a park</option>
+						<option value="poor_imagery">Poor Imagery</option>
+						<option value="too_diff">Too Difficult</option>
+					</select>
+				</li>
+				<li id="skip">Skip</li>
+				<li id="done">Submit</li>
+			</div>
+		</div>
+
+		<div id="details">
+			<span>Park Name</span>
+			<span>in City, ST</span>
+		</div>
+
+		<div id="map"></div>
+		<script type="text/javascript">
+			var map = L.map('map', {
+				center: [39.828175, -98.5795],
+				zoom: 4,
+				maxZoom: 18
+			});
+
+			var polygon = new L.GeoJSON();
+
+			new L.BingLayer("Anqm0F_JjIZvT0P3abS6KONpaBaKuTnITRrnYuiJCE0WOhH6ZbE4DzeT6brvKVR5").addTo(map);
+			polygon.addTo(map);
+			getNext();
+
+			map.on('move', function(){
+				var lat = map.getCenter().lat.toFixed(4).toString();
+				var lng = map.getCenter().lng.toFixed(4).toString();
+				var zoom = map.getZoom().toString();
+				var string = '<span id="prefix_text"><a href="http://www.openstreetmap.org/?mlat=' + lat + '&mlon=' + lng + '&zoom=' + zoom + '" target="_blank">' + lat + ',' + lng + '</a></span>';
+				map.attributionControl.setPrefix(string);
+			});
+
+			$("#instruct").click(function(){
+				$("#modal").css({'z-index': '9999', 'opacity': '1'});
+				$("#instruction").css({'opacity': '1'});
+			});
+
+			$("#modal").click(function(){
+				$("#modal").css({'opacity': '0', 'z-index': '-1'});
+				// could chain all this for a better transition
+				$("#instruction").css({'opacity': '0'});
+			});
+
+			function getNext() {
+				$.get("/poly?next", function(data){
+					data = jQuery.parseJSON(data);
+					// console.log(data);
+					var sw = new L.LatLng(data['bounds'][0], data['bounds'][1]),
+						ne = new L.LatLng(data['bounds'][2], data['bounds'][3]),
+						bounds = new L.LatLngBounds(sw, ne);
+					polygon = L.geoJson(data['geo'], {
+						style: {
+							"color": "#00FF00",
+							"weight": 3,
+							"opacity": 1,
+						},
+						onEachFeature: function(feature, layer){
+							layer.editing.enable();
+						}
+					});
+					map.fitBounds(polygon.getBounds());
+					setTimeout(function(){polygon.addTo(map)}, 600);
+						// b/c of some weird loading problems
+						// when the polygon load too quickly, the half-way nodes are loaded seperately and somewhere else completely, usually north east, miles away
+						// real nodes are fine and once each real one is touched the mid points return but it's still annoying
+						// delaying it seems to work and isn't too annoying because tiles are still loading anyway, it's not too noticable
+							// 500ms is too low
+
+					if (data.name != null) {
+						$("#details").text(data.name);
+						$("#details").show();
+					} else {
+						$("#details").text('');
+						$("#details").hide();
+					}
+					setBindings(data['id'], data['name']);
 				});
+			}
 
-				$("#modal").click(function(){
-					$("#instruction").hide();
-					$("#problem-mode").hide();
-					$("#modal").hide();
-					// just a little sloppy
-				});
-
-				$("#problem").click(function(){
-					$("#modal").show();	
-					$("#problem-mode").show();
+			function setBindings(id, name) {
+				console.log(name);
+				console.log(id);
+				$("#problem_selection").change(function(){
+					unsetBindings();
+					map.removeLayer(polygon);
+					map.setView([39.828175, -98.5795], 4);					
+					$("#problem_selection").val('problem');
+					$.ajax({
+						type: "POST",
+						url: "/poly",
+						data: {id: id, action: $('#problem_selection').val()}
+					}).done(function(msg) {
+						getNext();
+					});
 				});
 
 				$("#done").click(function(){
-					console.log('done clicked');
+					unsetBindings();
+					map.removeLayer(polygon);
+					map.setView([39.828175, -98.5795], 4);
+					var omg = littleboots.toGeoJSON(polygon)['geometries'][0];
+					// console.log(omg);
+					$.ajax({
+						type: "POST",
+						url: "/poly",
+						data: {id: id, action: 'new', geo: JSON.stringify(omg), name: name}
+					}).done(function(msg) {
+						// console.log(msg);
+						getNext();
+					});
 				});
 
-			});
-		});
-	</script>
-	<style type="text/css">
-		* {margin: 0; padding: 0;}
+				$("#skip").click(function(){
+					unsetBindings();
+					map.removeLayer(polygon);
+					map.setView([39.828175, -98.5795], 4);					
+					$.ajax({
+						type: "POST",
+						url: "/poly",
+						data: {id: id, action: "skip"}
+					}).done(function(msg) {
+						// need to throw up a spinner with a message
+						getNext();
+					});
+				});
+			}
 
-		body, html {
-			color: #222;
-			margin: 0;
-			height: 100%;
-			min-width: 640px;
-			font-family: Helvetica, Arial, sans-serif;
+			function unsetBindings() {
+				$("#details").hide();				
+				$("#problem_selection").unbind();
+				$("#done").unbind();
+				$("#skip").unbind();				
+			}
+
+	// from https://github.com/CloudMade/Leaflet/issues/712
+	var littleboots = {
+		toGeoJSON: function(target) {
+		    if (target instanceof L.Polygon) {
+		        //Polygon
+		        var coords = this.latLngsToCoords(target.getLatLngs());
+		        return {
+		            coordinates: [coords],
+		            type: 'Polygon'
+		        };
+		    } else if (target instanceof L.FeatureGroup) {
+		        //Multi point and GeometryCollection
+		        var multi = [];
+		        var layers = target._layers;
+		        var points = true;
+		        for (var stamp in layers) {
+		            var json = this.toGeoJSON(layers[stamp]);
+		            multi.push(json);
+		            if (json.type !== 'Point') {
+		                points = false;
+		            }
+		        }
+		        if (points) {
+		            var coords = multi.map(function(geo){
+		                return geo.coordinates;
+		            });
+		            return {
+		                coordinates: coords,
+		                type: 'MultiPoint'
+		            };
+		        } else {
+		            return {
+		                geometries: multi,
+		                type: 'GeometryCollection'
+		            };
+		        }
+		    }
+		},
+
+		latLngToCoords: function(latlng) {
+		    return [latlng.lng, latlng.lat];
+		},
+
+		latLngsToCoords: function(arrLatlng) {
+		    var coords = [];
+		    arrLatlng.forEach(function(latlng) {
+		        coords.push(this.latLngToCoords(latlng));
+		    },
+		    this);
+		    return coords;
 		}
-		a {text-decoration: none;}
-		#main {height: 100%;}
-		#map {min-height: 500px; height: 100%;}
-
-		#title {
-			position: absolute;
-			top: 0;
-			right: 0;
-			font-weight: bold;
-			padding: 10px 15px;
-			background-color: white;
-			margin-bottom: 5px;
-			font-size: 24px;
-			z-index: 10;
-		}
-
-		#instruct {
-			position: absolute;
-			top: 50px;
-			right: 0;
-			cursor: pointer;
-			z-index: 10;
-			padding: 10px 15px;
-			background-color: white;
-			float: right;
-		}		
-
-		#action-block {
-			color: white;
-			z-index: 10;
-			width: 100%;
-			margin: 0 auto;
-			position: absolute;
-			bottom: 0;
-			margin-bottom: 35px;
-		}
-
-		#done, #problem {
-			border: 1px solid rgba(255,255,255,0.25);
-			color: rgba(255,255,255,1);
-			padding: 8px 15px;
-			margin: 15px;
-			cursor: pointer;
-		}
-
-		#done {background-color: rgba(0, 179, 0, 0.6);}
-		#done:hover {background-color: rgba(0, 179, 0, 1);}
-		#done:active {background-color: rgba(0, 109, 0, 1);}		
-		#problem {background-color: rgba(188, 0, 0, 0.6);}
-		#problem:hover {background-color: rgba(188, 0, 0, 1);}
-		#problem:active {background-color: rgba(115, 0, 0, 1);}
-
-		#modal {
-			top: 0;
-			right: 0;
-			left: 0;
-			bottom: 0;
-			position: absolute;
-			background: rgba(0,0,0,0.5);
-			display: none;
-			width: 100%;
-			height: 100%;
-			z-index: 9999;
-			cursor: pointer;
-		}
-		#instruction {
-			display: none;
-			background-color: white;
-			line-height: 1.4em;
-			margin: -250px -320px 0 0;			
-			right: 50%;
-			top: 50%;
-			padding: 15px 20px;
-			position: absolute;
-			overflow: hidden;
-			height: 250px;
-			width: 640px;
-		}
-		#instruction h3 {
-			margin-bottom: 5px;
-		}
-		#problem-mode {
-			display: none;
-			background-color: white;
-			line-height: 1.4em;
-			margin: -250px -160px 0 0;			
-			right: 50%;
-			top: 50%;
-			padding: 15px 20px;
-			position: absolute;
-			overflow: hidden;
-			height: 250px;
-			width: 320px;
-		}		
-	</style>
-{% endblock %}
-
-{% block main %}
-	<span id="title">Outline the nearby park</span>
-	<span id="instruct">Instructions</span>
-
-	<div id="modal">
-		<div id="instruction">
-			<h3>Objective</h3>
-			<p style="margin-bottom: 20px;">The polygon is placed in a known area near a park, your job is to find the park and make an accurate outline of it. It's possible the data is out of date or just wrong, report problems accordingly. Be careful to not include nearby schools, golf courses, or residential yards; just the park. Do include small bodies of water, parking lots, and sidewalks that are obviously part of the park. The park should be fairly obvious, if you're struggling to find anything nearby that looks like a public park it probably isn't right.</p>
-
-			<h3>Tips</h3>
-			<li>Click the nodes (white dots) to delete them</li>
-			<li>Drag a transparent middle node to add a new node</li>
-		</div>
-		<div id="problem-mode">
-			<h3>Problem?</h3>
-			<form name="report_problem" action='/problem' method="POST">
-				<input type="radio" name="problem" value="no_park">No park here<br>
-				<input type="radio" name="problem" value="bad_imagery">Imagery is too poor<br>
-				<input type="radio" name="problem" value="whiny">Too difficult<br>
-				<!-- make them into big buttons that don't actually look like radio buttons -->
-				<!-- include "other" w/ a text field for input, make them all text? -->
-				<!-- when a button is clicked, bring up a submit button to confirm everything -->
-			</form>
-		</div>
-	</div>
-
-	<div id="action-block">
-		<span id="done">Done</span>
-		<span style=""> or </span>
-		<span id="problem">Problem</span>
-	</div>	
-	<div id="map"></div>
-	<script type="text/javascript">
-		var map = L.map('map', {maxZoom: 18}).fitBounds({% autoescape false %}{{ bounds }}{% endautoescape %});
-
-		// L.tileLayer('http://{s}.tile.cloudmade.com/{key}/22677/256/{z}/{x}/{y}.png', {
-		// 	attribution: 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2012 CloudMade',
-		// 	key: 'BC9A493B41014CAABB98F0471D759707'
-		// }).addTo(map);
-
-		map.attributionControl.setPrefix(false);
-
-		var bing = new L.BingLayer("Anqm0F_JjIZvT0P3abS6KONpaBaKuTnITRrnYuiJCE0WOhH6ZbE4DzeT6brvKVR5").addTo(map);
-
-		function onEachFeature(feature, layer) {
-			layer.editing.enable();
-		}
-
-		var myStyle = {
-			"color": "#00FF00",
-		    "weight": 3,
-		    "opacity": 1,
-		};
-
-		mypoly = {% autoescape false %}{{ polygon }}{% endautoescape %}
-		polygon = L.geoJson(mypoly, {
-			style: myStyle, onEachFeature: onEachFeature
-		});
-		polygon.addTo(map);
-
-	</script>
-{% endblock %}
+	}
+		</script>
+	</body>
+</html>
