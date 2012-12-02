@@ -11,6 +11,7 @@ import sys
 
 app = Flask(__name__)
 
+CREATED_BY = 'tiger-parks'
 
 @app.route('/poly', methods=['GET', 'POST'])
 def poly():
@@ -21,7 +22,7 @@ def poly():
             new = json.loads(request.form['geo'])
             geo = asShape(new)
             # need to load it into shapely, no bounds object yet
-            # qd, just copied from the regular 'next' case below
+            # qd, next lines just copied from below
             envelope = map(str, geo.bounds)
             bbox = '[bbox=' + envelope[0] + ',' + envelope[1] + ',' + envelope[2] + ',' + envelope[3] + ']'
             osm_xml = get_osm(bbox)
@@ -33,7 +34,6 @@ def poly():
                 return 'false'
             # check if an open changeset exist for use by osmparks
                 # if not, start a new changeset
-            print new['coordinates'][0]
             wtf = build_upload(0, new['coordinates'][0])
             print request.form['name'] + ':'
             print new
@@ -192,6 +192,26 @@ def done(id, result, geo_after=False):
         # conn = sqlite3.connect('merged.sqlite')
         return 'ok'
 
+
+def changeset(userid):
+    # creates a new changeset or finds an open one already created by us
+    # returns the changeset id
+    id = 0
+    baseurl = 'http://api.openstreetmap.org/api/0.6/changesets?&open=1&user='
+    request = baseurl + userid
+    # should check for errors and such
+    result = urllib2.urlopen(request).read()
+    result = fromstring(result)
+    for cset in result.iterfind('changeset'):
+        if cset.get('open') == 'true':
+            for tag in cset.iterfind('tag'):
+                if (tag.get('k') == 'created_by' and tag.get('v') == CREATED_BY):
+                    id = cset.get('id')
+    if id == 0:
+        # no open changeset, need to create one
+        # http://wiki.openstreetmap.org/wiki/API_v0.6#Create:_PUT_.2Fapi.2F0.6.2Fchangeset.2Fcreate
+        # need to get OAuth working first
+    return id 
 
 def build_upload(changeset, coordinates):
     # diff upload, osmChange format
