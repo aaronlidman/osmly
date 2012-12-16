@@ -1,18 +1,43 @@
 from xml.etree.ElementTree import ElementTree, fromstring, Element, SubElement, tostring
 import sqlite3
 from flask import Flask, render_template, request
-import urllib2
+import requests
+from oauth_hook import OAuthHook
 import json
 from shapely.geometry import asShape, mapping
 import shapely.wkt
 import time
+from urlparse import parse_qs
+from urllib import unquote
 
 import sys
 
 app = Flask(__name__)
 
-CREATED_BY = 'tiger-parks'
+# CREATED_BY = 'tiger-parks'
+CREATED_BY = 'osmly-tigerparks'
+OAUTH_REQUEST_URL = 'http://www.openstreetmap.org/oauth/request_token'
+OAUTH_AUTH_URL = 'http://www.openstreetmap.org/oauth/authorize'
+OAUTH_ACCESS_URL = 'http://www.openstreetmap.org/oauth/access_token'
+OAUTH_CONSUMER_KEY = 'obsZB5J8TtmqDeJXNGerCDuO5RbBlJbqyCvmf3Ne'
+OAUTH_SECRET = '0dTn0G85uORXNvKNBs2MUygdOqoVvSi2xI6mLGrv'
+USER_DETAILS = 'http://api.openstreetmap.org/api/0.6/user/details'
 
+
+@app.route('/oauth')
+def oauth():
+    if 'rtoken' in request.args:
+        rq = oauth_request_token()
+        oauth = {'token': rq['oauth_token'][0], 'secret': rq['oauth_token_secret'][0]}
+        return json.dumps(oauth)
+    elif 'atoken' in request.args:
+        oreo = json.loads(unquote(request.cookies['rtoken']))
+        acs = oauth_access_token(oreo['token'], oreo['secret'])
+        return 'stuff'
+
+# might want to simplify all these routes to a single one
+# just use the "in" method and many more arguments instead, simpler
+# makes it easier to drop flask too
 @app.route('/poly', methods=['GET', 'POST'])
 def poly():
     if request.method == 'POST':
@@ -58,6 +83,7 @@ def poly():
                 envelope = map(str, polygon['geo'].bounds)
                 bbox = '[bbox=' + envelope[0] + ',' + envelope[1] + ',' + envelope[2] + ',' + envelope[3] + ']'
                 osm_xml = get_osm(bbox)
+                print osm_xml
                 osm_json = osm_polygons(osm_xml)
                 if polys_intersect(osm_json, polygon['geo']) is False:
                     polygon = prep(polygon)
@@ -70,6 +96,9 @@ def poly():
                 else:
                     done(polygon['id'], 'dupe')
                     polygon = False
+        # elif 'oauth_token' in request.args:
+            # get the secret, set both the token and secret as a cookie
+            # redirect back to "/"
         else:
             # plain jane visit
             return render_template('poly.html')
@@ -96,11 +125,12 @@ def get_osm(bbox):
     # provider = 'http://jxapi.osm.rambler.ru/xapi/api/0.6/'
     request = provider + 'way' + bbox
     # should check for errors and such
-    return urllib2.urlopen(request).read()
+    osm = requests.get(request).text.encode('ascii', 'ignore')
+        # had a problem with encoding on some name values
+    return str(osm)
 
 
 def osm_polygons(osm_string):
-    # xpath might simplify this a bit, forgot about it
     geojson = {'type': 'FeatureCollection', 'features': []}
     tree = fromstring(osm_string)
     for way in tree.iterfind('way'):
@@ -193,21 +223,54 @@ def done(id, result, geo_after=False):
         return 'ok'
 
 
+def oauth_request_token():
+    # directly from "3-legged Authorization" https://github.com/maraujop/requests-oauth
+    request_hook = OAuthHook(consumer_key=OAUTH_CONSUMER_KEY, consumer_secret=OAUTH_SECRET)
+    response = requests.post(OAUTH_REQUEST_URL, hooks={'pre_request': request_hook})
+    # should check for errors and such
+    qs = parse_qs(response.text)
+    print qs['oauth_token'][0]
+    print qs['oauth_token_secret'][0]
+    return qs
+
+
+def oauth_access_token(token, secret):
+    # get acces token and secret
+    oauth_verifier = 0 # OSM doesn't use this
+    access_hook = OAuthHook(token, secret, OAUTH_CONSUMER_KEY, OAUTH_SECRET)
+    access = requests.post(OAUTH_ACCESS_URL, {'oauth_verifier': oauth_verifier}, hooks={'pre_request': access_hook})
+    print access.text
+    access = parse_qs(access.text)
+    print 'access: '
+    print access
+    # access['oauth_token'][0]
+    # access['oauth_token_secret'][0]
+    # get user details
+    OAuthHook.consumer_key = OAUTH_CONSUMER_KEY
+    OAuthHook.consumer_secret = OAUTH_SECRET
+    deets_hook = OAuthHook(access['oauth_token'][0], access['oauth_token_secret'][0], header_auth=True)
+    response = requests.get(USER_DETAILS, {'oauth_verifier': oauth_verifier}, hooks={'pre_request': deets_hook})
+    print 'response: '
+    print response
+    # return access
+
+
 def changeset(userid):
     # creates a new changeset or finds an open one already created by us
     # returns the changeset id
     id = 0
-    baseurl = 'http://api.openstreetmap.org/api/0.6/changesets?&open=1&user='
-    request = baseurl + userid
+    baseurl = 'http://api06.dev.openstreetmap.org/api/0.6/changesets?&open=1&user='
+    query = baseurl + userid
     # should check for errors and such
-    result = urllib2.urlopen(request).read()
-    result = fromstring(result)
+    r = requests.get(query)
+    result = fromstring(r.text)
     for cset in result.iterfind('changeset'):
         if cset.get('open') == 'true':
             for tag in cset.iterfind('tag'):
                 if (tag.get('k') == 'created_by' and tag.get('v') == CREATED_BY):
                     id = cset.get('id')
     if id == 0:
+        id = False
         # no open changeset, need to create one
         # http://wiki.openstreetmap.org/wiki/API_v0.6#Create:_PUT_.2Fapi.2F0.6.2Fchangeset.2Fcreate
         # need to get OAuth working first
@@ -235,6 +298,7 @@ def build_upload(changeset, coordinates):
     way = SubElement(create, 'way', id='-'+str(count), timestamp=tstamp)
     way.extend(nds)
     parkify = SubElement(way, 'tag', k='leisure', v='park')
+    print tostring(osmchange)
     return tostring(osmchange)
 
 

@@ -49,6 +49,10 @@ a {text-decoration: none;}
 	margin-left: -10px;
 	position: relative;
 	width: 400px;
+	opacity: 0;
+	transition: opacity .25s ease-in-out;
+	-moz-transition: opacity .25s ease-in-out;
+	-webkit-transition: opacity .25s ease-in-out;	
 }
 
 #action-block li {
@@ -142,13 +146,33 @@ button:focus {
 }
 
 #details {
-	display: none;
+	opacity: 0;
 	position: absolute;
 	bottom: 90px;
 	left: 10px;
 	padding: 10px 15px;
 	background-color: white;
 	z-index: 10;
+	transition: opacity .25s ease-in-out;
+	-moz-transition: opacity .25s ease-in-out;
+	-webkit-transition: opacity .25s ease-in-out;
+}
+
+#login {
+	cursor: pointer;
+	position: absolute;
+	opacity: 0;
+	display: block;
+	background-color: white;
+	font-size: 20px;
+	font-weight: bold;
+	color: black;
+	padding: 15px 20px;
+	z-index: 900;
+	left: 10px;
+	transition: opacity .5s ease-in-out;
+	-moz-transition: opacity .5s ease-in-out;
+	-webkit-transition: opacity .5s ease-in-out;	
 }
 
 /* I stupidly editted the leaflet source css previously, need to diff and move it all here instead */
@@ -156,6 +180,7 @@ button:focus {
 	background: none !important;
 	color: white;
 	text-shadow: 1px 1px black;
+	font-weight: bold !important;
 }
 .leaflet-container a {
 	color: white !important;

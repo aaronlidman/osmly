@@ -10,6 +10,7 @@
 		<script src="static/leaflet0.4.js"></script>
 		<script src="static/Bing.js"></script>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+		<script src="static/jquery.cookie.js"></script>
 	</head>
 	<body>
 		<ul id="top_right">
@@ -41,6 +42,7 @@
 		</div>
 
 		<div id="zwrap">
+			<div id="login">Login with your OSM account »</div>
 			<div id="action-block">
 				<li id="problem">
 					<select name="problem" id="problem_selection">
@@ -55,13 +57,12 @@
 			</div>
 		</div>
 
-		<div id="details">
-			<span>Park Name</span>
-			<span>in City, ST</span>
-		</div>
+		<div id="details"></div>
 
 		<div id="map"></div>
 		<script type="text/javascript">
+			run_down();
+
 			var map = L.map('map', {
 				center: [39.828175, -98.5795],
 				zoom: 4,
@@ -72,7 +73,19 @@
 
 			new L.BingLayer("Anqm0F_JjIZvT0P3abS6KONpaBaKuTnITRrnYuiJCE0WOhH6ZbE4DzeT6brvKVR5").addTo(map);
 			polygon.addTo(map);
-			getNext();
+
+			// need to do an auth check first, check for cookie
+				// first check for url but no cookie (oauth_token)
+					// set the correct cookie and redirect to check again
+				// check for cookie
+			// if cookie is present, continue and load getNext();
+			// else throw up the login thing in the place of controls
+			// getNext();
+			$("#login").css({'opacity': '1'});
+				// clicking on this sends a request to build a new token
+				// it's built, gets returned, and the user is automatically redirected to osm.org
+				// the click ok, and get redirected back
+				// we see the oauth_token attached and pick it up from there
 
 			map.on('move', function(){
 				var lat = map.getCenter().lat.toFixed(4).toString();
@@ -92,6 +105,39 @@
 				// could chain all this for a better transition
 				$("#instruction").css({'opacity': '0'});
 			});
+
+			$("#login").click(function(){
+				$.get("/oauth?rtoken=1", function(data){
+					$.cookie('rtoken', data, {path: '/'});
+					data = jQuery.parseJSON(data);
+					console.log(data['token']);
+					window.location.href = 'http://www.openstreetmap.org/oauth/authorize?oauth_token=' + data['token'];
+				});
+			});
+
+			function run_down() {
+				if (getVar('oauth_token')){
+					var rtoken = jQuery.parseJSON($.cookie('rtoken'));
+					if (getVar('oauth_token') === rtoken['token']){
+						console.log('cookie and token match');
+						$.get("/oauth?atoken", function(data){
+							$.cookie('atoken', data, {path: '/'});
+							data = jQuery.parseJSON(data);
+							console.log(data['token']);
+						});
+						// do another $.get for access token
+							// save results to a new cooke (oauth)
+							// delete p-oauth cookie
+							// redirect to plain-jane
+								// plain jane picks it up and recognizes it
+								// we're golden
+					}
+				}
+				// check the url for oauth_token
+					// if oauth_token == true
+						// check for p-oauth cookie, make sure they match
+				// check cookies for oath
+			}
 
 			function getNext() {
 				$.get("/poly?next", function(data){
@@ -120,16 +166,17 @@
 
 					if (data.name != null) {
 						$("#details").text(data.name);
-						$("#details").show();
+						$("#details").css({'opacity': '1'});
 					} else {
 						$("#details").text('');
-						$("#details").hide();
+						$("#action-block").css({'opacity': '0'});
 					}
 					setBindings(data['id'], data['name']);
 				});
 			}
 
 			function setBindings(id, name) {
+				$("#action-block").css({'opacity': '1'});
 				console.log(name);
 				console.log(id);
 				$("#problem_selection").change(function(){
@@ -178,7 +225,8 @@
 			}
 
 			function unsetBindings() {
-				$("#details").hide();				
+				$("#action-block").css({'opacity': '0'});
+				$("#details").css({'opacity': '0'});
 				$("#problem_selection").unbind();
 				$("#done").unbind();
 				$("#skip").unbind();				
@@ -235,6 +283,17 @@
 		    this);
 		    return coords;
 		}
+	}
+
+	// http://css-tricks.com/snippets/javascript/get-url-variables/
+	function getVar(variable) {
+	       var query = window.location.search.substring(1);
+	       var vars = query.split("&");
+	       for (var i=0;i<vars.length;i++) {
+	               var pair = vars[i].split("=");
+	               if(pair[0] == variable){return pair[1];}
+	       }
+	       return(false);
 	}
 		</script>
 	</body>
