@@ -7,7 +7,10 @@ body, html {
 	min-width: 640px;
 	font-family: Helvetica, Arial, sans-serif;
 }
-a {text-decoration: none;}
+a {
+	text-decoration: none;
+	color: #222;
+}
 #main {height: 100%;}
 #map {min-height: 500px; height: 100%;}
 
@@ -43,13 +46,13 @@ a {text-decoration: none;}
 }
 
 #action-block {
+	display: none;
 	list-style-type: none;
 	color: white;
 	z-index: 10;
 	margin-left: -10px;
 	position: relative;
 	width: 400px;
-	opacity: 0;
 	transition: opacity .25s ease-in-out;
 	-moz-transition: opacity .25s ease-in-out;
 	-webkit-transition: opacity .25s ease-in-out;	
@@ -96,72 +99,90 @@ button:focus {
 #skip:active {background-color: rgba(0, 49, 109, 1);}
 
 #modal {
-	cursor: pointer;
 	top: 0;
 	right: 0;
 	left: 0;
 	bottom: 0;
 	position: absolute;
-	background: rgba(0,0,0,0.5);
+	background: rgba(0,0,0,0.4);
 	width: 100%;
 	height: 100%;
-	z-index: -1;
-	opacity: 0;
-	transition: opacity .1s ease-in-out;
-	-moz-transition: opacity .1s ease-in-out;
-	-webkit-transition: opacity .1s ease-in-out;
+	z-index: 9000;
+	display: none;
 }
 
 #instruction {
+	cursor: pointer;
 	background-color: white;
 	line-height: 1.4em;
-	margin: -250px -320px 0 0;			
+	margin: -290px -340px 0 0;			
 	right: 50%;
 	top: 50%;
-	padding: 15px 20px;
+	padding: 20px;
 	position: absolute;
 	overflow: hidden;
-	height: 420px;
+	height: 510px;
 	width: 640px;
-	opacity: 0;
-	transition: opacity .1s ease-in-out;
-	-moz-transition: opacity .1s ease-in-out;
-	-webkit-transition: opacity .1s ease-in-out;
+	display: none;
 }
+	#instruction a {
+		border-bottom: 1px solid #999;
+	}
+
+#display {
+	display: none;
+	width: 640px;
+	height: 640px;
+	margin: -320px -320px 0 0;
+	right: 50%;
+	top: 50%;
+	position: absolute;
+	overflow: visible;
+	z-index: 10;
+}
+	#display img {
+		display: none;
+		width: 640px;
+	}
+
+	#display canvas {
+		position: relative;
+		top: 20%;
+		display: none;
+		width: 640px;
+	}
 
 #instruction h3 {margin-bottom: 5px;}
 #instruction li {margin-left: 20px;}
 
 .close {
-	color: #999;
+	color: #666;
 	padding: 10px 20px;
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 14px;
 	position: absolute;
 	top: 0;
 	right: 0;
+	border: none;
+	background-color: #eee;
 }
 .close:hover {
 	color: black;
 }
 
 #details {
-	opacity: 0;
+	display: none;
 	position: absolute;
 	bottom: 90px;
 	left: 10px;
 	padding: 10px 15px;
 	background-color: white;
 	z-index: 10;
-	transition: opacity .25s ease-in-out;
-	-moz-transition: opacity .25s ease-in-out;
-	-webkit-transition: opacity .25s ease-in-out;
 }
 
 #login {
 	cursor: pointer;
 	position: absolute;
-	opacity: 0;
 	display: block;
 	background-color: white;
 	font-size: 20px;
@@ -170,18 +191,29 @@ button:focus {
 	padding: 15px 20px;
 	z-index: 900;
 	left: 10px;
-	transition: opacity .5s ease-in-out;
-	-moz-transition: opacity .5s ease-in-out;
-	-webkit-transition: opacity .5s ease-in-out;	
+	display: none;
 }
 
 /* I stupidly editted the leaflet source css previously, need to diff and move it all here instead */
-.leaflet-container .leaflet-control-attribution {
+.leaflet-control-attribution {
 	background: none !important;
-	color: white;
-	text-shadow: 1px 1px black;
+	color: white !important;
+	text-shadow: 1px 1px black !important;
 	font-weight: bold !important;
 }
-.leaflet-container a {
+.leaflet-control-attribution a {
 	color: white !important;
+}
+
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+	-moz-border-radius: 5px !important;
+	-webkit-border-radius: 5px !important;
+	border-radius: 5px !important;
+	box-shadow: 0 2px 10px #333 !important;
+	-moz-box-shadow: 0 2px 10px #333 !important;
+	-webkit-box-shadow: 0 2px 10px #333 !important;
+}
+
+.leaflet-popup-content {
+	/*margin: ;*/
 }

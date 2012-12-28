@@ -2,257 +2,361 @@ from xml.etree.ElementTree import ElementTree, fromstring, Element, SubElement, 
 import sqlite3
 from flask import Flask, render_template, request
 import requests
-from oauth_hook import OAuthHook
 import json
 from shapely.geometry import asShape, mapping
 import shapely.wkt
 import time
-from urlparse import parse_qs
-from urllib import unquote
-
-import sys
 
 app = Flask(__name__)
 
-# CREATED_BY = 'tiger-parks'
+sqlite = {
+    'db': 'laparks.sqlite',
+    'table': 'parks',
+    'columns': [
+        'OGC_FID',
+        'GEOMETRY',
+        'name',
+        'source'],
+    'where': 'aland < 350000 AND aland > 500 AND skip_count < 15'
+}
+
+to_intersect = {
+    'way': [
+        'leisure=park',
+        'leisure=nature_reserve',
+        'leisure=garden',
+        'leisure=stadium'],
+    'node': []
+}
+
+to_display = {
+    'way': [
+        'leisure=park',
+        'leisure=nature_reserve',
+        'lesiure=stadium',
+        'leisure=golf_course',
+        'leisure=dog_park',
+        'landuse=cemetery',
+        'landuse=farm',
+        'landuse=farmland',
+        'landuse=recreation_ground',
+        'amenity=college',
+        'amenity=kindergarten',
+        'amenity=school',
+        'amenity=university',
+        'amenity=grave_yard'],
+    'node': [
+        'leisure=park',
+        'lesiure=stadium',
+        'leisure=golf_course',
+        'landuse=cemetery',
+        'amenity=college',
+        'amenity=kindergarten',
+        'amenity=school',
+        'amenity=university',
+        'amenity=grave_yard']
+}
+
 CREATED_BY = 'osmly-tigerparks'
-OAUTH_REQUEST_URL = 'http://www.openstreetmap.org/oauth/request_token'
-OAUTH_AUTH_URL = 'http://www.openstreetmap.org/oauth/authorize'
-OAUTH_ACCESS_URL = 'http://www.openstreetmap.org/oauth/access_token'
-OAUTH_CONSUMER_KEY = 'obsZB5J8TtmqDeJXNGerCDuO5RbBlJbqyCvmf3Ne'
-OAUTH_SECRET = '0dTn0G85uORXNvKNBs2MUygdOqoVvSi2xI6mLGrv'
-USER_DETAILS = 'http://api.openstreetmap.org/api/0.6/user/details'
 
-
-@app.route('/oauth')
-def oauth():
-    if 'rtoken' in request.args:
-        rq = oauth_request_token()
-        oauth = {'token': rq['oauth_token'][0], 'secret': rq['oauth_token_secret'][0]}
-        return json.dumps(oauth)
-    elif 'atoken' in request.args:
-        oreo = json.loads(unquote(request.cookies['rtoken']))
-        acs = oauth_access_token(oreo['token'], oreo['secret'])
-        return 'stuff'
 
 # might want to simplify all these routes to a single one
 # just use the "in" method and many more arguments instead, simpler
 # makes it easier to drop flask too
-@app.route('/poly', methods=['GET', 'POST'])
-def poly():
+@app.route('/', methods=['GET', 'POST'])
+def slash():
     if request.method == 'POST':
         if request.form['action'] == 'new':
             # need to check for intersection again
-            # maybe try/except this?
+            # !! - try/except this - !!
+                # I don't trust you
             new = json.loads(request.form['geo'])
             geo = asShape(new)
-            # need to load it into shapely, no bounds object yet
-            # qd, next lines just copied from below
-            envelope = map(str, geo.bounds)
-            bbox = '[bbox=' + envelope[0] + ',' + envelope[1] + ',' + envelope[2] + ',' + envelope[3] + ']'
-            osm_xml = get_osm(bbox)
-            osm_json = osm_polygons(osm_xml)
-            if polys_intersect(osm_json, geo) is True:
+            osm_json = get_osm(geo, 0)
+            if intersection(osm_json['polygons']['intersect'], geo) is True:
                 # an intersection between user editted data and existing OSM data
                 print 'after edit intersection'
                 # done() it
                 return 'false'
-            # check if an open changeset exist for use by osmparks
-                # if not, start a new changeset
-            wtf = build_upload(0, new['coordinates'][0])
-            print request.form['name'] + ':'
-            print new
-            return 'got new'
+            if request.form['name'] == 'Park':
+                name = ''
+            else:
+                name = request.form['name']
+            wtf = build_upload(0, new['coordinates'][0], name)
+            return wtf
             # done(request.form['id'], request.form['action'], request.form['geo'])
         else:
             # skip or report a problem
             done(request.form['id'], request.form['action'])
-            status = {}
-            status['status'] = 'ok'
-            status['id'] = request.form['id']
+            status = {
+                'status': 'ok',
+                'id': request.form['id']
+            }
             return json.dumps(status)
     else:
+        # GET
         polygon = False
         if 'next' in request.args:
             while polygon is False:
                 # might want to limit this loop somehow to avoid hitting xapi too hard
                 # after x failures switch providers?
                 # incrementally sleep for a second or two?
+                # need to work around new limitation: http://wiki.openstreetmap.org/wiki/Overpass_API/versions#Overpass_API_v0.7.1
+                    # CORS support too, client side intersection query?
                 polygon = next_polygon()
-                # print 'polygon: ' + str(polygon['id'])
-                envelope = map(str, polygon['geo'].bounds)
-                bbox = '[bbox=' + envelope[0] + ',' + envelope[1] + ',' + envelope[2] + ',' + envelope[3] + ']'
-                osm_xml = get_osm(bbox)
-                print osm_xml
-                osm_json = osm_polygons(osm_xml)
-                if polys_intersect(osm_json, polygon['geo']) is False:
+                osm_json = get_osm(polygon['geo'])
+                if intersection(osm_json['polygons']['intersect'], polygon['geo']) is False:
                     polygon = prep(polygon)
                     if polygon == 'json_problem':
                         done(polygon['id'], 'json_problem')
                         polygon = False
                     else:
-                        polygon['bounds'] = envelope[1], envelope[0], envelope[3], envelope[2]
-                        return json.dumps(polygon)
+                        return json.dumps({
+                            'display_polys': osm_json['polygons']['display'],
+                            'display_nodes': osm_json['nodes']['display'],
+                            'edit': polygon
+                        })
                 else:
                     done(polygon['id'], 'dupe')
                     polygon = False
-        # elif 'oauth_token' in request.args:
-            # get the secret, set both the token and secret as a cookie
-            # redirect back to "/"
+                    # polygon = prep(polygon)
+                    # return json.dumps({
+                    #     'display_polys': osm_json['polygons']['display'],
+                    #     'display_nodes': osm_json['nodes']['display'],
+                    #     'edit': polygon
+                    # })
+                    # to actually see dupe detection on leaflet
         else:
             # plain jane visit
             return render_template('poly.html')
 
 
 def next_polygon():
-    conn = sqlite3.connect('merged.sqlite')
-    # row = conn.execute('SELECT OGC_FID, GEOMETRY, fullname FROM merged WHERE OGC_FID="12413"')
-    # testing: 18870 is a dupe, 608 is a multi, 15997 json_problem, 12413 multi
-    # row = conn.execute('SELECT OGC_FID, GEOMETRY, fullname FROM merged WHERE awater = 0 AND aland < 350000 AND aland > 500 AND skip_count < 15 ORDER BY RANDOM() LIMIT 1')
-    row = conn.execute('SELECT OGC_FID, GEOMETRY, fullname FROM merged WHERE aland < 350000 AND aland > 500 AND skip_count < 15 ORDER BY RANDOM() LIMIT 1')
+    conn = sqlite3.connect(sqlite['db'])
+    # row = conn.execute('SELECT OGC_FID, GEOMETRY, fullname FROM merged WHERE OGC_FID="17120"')
+    # testing: 18870 is a dupe, 608, 17120 is a multi, 15997 json_problem, 12413, 10938 multi
+    # 5891 has display data, 6453 has a single display node
+    row = conn.execute('SELECT ' + ', '.join(sqlite['columns']) + ' FROM ' + sqlite['table'] + ' WHERE ' + sqlite['where'] + ' ORDER BY RANDOM() LIMIT 1')
     row = row.fetchone()
     poly_wkb = str(row[1])
-    polygon = {}
-    polygon['id'] = row[0]
-    polygon['geo'] = shapely.wkb.loads(poly_wkb).simplify(0.0001)
-    polygon['name'] = row[2]
+    polygon = {
+        'id': row[0],
+        'geo': shapely.wkb.loads(poly_wkb).simplify(0.0001),
+        'name': row[2]
+    }
     return polygon
 
 
-def get_osm(bbox):
+def get_osm(shapely_obj, display = 1):
+    # added a display conditional to speed up reviews, a bit messy still
+    if display:
+        shapely_obj = shapely_obj.buffer(0.001)
+        # 0.001 is good, 0.005 ok for testing
+    envelope = map(str, shapely_obj.bounds)
+    bbox = '[bbox=' + envelope[0] + ',' + envelope[1] + ',' + envelope[2] + ',' + envelope[3] + ']'
+    print bbox
     # provider = 'http://overpass.osm.rambler.ru/cgi/xapi?'
+        # a bit erratic
     provider = 'http://www.overpass-api.de/api/xapi?'
-    # provider = 'http://jxapi.osm.rambler.ru/xapi/api/0.6/'
-    request = provider + 'way' + bbox
-    # should check for errors and such
+    request = provider + '*' + bbox
+    # should check for http errors and such here
     osm = requests.get(request).text.encode('ascii', 'ignore')
         # had a problem with encoding on some name values
-    return str(osm)
+    multips = osm_multips(str(osm))
+    results = {}
+    results['polygons'] = osm_polygons(str(osm), display)
+    if display:
+        results['nodes'] = osm_nodes(str(osm), display)
+    if multips:
+        results['polygons']['intersect']['features'].append(multips[0])
+        if display:
+            results['polygons']['display']['features'].append(multips[0])
+    return results
 
 
-def osm_polygons(osm_string):
-    geojson = {'type': 'FeatureCollection', 'features': []}
+def osm_multips(osm_string):
+    # looking for relations with tags that match to_intersect['way']
+    # gather all the ids within that relation, then build polygons of those way
+    # result ready to insert into osm_polygons['features']
+    # last minute, this could be better
+    ids, multi_ways = [], []
     tree = fromstring(osm_string)
+    if len(to_intersect['way']) or len(to_display['way']):
+        for rel in tree.iterfind('relation'):
+            for tag in rel.iterfind('tag'):
+                check = str(tag.get('k') + '=' + tag.get('v')).lower()
+                if any(check == val for val in to_intersect['way']):
+                    for member in rel.iterfind('member'):
+                        if member.get('type') == 'way':
+                            ids.append(member.get('ref'))
+
     for way in tree.iterfind('way'):
-        keep = 0
-        for tag in way.iterfind('tag'):
-            # better way?
-            if ((tag.get('k') == 'leisure') and (tag.get('v') == 'park')):
-                keep += 1
-            elif (tag.get('k') == 'landuse' and (tag.get('v') == 'forest')):
-                keep += 1
-            elif (tag.get('k') == 'leisure' and (tag.get('v') == 'nature_reserve')):
-                keep += 1
-            elif (tag.get('k') == 'leisure' and (tag.get('v') == 'garden')):
-                keep += 1
-            elif (tag.get('k') == 'natural' and (tag.get('v') == 'wood')):
-                keep += 1
-            elif (tag.get('k') == 'leisure' and (tag.get('v') == 'stadium')):
-                keep += 1
-        if (keep > 0):
-            coordinates = []
+        if way.get('id') in ids:
+            coords = []
             for nd in way.iterfind('nd'):
                 for node in tree.iterfind('node'):
                     if (node.get('id') == nd.get('ref')):
-                        coordinates.append([float(node.get('lon')), float(node.get('lat'))])
-            polygon = {
+                        coords.append([float(node.get('lon')), float(node.get('lat'))])
+            poly = {
                 'type': 'Feature',
                 'geometry': {
-                    'type': 'LineString',
-                    'coordinates': coordinates
+                    'type': 'Polygon',
+                    'coordinates': [coords]
                 },
-                'properties': 'null'
+                'properties': {
+                    'popupContent': ''
+                }
             }
-            geojson['features'].append(polygon)
+            multi_ways.append(poly)
 
-    return json.dumps(geojson)
+    return multi_ways
 
 
-def polys_intersect(osm_geojson, other_geo, other='wkt'):
+def osm_polygons(osm_string, display = 1):
+    # try converting this to json and see how much easier/harder
+    # also, pull parser?
+    inter_json = {'type': 'FeatureCollection', 'features': []}
+    disp_json = {'type': 'FeatureCollection', 'features': []}
+    tree = fromstring(osm_string)
+
+    if len(to_intersect['way']) or len(to_display['way']):
+        for way in tree.iterfind('way'):
+            inter_c, disp_c, props, coords = 0, 0, {}, []
+            for tag in way.iterfind('tag'):
+                check = str(tag.get('k') + '=' + tag.get('v')).lower()
+                if any(check == val for val in to_intersect['way']):
+                    inter_c += 1
+                if any(check == val for val in to_display['way']):
+                    disp_c += 1
+                    props['tag'] = str(tag.get('v')).capitalize()
+                if tag.get('k') == 'name':
+                    props['name'] = ': ' + str(tag.get('v'))
+            if inter_c or disp_c:
+                for nd in way.iterfind('nd'):
+                    # horribly inefficient, qd
+                    for node in tree.iterfind('node'):
+                        if (node.get('id') == nd.get('ref')):
+                            coords.append([float(node.get('lon')), float(node.get('lat'))])
+                poly = {
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Polygon',
+                        'coordinates': [coords]
+                    },
+                    'properties': {
+                        'popupContent': ''
+                    }
+                }
+                if 'tag' in props:
+                    poly['properties']['popupContent'] += props['tag']
+                if 'name' in props:
+                    poly['properties']['popupContent'] += props['name']
+                if inter_c:
+                    inter_json['features'].append(poly)
+                if disp_c and display:
+                    disp_json['features'].append(poly)
+
+    return {
+        'intersect': inter_json,
+        'display': disp_json
+    }
+
+
+def osm_nodes(osm_string, display):
+    inter_json = {'type': 'FeatureCollection', 'features': []}
+    disp_json = {'type': 'FeatureCollection', 'features': []}
+    tree = fromstring(osm_string)
+
+    if len(to_intersect['node']) or len(to_display['node']):
+        for node in tree.iterfind('node'):
+            inter_c, disp_c, props, coords = 0, 0, {}, []
+            for tag in node.iterfind('tag'):
+                check = str(tag.get('k') + '=' + tag.get('v')).lower()
+                if any(check == val for val in to_intersect['node']):
+                    inter_c += 1
+                if any(check == val for val in to_display['node']):
+                    disp_c += 1
+                    props['tag'] = str(tag.get('v')).capitalize()
+                if tag.get('k') == 'name':
+                    props['name'] = ': ' + str(tag.get('v'))
+            if inter_c or disp_c:
+                coords = [float(node.get('lon')), float(node.get('lat'))]
+                pnt = {
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'Point',
+                        'coordinates': coords
+                    },
+                    'properties': {
+                        'popupContent': ''
+                    }
+                }
+                if 'tag' in props:
+                    pnt['properties']['popupContent'] += props['tag']
+                if 'name' in props:
+                    pnt['properties']['popupContent'] += props['name']
+                if inter_c:
+                    inter_json['features'].append(pnt)
+                if disp_c and display:
+                    disp_json['features'].append(pnt)
+
+    return {
+        'intersect': inter_json,
+        'display': disp_json
+    }
+
+
+def intersection(osm_geojson, other_geo, other='wkt'):
     # returns true for intersection, false for no intersection
-    osm_geojson = json.loads(osm_geojson)
+    # osm_geojson = json.loads(osm_geojson)
     for feature in osm_geojson['features']:
-        print feature['geometry']
+        # todo: remove need for wkt/json conditional
         feature = asShape(feature['geometry'])
         if other == 'wkt':
             if feature.intersects(other_geo) is True:
                 return True
         elif other == 'geojson':
             return False
+            # yes, premature
     return False
 
 
 def prep(polygon):
     polygon['geo'] = mapping(polygon['geo'])
     polygon['geo']['coordinates'] = listit(polygon['geo']['coordinates'])
-    if (len(polygon['geo']['coordinates']) > 1):
-        # multipolygon, just the outer
-        # what if there is more than 1 inner?
-        del polygon['geo']['coordinates'][-1]
     try:
+        # there's a rare issue with mapping(), everything ends up as a single key/value
+        # I think I got it, looking out for others
+        if (len(polygon['geo']['coordinates']) > 1):
+            # multipolygon, just the first one
+            polygon['geo']['coordinates'] = [polygon['geo']['coordinates'][0]]
         del polygon['geo']['coordinates'][0][-1]
-        # wkt needs that connecting point, geojson doesn't
+        # remove the start/end polygon connecting point, leaflet should understand this
     except:
-        # there's some rare issue in mapping
-        # ends up as a single key with a everything else as a value
         return 'json_problem'
-    # print polygon
     return polygon
 
 
 def done(id, result, geo_after=False):
-    # a few columns have been added to the original 'merged' table
-    # skip_count has been zeroed
-    # should add date column
-    # print id
-    # print result
-    # print geo_after
+    # a few columns have been added to the original table
+    # ALTER TABLE parks ADD skip_count NUMERIC NOT NULL DEFAULT 0
+    # ALTER TABLE parks ADD unixtime NUMERIC
+    # ALTER TABLE parks ADD result TEXT
+    unix = int(time.time())
     try:
         conn = sqlite3.connect('merged.sqlite')
         if result == 'skip':
-            conn.execute('UPDATE merged SET skip_count = skip_count + ? WHERE OGC_FID = ?', (1, id))
+            conn.execute('UPDATE merged SET skip_count = skip_count + ?, unixtime = ? WHERE OGC_FID = ?', (1, unix, id))
         elif result == 'new':
-            conn.execute('UPDATE merged SET result = ? WHERE OGC_FID = ?', (result, id))
+            conn.execute('UPDATE merged SET result = ?, unixtime = ? WHERE OGC_FID = ?', (result, unix, id))
         else:
-            conn.execute('UPDATE merged SET result = ? WHERE OGC_FID = ?', (result, id))
+            conn.execute('UPDATE merged SET result = ?, unixtime = ? WHERE OGC_FID = ?', (result, unix, id))
         conn.commit()
         conn.close()
     except sqlite3.OperationalError:
         # add the new columns, can it done in a single statement?
         # conn = sqlite3.connect('merged.sqlite')
         return 'ok'
-
-
-def oauth_request_token():
-    # directly from "3-legged Authorization" https://github.com/maraujop/requests-oauth
-    request_hook = OAuthHook(consumer_key=OAUTH_CONSUMER_KEY, consumer_secret=OAUTH_SECRET)
-    response = requests.post(OAUTH_REQUEST_URL, hooks={'pre_request': request_hook})
-    # should check for errors and such
-    qs = parse_qs(response.text)
-    print qs['oauth_token'][0]
-    print qs['oauth_token_secret'][0]
-    return qs
-
-
-def oauth_access_token(token, secret):
-    # get acces token and secret
-    oauth_verifier = 0 # OSM doesn't use this
-    access_hook = OAuthHook(token, secret, OAUTH_CONSUMER_KEY, OAUTH_SECRET)
-    access = requests.post(OAUTH_ACCESS_URL, {'oauth_verifier': oauth_verifier}, hooks={'pre_request': access_hook})
-    print access.text
-    access = parse_qs(access.text)
-    print 'access: '
-    print access
-    # access['oauth_token'][0]
-    # access['oauth_token_secret'][0]
-    # get user details
-    OAuthHook.consumer_key = OAUTH_CONSUMER_KEY
-    OAuthHook.consumer_secret = OAUTH_SECRET
-    deets_hook = OAuthHook(access['oauth_token'][0], access['oauth_token_secret'][0], header_auth=True)
-    response = requests.get(USER_DETAILS, {'oauth_verifier': oauth_verifier}, hooks={'pre_request': deets_hook})
-    print 'response: '
-    print response
-    # return access
 
 
 def changeset(userid):
@@ -274,14 +378,14 @@ def changeset(userid):
         # no open changeset, need to create one
         # http://wiki.openstreetmap.org/wiki/API_v0.6#Create:_PUT_.2Fapi.2F0.6.2Fchangeset.2Fcreate
         # need to get OAuth working first
-    return id 
+    return id
 
-def build_upload(changeset, coordinates):
+
+def build_upload(changeset, coordinates, name):
     # diff upload, osmChange format
     # http://wiki.openstreetmap.org/wiki/API_v0.6#Diff_upload:_POST_.2Fapi.2F0.6.2Fchangeset.2F.23id.2Fupload
     # http://gitorious.org/osm-poi-tools/monetdb/blobs/4885d983bcbd563c31250fce9741f28b1127a001/oscparser.py
     osmchange = Element('osmChange', version='0.6')
-    # osmchange.set('version', '0.6')
     create = SubElement(osmchange, 'create')
     nodes = []
     nds = []
@@ -295,15 +399,16 @@ def build_upload(changeset, coordinates):
     # adding polygon wrap around node
     nds.append(nds[0])
     create.extend(nodes)
-    way = SubElement(create, 'way', id='-'+str(count), timestamp=tstamp)
+    way = SubElement(create, 'way', id='-' + str(count), timestamp=tstamp)
     way.extend(nds)
     parkify = SubElement(way, 'tag', k='leisure', v='park')
-    print tostring(osmchange)
+    if name != '':
+        nameify = SubElement(way, 'tag', k='name', v=name)
     return tostring(osmchange)
 
 
 def listit(t):
-    # http://stackoverflow.com/questions/1014352/how-do-i-convert-a-nested-tuple-of-tuples-and-lists-to-lists-of-lists-in-python
+    # http://stackoverflow.com/q/1014352
     return list(map(listit, t)) if isinstance(t, (list, tuple)) else t
 
 

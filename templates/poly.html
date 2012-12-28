@@ -1,300 +1,423 @@
 <!doctype html>
 <html>
-	<head>
-		<title>rawr</title>
-		<link rel="stylesheet" type="text/css" href="static/css.css" />
-		<link rel="stylesheet" type="text/css" href="static/leaflet0.4.css" />
-		<!--[if lte IE 8]>
-		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4/leaflet.ie.css" />
-		<![endif]-->
-		<script src="static/leaflet0.4.js"></script>
-		<script src="static/Bing.js"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-		<script src="static/jquery.cookie.js"></script>
-	</head>
-	<body>
-		<ul id="top_right">
-			<li id="title">Outline the nearby park</li>
-			<li id="instruct">Instructions</li>
-		</ul>
-		<!-- <span id="title">Outline the nearby park</span> -->
-		<!-- <span id="instruct">Instructions</span> -->
+    <head>
+        <title>rawr</title>
+        <script type="text/javascript" src="static/ohauth/sha.js"></script>
+        <script type="text/javascript" src="static/ohauth/ohauth.js"></script>
+        <link rel="stylesheet" type="text/css" href="static/css.css" />
+        <link rel="stylesheet" type="text/css" href="static/leaflet0.4.css" />
+        <!--[if lte IE 8]>
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.4/leaflet.ie.css" />
+        <![endif]-->
+        <script src="static/leaflet0.4.js"></script>
+        <script src="static/Bing.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    </head>
+    <body>
+        <ul id="top_right">
+            <li id="title">Outline the nearby park</li>
+            <li id="instruct">Instructions</li>
+        </ul>
+        <!-- <span id="title">Outline the nearby park</span> -->
+        <!-- <span id="instruct">Instructions</span> -->
 
-		<div id="modal">
-			<div id="instruction">
-				<h3>Instructions</h3>
-				<li>Make a more accurate outline of the nearby park.</li>
-				<li>It's possible the data is out of date or just wrong; report problems accordingly.</li>
-				<li>Be careful to not include nearby schools, golf courses, or residential yards; just the park.</li>
-				<li>Do include small bodies of water, parking lots, and sidewalks that are obviously part of the park.</li>
-				<li>The park should be fairly obvious, if you're struggling to find anything nearby that looks like a public park it probably isn't right.</li>
+        <div id="modal">
+            <div id="instruction">
+                <h3>Instructions</h3>
+                <li>Make a more accurate outline of the nearby park.</li>
+                <li>It's possible the data is out of date or just wrong; report problems accordingly.</li>
+                <li>Be careful to not include nearby schools, golf courses, or residential yards; just the park.</li>
+                <li>Do include small bodies of water, parking lots, and sidewalks that are obviously part of the park.</li>
+                <li>The park should be fairly obvious, if you're struggling to find anything nearby that looks like a public park it probably isn't right.</li>
 
-				<h3 style="margin-top: 15px;">Tips</h3>
-				<li>Click on the nodes (white dots) to delete them</li>
-				<li>Drag a transparent middle node to add a new node</li>
-				<li>If you want to edit from another editor, click the coordinates in the bottom right corner which will take you to osm.org</li>
+                <h3 style="margin-top: 15px;">Tips</h3>
+                <li>Click on the nodes (white dots) to delete them</li>
+                <li>Drag a transparent middle node to add a new node</li>
+                <li>Yellow features are other OSM references there to help you. You can't edit them here but clicking them provides more information. Use this info to help make your features more accurate</li>
+                <li>If you want to edit from another editor, click the coordinates in the bottom right corner which will take you to osm.org</li>
 
-				<h3 style="margin-top: 15px;">About</h3>
-				<li>Data from TIGER 2011 area landmarks.</li>
-				<li>xx original parks, xx processed, xx new to OSM</li>
-				<a href="#" class="close">X</a> 
-			</div>
-		</div>
+                <h3 style="margin-top: 15px;">About</h3>
+                <li>Data from TIGER 2011 area landmarks.</li>
+                <li>xx original parks, xx processed, xx new to OSM</li>
+                <li><a href="http://thenounproject.com/noun/arrow/#icon-No8828" target="_blank">Skip arrow</a> and <a href="http://thenounproject.com/noun/delete/#icon-No8843" target="_blank">problem X</a> designed by <a href="http://thenounproject.com/cr" target="_blank">Chris Robinson</a> from The Noun Project</li>
+                <a href="#" class="close">X</a> 
+            </div>
+        </div>
 
-		<div id="zwrap">
-			<div id="login">Login with your OSM account »</div>
-			<div id="action-block">
-				<li id="problem">
-					<select name="problem" id="problem_selection">
-						<option value="problem" disabled selected>Problem</option>
-						<option value="no_park">Not a park</option>
-						<option value="poor_imagery">Poor Imagery</option>
-						<option value="too_diff">Too Difficult</option>
-					</select>
-				</li>
-				<li id="skip">Skip</li>
-				<li id="done">Submit</li>
-			</div>
-		</div>
+        <div id="display">
+            <canvas id="d-spinner"></canvas>
+            <img id="d-problem" src="/static/images/problem_white.svg" />
+            <img id="d-skip" src="/static/images/skip_white.svg" />
+            <img id="d-upload" src="/static/images/upload_white.svg" />
+        </div>
 
-		<div id="details"></div>
+        <div id="zwrap">
+            <div id="login">Login with your OSM account »</div>
+            <div id="action-block">
+                <li id="problem">
+                    <select name="problem" id="problem_selection">
+                        <option value="problem" disabled selected>Problem</option>
+                        <option value="no_park">No Park Here</option>
+                        <option value="poor_imagery">Poor Imagery</option>
+                        <option value="too_diff">Too Difficult</option>
+                    </select>
+                </li>
+                <li id="skip">Skip</li>
+                <li id="done">Submit</li>
+            </div>
+        </div>
 
-		<div id="map"></div>
-		<script type="text/javascript">
-			run_down();
+        <div id="details"></div>
 
-			var map = L.map('map', {
-				center: [39.828175, -98.5795],
-				zoom: 4,
-				maxZoom: 18
-			});
+        <div id="map"></div>
+        <script type="text/javascript">
+        // map setup
+            var map = L.map('map', {
+                center: [39.828175, -98.5795],
+                zoom: 4,
+                maxZoom: 18
+            });
 
-			var polygon = new L.GeoJSON();
+            var polygon = new L.GeoJSON();
 
-			new L.BingLayer("Anqm0F_JjIZvT0P3abS6KONpaBaKuTnITRrnYuiJCE0WOhH6ZbE4DzeT6brvKVR5").addTo(map);
-			polygon.addTo(map);
+            new L.BingLayer("Anqm0F_JjIZvT0P3abS6KONpaBaKuTnITRrnYuiJCE0WOhH6ZbE4DzeT6brvKVR5").addTo(map);
+            polygon.addTo(map);
 
-			// need to do an auth check first, check for cookie
-				// first check for url but no cookie (oauth_token)
-					// set the correct cookie and redirect to check again
-				// check for cookie
-			// if cookie is present, continue and load getNext();
-			// else throw up the login thing in the place of controls
-			// getNext();
-			$("#login").css({'opacity': '1'});
-				// clicking on this sends a request to build a new token
-				// it's built, gets returned, and the user is automatically redirected to osm.org
-				// the click ok, and get redirected back
-				// we see the oauth_token attached and pick it up from there
+            map.on('move', function() {
+                var lat = map.getCenter().lat.toFixed(4).toString();
+                var lng = map.getCenter().lng.toFixed(4).toString();
+                var zoom = map.getZoom().toString();
+                var string = '<span id="prefix_text"><a href="http://www.openstreetmap.org/?lat=' + lat + '&lon=' + lng + '&zoom=' + zoom + '" target="_blank">' + lat + ',' + lng + '</a></span>';
+                map.attributionControl.setPrefix(string);
+            });
 
-			map.on('move', function(){
-				var lat = map.getCenter().lat.toFixed(4).toString();
-				var lng = map.getCenter().lng.toFixed(4).toString();
-				var zoom = map.getZoom().toString();
-				var string = '<span id="prefix_text"><a href="http://www.openstreetmap.org/?mlat=' + lat + '&mlon=' + lng + '&zoom=' + zoom + '" target="_blank">' + lat + ',' + lng + '</a></span>';
-				map.attributionControl.setPrefix(string);
-			});
+        // login
+            $("#login").fadeIn();
 
-			$("#instruct").click(function(){
-				$("#modal").css({'z-index': '9999', 'opacity': '1'});
-				$("#instruction").css({'opacity': '1'});
-			});
+            $("#login").click(function() {
+                console.log('redirecting for login');
+                o.oauth_timestamp = ohauth.timestamp();
+                o.oauth_nonce = ohauth.nonce();
+                var url = host + '/oauth/request_token';
+                o.oauth_signature = ohauth.signature(oauth_secret, '',
+                    ohauth.baseString('POST', url, o));
+                ohauth.xhr('POST', url, o, null, {}, function(xhr) {
+                    var token = ohauth.stringQs(xhr.response);
+                    document.cookie = 'ohauth_token_secret=' + token.oauth_token_secret;
+                    var at = host + '/oauth/authorize?';
+                    // todo: modal-ize, how's getGo() work then?
+                    window.location = at + ohauth.qsString({
+                        oauth_token: token.oauth_token,
+                        oauth_callback: location.href
+                    });
+                });
+            });
 
-			$("#modal").click(function(){
-				$("#modal").css({'opacity': '0', 'z-index': '-1'});
-				// could chain all this for a better transition
-				$("#instruction").css({'opacity': '0'});
-			});
+        // auth
+            var host = 'http://api06.dev.openstreetmap.org',
+                oauth_secret = 'Mon0UoBHaO3qvfgwWrMkf4QAPM0O4lITd3JRK4ff';
 
-			$("#login").click(function(){
-				$.get("/oauth?rtoken=1", function(data){
-					$.cookie('rtoken', data, {path: '/'});
-					data = jQuery.parseJSON(data);
-					console.log(data['token']);
-					window.location.href = 'http://www.openstreetmap.org/oauth/authorize?oauth_token=' + data['token'];
-				});
-			});
+            var o = {
+                oauth_consumer_key: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg',
+                oauth_signature_method: 'HMAC-SHA1'
+            };
 
-			function run_down() {
-				if (getVar('oauth_token')){
-					var rtoken = jQuery.parseJSON($.cookie('rtoken'));
-					if (getVar('oauth_token') === rtoken['token']){
-						console.log('cookie and token match');
-						$.get("/oauth?atoken", function(data){
-							$.cookie('atoken', data, {path: '/'});
-							data = jQuery.parseJSON(data);
-							console.log(data['token']);
-						});
-						// do another $.get for access token
-							// save results to a new cooke (oauth)
-							// delete p-oauth cookie
-							// redirect to plain-jane
-								// plain jane picks it up and recognizes it
-								// we're golden
-					}
-				}
-				// check the url for oauth_token
-					// if oauth_token == true
-						// check for p-oauth cookie, make sure they match
-				// check cookies for oath
-			}
+            var getVar = ohauth.stringQs(location.search.slice(1));
+            if (document.cookie.match(/token=([^;]+)/) &&
+                document.cookie.match(/secret=([^;]+)/)) {
+                $("#login").fadeOut(200);
+                getNext();
+            } else if (getVar.oauth_token) {
+                console.log('back from login');
+                getGo();
+            }
 
-			function getNext() {
-				$.get("/poly?next", function(data){
-					data = jQuery.parseJSON(data);
-					// console.log(data);
-					var sw = new L.LatLng(data['bounds'][0], data['bounds'][1]),
-						ne = new L.LatLng(data['bounds'][2], data['bounds'][3]),
-						bounds = new L.LatLngBounds(sw, ne);
-					polygon = L.geoJson(data['geo'], {
-						style: {
-							"color": "#00FF00",
-							"weight": 3,
-							"opacity": 1,
-						},
-						onEachFeature: function(feature, layer){
-							layer.editing.enable();
-						}
-					});
-					map.fitBounds(polygon.getBounds());
-					setTimeout(function(){polygon.addTo(map)}, 600);
-						// b/c of some weird loading problems
-						// when the polygon load too quickly, the half-way nodes are loaded seperately and somewhere else completely, usually north east, miles away
-						// real nodes are fine and once each real one is touched the mid points return but it's still annoying
-						// delaying it seems to work and isn't too annoying because tiles are still loading anyway, it's not too noticable
-							// 500ms is too low
+        // clicky
+            $("#instruct").click(function() {
+                $("#modal").fadeIn(200);
+                $("#instruction").fadeIn(200);
+            });
 
-					if (data.name != null) {
-						$("#details").text(data.name);
-						$("#details").css({'opacity': '1'});
-					} else {
-						$("#details").text('');
-						$("#action-block").css({'opacity': '0'});
-					}
-					setBindings(data['id'], data['name']);
-				});
-			}
+            $("#instruction").click(function() {
+                $("#instruction").fadeOut(200);
+                $("#modal").fadeOut(200);
+            });
 
-			function setBindings(id, name) {
-				$("#action-block").css({'opacity': '1'});
-				console.log(name);
-				console.log(id);
-				$("#problem_selection").change(function(){
-					unsetBindings();
-					map.removeLayer(polygon);
-					map.setView([39.828175, -98.5795], 4);					
-					$("#problem_selection").val('problem');
-					$.ajax({
-						type: "POST",
-						url: "/poly",
-						data: {id: id, action: $('#problem_selection').val()}
-					}).done(function(msg) {
-						getNext();
-					});
-				});
+            function getNext() {
+                // split this later for preloading
+                setTimeout(function(){
+                    // delay a bit, it was annoyingly quick
+                    $('#display').show();
+                    $('#d-spinner').fadeIn(500);
+                }, 750);
+                $.get("/?next", function(data) {
+                    $('#d-spinner').fadeOut(200, function(){
+                        $('#display').hide();
+                    });
+                    data = jQuery.parseJSON(data);
+                    console.log(data);
+                    polygon = L.geoJson(data['edit']['geo'], {
+                        style: {
+                            "color": "#00FF00",
+                            "weight": 3,
+                            "opacity": 1,
+                        },
+                        onEachFeature: function (feature, layer){
+                            layer.editing.enable();
+                        }
+                    });
+                    display_polys = L.geoJson([data['display_polys']['features'], data['display_nodes']['features']], {
+                        style: {
+                            "color": "#FFFF00",
+                            "weight": 2,
+                            "opacity": 1
+                        },
+                        onEachFeature: function(feature, layer) {
+                            if (feature.properties && feature.properties.popupContent) {
+                                popupContent = feature.properties.popupContent;
+                                layer.bindPopup(popupContent);
+                            }
+                        },
+                        pointToLayer: function (feature, latlng) {
+                            return L.circleMarker(latlng, {
+                                radius: 5,
+                                opacity: 1,
+                                fillOpacity: 0.5
+                            })
+                        }
+                    });
+                    map.fitBounds(polygon.getBounds());
+                    setTimeout(function(){
+                        polygon.addTo(map)
+                        display_polys.addTo(map)
+                        // display_nodes.addTo(map)
+                    }, 600);
+                    // fitBounds zooms and centers the map to the extent of the polygon. In the process here the polygon nodes become all screwed up. Actually only the middle nodes become screwed up landing seperate from the polygon miles away, usually to the northeast. If it's left as is, when the real nodes are touched the middle nodes are recalculated and move into their correct place, but it's still annoying. I think it has to do with those mid points being placed while the map is zooming. I tried using the 'zoomend' event but that was actually worse, screwing up all the nodes, I think it fires too soon. This also seems to be bigger problem the more nodes there are. Up to about 7 or 8 node polygons are mostly fine, anything more is always screwed.
+                    // So I set a timeout to wait till everything blows over. It's not too big of a deal because tiles are still loading anyway. 500ms is too low. 600 is about right from everything I've seen, at least on Chrome. I bet slower javascript browsers are a problem.
+                    // I've tried fixing this many times, the function isn't documented for good reason. Seems like it's going to be split into a plugin, soo...
 
-				$("#done").click(function(){
-					unsetBindings();
-					map.removeLayer(polygon);
-					map.setView([39.828175, -98.5795], 4);
-					var omg = littleboots.toGeoJSON(polygon)['geometries'][0];
-					// console.log(omg);
-					$.ajax({
-						type: "POST",
-						url: "/poly",
-						data: {id: id, action: 'new', geo: JSON.stringify(omg), name: name}
-					}).done(function(msg) {
-						// console.log(msg);
-						getNext();
-					});
-				});
+                    if (data['edit'].name != null && data['edit'].name != 'Park') {
+                        $("#details").text(data['edit'].name);
+                        $("#details").fadeIn(200);
+                    } else {
+                        $("#details").text('');
+                    }
+                    setup(data['edit']['id'], data['edit']['name']);
+                });
+            }
 
-				$("#skip").click(function(){
-					unsetBindings();
-					map.removeLayer(polygon);
-					map.setView([39.828175, -98.5795], 4);					
-					$.ajax({
-						type: "POST",
-						url: "/poly",
-						data: {id: id, action: "skip"}
-					}).done(function(msg) {
-						// need to throw up a spinner with a message
-						getNext();
-					});
-				});
-			}
+            function setup(id, name) {
+                $("#login").fadeOut(200);
+                $("#action-block").fadeIn(200);
+                console.log(name);
+                console.log(id);
+                $("#problem_selection").change(function() {
+                    $('#display').show();
+                    $('#d-problem').show();
+                    teardown();
+                    map.setView([39.828175, -98.5795], 4);
+                    $("#problem_selection").val('problem');
+                    $.ajax({
+                        type: "POST",
+                        url: "/",
+                        data: {id: id, action: $('#problem_selection').val()}
+                    }).done(function(msg) {
+                        $('#d-problem').fadeOut(500);
+                        getNext();
+                    });
+                });
 
-			function unsetBindings() {
-				$("#action-block").css({'opacity': '0'});
-				$("#details").css({'opacity': '0'});
-				$("#problem_selection").unbind();
-				$("#done").unbind();
-				$("#skip").unbind();				
-			}
+                $("#skip").click(function() {
+                    $('#display').show();
+                    $('#d-skip').show();
+                    teardown();
+                    map.setView([39.828175, -98.5795], 4);
+                    $.ajax({
+                        type: "POST",
+                        url: "/",
+                        data: {id: id, action: "skip"}
+                    }).done(function(msg) {
+                        $('#d-skip').fadeOut(500);
+                        getNext();
+                    });
+                });
 
-	// from https://github.com/CloudMade/Leaflet/issues/712
-	var littleboots = {
-		toGeoJSON: function(target) {
-		    if (target instanceof L.Polygon) {
-		        //Polygon
-		        var coords = this.latLngsToCoords(target.getLatLngs());
-		        return {
-		            coordinates: [coords],
-		            type: 'Polygon'
-		        };
-		    } else if (target instanceof L.FeatureGroup) {
-		        //Multi point and GeometryCollection
-		        var multi = [];
-		        var layers = target._layers;
-		        var points = true;
-		        for (var stamp in layers) {
-		            var json = this.toGeoJSON(layers[stamp]);
-		            multi.push(json);
-		            if (json.type !== 'Point') {
-		                points = false;
-		            }
-		        }
-		        if (points) {
-		            var coords = multi.map(function(geo){
-		                return geo.coordinates;
-		            });
-		            return {
-		                coordinates: coords,
-		                type: 'MultiPoint'
-		            };
-		        } else {
-		            return {
-		                geometries: multi,
-		                type: 'GeometryCollection'
-		            };
-		        }
-		    }
-		},
+                $("#done").click(function() {
+                    $('#display').show();
+                    $('#d-upload').show();
+                    teardown();
+                    map.setView([39.828175, -98.5795], 4);
+                    var omg = littleboots.toGeoJSON(polygon)['geometries'][0];
+                    // console.log(omg);
+                    $.ajax({
+                        type: "POST",
+                        url: "/",
+                        data: {id: id, action: 'new', geo: JSON.stringify(omg), name: name}
+                    }).done(function(msg) {
+                        // this is just for intersect results, not osm uploading yet
+                        $('#d-upload').fadeOut(500);
+                        console.log(msg);
+                        // check for intersection
+                            // depending on the response, we start a changeset, build the osmchange and upload it
+                            // or throw it away because of dupe
+                        getNext();
+                    });
+                });
+            }
 
-		latLngToCoords: function(latlng) {
-		    return [latlng.lng, latlng.lat];
-		},
+            function teardown() {
+                // right now this is called as soon as a problem/skip/submit is clicked
+                // should be called after the success callback
+                // todo: decouple (hiding the interface) and (actually removing stuff)
+                map.closePopup();
+                map.removeLayer(polygon);
+                map.removeLayer(display_polys);
+                // map.removeLayer(display_nodes);
+                $("#action-block").fadeOut(200);
+                $("#details").fadeOut(200);
+                $("#problem_selection").unbind();
+                $("#done").unbind();
+                $("#skip").unbind();
+            }
 
-		latLngsToCoords: function(arrLatlng) {
-		    var coords = [];
-		    arrLatlng.forEach(function(latlng) {
-		        coords.push(this.latLngToCoords(latlng));
-		    },
-		    this);
-		    return coords;
-		}
-	}
+            function getGo() {
+                // throw up a spinner and quick message, block all actions, wait
+                o.oauth_timestamp = ohauth.timestamp();
+                o.oauth_nonce = ohauth.nonce();
+                o.oauth_token = getVar.oauth_token;
+                var url = host + '/oauth/access_token';
+                var token_secret = document.cookie.match(/ohauth_token_secret=([^;]+)/);
+                if (!token_secret) return console.error('Required token not found');
+                o.oauth_signature = ohauth.signature(oauth_secret, token_secret[1],
+                    ohauth.baseString('POST', url, o));
+                ohauth.xhr('POST', url, o, null, {}, function(xhr) {
+                    console.log(String.fromCharCode(0x2713) + ' login');
+                    history.pushState(null, null, '/');
+                        // http://caniuse.com/#search=pushstate
+                    var access_token = ohauth.stringQs(xhr.response);
+                    o.oauth_token = access_token.oauth_token;
+                    document.cookie = 'token=' + access_token.oauth_token;
+                    token_secret = access_token.oauth_token_secret;
+                    document.cookie = 'secret=' + access_token.oauth_token_secret;
+                });
+                getNext();
+            }
 
-	// http://css-tricks.com/snippets/javascript/get-url-variables/
-	function getVar(variable) {
-	       var query = window.location.search.substring(1);
-	       var vars = query.split("&");
-	       for (var i=0;i<vars.length;i++) {
-	               var pair = vars[i].split("=");
-	               if(pair[0] == variable){return pair[1];}
-	       }
-	       return(false);
-	}
-		</script>
-	</body>
+            // // changeset stuff, saving for later
+            // ohauth.xhr('POST', url, o, null, {}, function(xhr) {
+            //     var access_token = ohauth.stringQs(xhr.response);
+            //     o.oauth_token = access_token.oauth_token;
+            //     o.oauth_timestamp = ohauth.timestamp();
+            //     o.oauth_nonce = ohauth.nonce();
+            //     token_secret = access_token.oauth_token_secret;
+            //     var url = host + '/api/0.6/changeset/create';
+            //     o.oauth_signature = ohauth.signature(oauth_secret, token_secret,
+            //         ohauth.baseString('PUT', url, o));
+            //     ohauth.xhr('PUT', url, o, change, { header: { 'Content-Type': 'text/xml' } },
+            //         function(xhr) {
+            //             var changeset_id = xhr.response;
+            //             var url = host + '/api/0.6/changeset/' + changeset_id + '/upload'
+            //             o.oauth_timestamp = ohauth.timestamp();
+            //             o.oauth_nonce = ohauth.nonce();
+            //             o.oauth_signature = ohauth.signature(oauth_secret, token_secret,
+            //                 ohauth.baseString('POST', url, o));
+            //             node = node.replace('{changeset}', changeset_id);
+            //             ohauth.xhr('POST', url, o, node, { header: { 'Content-Type': 'text/xml' } },
+            //             function(xhr) {
+            //                 var url = host + '/api/0.6/changeset/' + changeset_id + '/close';
+            //                 o.oauth_timestamp = ohauth.timestamp();
+            //                 o.oauth_nonce = ohauth.nonce();
+            //                 o.oauth_signature = ohauth.signature(oauth_secret, token_secret,
+            //                     ohauth.baseString('PUT', url, o));
+            //                 ohauth.xhr('PUT', url, o, '', { header: { 'Content-Type': 'text/xml' } },
+            //                 function(xhr) {
+            //                     console.log(arguments);
+            //                 });
+            //             });
+            //     });
+            // });
+            
+            // https://gist.github.com/3104283
+            // I need to learn a bit of canvas, I have no clue what's happening here
+            // need to upscale it (somehow) to fix pixelated spinner
+            var canvas = document.getElementById('d-spinner');
+            var context = canvas.getContext('2d');
+            var start = new Date();
+            var lines = 12,
+                cW = context.canvas.width,
+                cH = context.canvas.height;
+            var draw = function() {
+                var rotation = parseInt(((new Date() - start) / 1000) * lines) / lines;
+                context.save();
+                context.clearRect(0, 0, cW, cH);
+                context.translate(cW / 2, cH / 2);
+                context.rotate(Math.PI * 2 * rotation);
+                for (var i = 0; i < lines; i++) {
+                    context.beginPath();
+                    context.rotate(Math.PI * 2 / lines);
+                    context.moveTo(cW / 10, 0);
+                    context.lineTo(cW / 4.5, 0);
+                    context.lineWidth = cW / 30;
+                    context.strokeStyle = "rgba(255,255,255," + i / lines + ")";
+                    context.stroke();
+                }
+                context.restore();
+            };
+            setInterval(draw, 30);
+
+
+    // https://github.com/CloudMade/Leaflet/issues/712
+    var littleboots = {
+        toGeoJSON: function(target) {
+            if (target instanceof L.Polygon) {
+                //Polygon
+                var coords = this.latLngsToCoords(target.getLatLngs());
+                return {
+                    coordinates: [coords],
+                    type: 'Polygon'
+                };
+            } else if (target instanceof L.FeatureGroup) {
+                //Multi point and GeometryCollection
+                var multi = [];
+                var layers = target._layers;
+                var points = true;
+                for (var stamp in layers) {
+                    var json = this.toGeoJSON(layers[stamp]);
+                    multi.push(json);
+                    if (json.type !== 'Point') {
+                        points = false;
+                    }
+                }
+                if (points) {
+                    var coords = multi.map(function(geo){
+                        return geo.coordinates;
+                    });
+                    return {
+                        coordinates: coords,
+                        type: 'MultiPoint'
+                    };
+                } else {
+                    return {
+                        geometries: multi,
+                        type: 'GeometryCollection'
+                    };
+                }
+            }
+        },
+
+        latLngToCoords: function(latlng) {
+            return [latlng.lng, latlng.lat];
+        },
+
+        latLngsToCoords: function(arrLatlng) {
+            var coords = [];
+            arrLatlng.forEach(function(latlng) {
+                coords.push(this.latLngToCoords(latlng));
+            },
+            this);
+            return coords;
+        }
+    }
+        </script>
+    </body>
 </html>
