@@ -4,6 +4,7 @@
         <title>rawr</title>
         <script type="text/javascript" src="static/ohauth/sha.js"></script>
         <script type="text/javascript" src="static/ohauth/ohauth.js"></script>
+        <!-- still need to css reset -->
         <link rel="stylesheet" type="text/css" href="static/css.css" />
         <link rel="stylesheet" type="text/css" href="static/leaflet0.4.css" />
         <!--[if lte IE 8]>
@@ -71,16 +72,22 @@
 
         <div id="map"></div>
         <script type="text/javascript">
+
+/* 
+    This is shit. I know it. I'll get to it.
+    Any good code you find isn't mine.
+*/
+
         // map setup
             var map = L.map('map', {
-                center: [39.828175, -98.5795],
-                zoom: 4,
+                center: [34.057700,-118.24094],
+                zoom: 10,
                 maxZoom: 18
             });
 
             var polygon = new L.GeoJSON();
 
-            new L.BingLayer("Anqm0F_JjIZvT0P3abS6KONpaBaKuTnITRrnYuiJCE0WOhH6ZbE4DzeT6brvKVR5").addTo(map);
+            var bing = new L.BingLayer("Anqm0F_JjIZvT0P3abS6KONpaBaKuTnITRrnYuiJCE0WOhH6ZbE4DzeT6brvKVR5").addTo(map);
             polygon.addTo(map);
 
             map.on('move', function() {
@@ -91,11 +98,19 @@
                 map.attributionControl.setPrefix(string);
             });
 
-        // login
+            // all oauth stuff copied directly from ohauth example:
+            // https://github.com/tmcw/ohauth/blob/gh-pages/index.html
+            var host = 'http://api06.dev.openstreetmap.org',
+                oauth_secret = 'Mon0UoBHaO3qvfgwWrMkf4QAPM0O4lITd3JRK4ff';
+
+            var o = {
+                oauth_consumer_key: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg',
+                oauth_signature_method: 'HMAC-SHA1'
+            };            
+
             $("#login").fadeIn();
 
             $("#login").click(function() {
-                console.log('redirecting for login');
                 o.oauth_timestamp = ohauth.timestamp();
                 o.oauth_nonce = ohauth.nonce();
                 var url = host + '/oauth/request_token';
@@ -105,7 +120,6 @@
                     var token = ohauth.stringQs(xhr.response);
                     document.cookie = 'ohauth_token_secret=' + token.oauth_token_secret;
                     var at = host + '/oauth/authorize?';
-                    // todo: modal-ize, how's getGo() work then?
                     window.location = at + ohauth.qsString({
                         oauth_token: token.oauth_token,
                         oauth_callback: location.href
@@ -113,26 +127,17 @@
                 });
             });
 
-        // auth
-            var host = 'http://api06.dev.openstreetmap.org',
-                oauth_secret = 'Mon0UoBHaO3qvfgwWrMkf4QAPM0O4lITd3JRK4ff';
-
-            var o = {
-                oauth_consumer_key: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg',
-                oauth_signature_method: 'HMAC-SHA1'
-            };
-
             var getVar = ohauth.stringQs(location.search.slice(1));
-            if (document.cookie.match(/token=([^;]+)/) &&
-                document.cookie.match(/secret=([^;]+)/)) {
+            if (document.cookie.match(/access_token=([^;]+)/) &&
+                document.cookie.match(/access_token_secret=([^;]+)/)) {
+                // already logged in
                 $("#login").fadeOut(200);
                 getNext();
             } else if (getVar.oauth_token) {
                 console.log('back from login');
-                getGo();
+                // getGo();
             }
 
-        // clicky
             $("#instruct").click(function() {
                 $("#modal").fadeIn(200);
                 $("#instruction").fadeIn(200);
@@ -144,9 +149,8 @@
             });
 
             function getNext() {
-                // split this later for preloading
                 setTimeout(function(){
-                    // delay a bit, it was annoyingly quick
+                    // delay a bit, it was annoying
                     $('#display').show();
                     $('#d-spinner').fadeIn(500);
                 }, 750);
@@ -154,9 +158,9 @@
                     $('#d-spinner').fadeOut(200, function(){
                         $('#display').hide();
                     });
-                    data = jQuery.parseJSON(data);
-                    console.log(data);
-                    polygon = L.geoJson(data['edit']['geo'], {
+                    window.data = jQuery.parseJSON(data);
+                    console.log(window.data);
+                    polygon = L.geoJson(window.data['edit']['geo'], {
                         style: {
                             "color": "#00FF00",
                             "weight": 3,
@@ -166,7 +170,7 @@
                             layer.editing.enable();
                         }
                     });
-                    display_polys = L.geoJson([data['display_polys']['features'], data['display_nodes']['features']], {
+                    display_polys = L.geoJson([window.data['display_polys']['features'], window.data['display_nodes']['features']], {
                         style: {
                             "color": "#FFFF00",
                             "weight": 2,
@@ -196,16 +200,19 @@
                     // So I set a timeout to wait till everything blows over. It's not too big of a deal because tiles are still loading anyway. 500ms is too low. 600 is about right from everything I've seen, at least on Chrome. I bet slower javascript browsers are a problem.
                     // I've tried fixing this many times, the function isn't documented for good reason. Seems like it's going to be split into a plugin, soo...
 
-                    if (data['edit'].name != null && data['edit'].name != 'Park') {
-                        $("#details").text(data['edit'].name);
+                    if (window.data['edit'].name != null && window.data['edit'].name != 'Park') {
+                        $("#details").text(window.data['edit'].name);
                         $("#details").fadeIn(200);
                     } else {
                         $("#details").text('');
                     }
-                    setup(data['edit']['id'], data['edit']['name']);
+                    setup(window.data['edit']['id'], window.data['edit']['name']);
                 });
             }
 
+            // remove the necessity for name
+            // rely on global window.data instead
+                // make it so that all rows of data are fluidly going back and forth
             function setup(id, name) {
                 $("#login").fadeOut(200);
                 $("#action-block").fadeIn(200);
@@ -247,12 +254,13 @@
                     $('#d-upload').show();
                     teardown();
                     map.setView([39.828175, -98.5795], 4);
-                    var omg = littleboots.toGeoJSON(polygon)['geometries'][0];
+                    data['edit']['geo']['coordinates'] = littleboots.toGeoJSON(polygon)['geometries'][0]['coordinates'];
                     // console.log(omg);
                     $.ajax({
                         type: "POST",
                         url: "/",
-                        data: {id: id, action: 'new', geo: JSON.stringify(omg), name: name}
+                        data: {id: id, action: 'new', data: JSON.stringify(data['edit'])}
+                            // need to have a global var and just take shit from there
                     }).done(function(msg) {
                         // this is just for intersect results, not osm uploading yet
                         $('#d-upload').fadeOut(500);
@@ -280,36 +288,105 @@
                 $("#skip").unbind();
             }
 
-            function getGo() {
-                // throw up a spinner and quick message, block all actions, wait
+            function getGoz() {
+                var oauth_token = ohauth.stringQs(location.search.slice(1));
                 o.oauth_timestamp = ohauth.timestamp();
                 o.oauth_nonce = ohauth.nonce();
-                o.oauth_token = getVar.oauth_token;
+                o.oauth_token = oauth_token.oauth_token;
                 var url = host + '/oauth/access_token';
                 var token_secret = document.cookie.match(/ohauth_token_secret=([^;]+)/);
                 if (!token_secret) return console.error('Required token not found');
                 o.oauth_signature = ohauth.signature(oauth_secret, token_secret[1],
                     ohauth.baseString('POST', url, o));
                 ohauth.xhr('POST', url, o, null, {}, function(xhr) {
+                    var access_token = ohauth.stringQs(xhr.response);
+                    // o.oauth_token = access_token.oauth_token;
+                    document.cookie = 'access_token=' + access_token.oauth_token;
+                    // token_secret = access_token.oauth_token_secret;
+                    document.cookie = 'access_token_secret=' + access_token.oauth_token_secret;
                     console.log(String.fromCharCode(0x2713) + ' login');
                     history.pushState(null, null, '/');
-                        // http://caniuse.com/#search=pushstate
-                    var access_token = ohauth.stringQs(xhr.response);
-                    o.oauth_token = access_token.oauth_token;
-                    document.cookie = 'token=' + access_token.oauth_token;
-                    token_secret = access_token.oauth_token_secret;
-                    document.cookie = 'secret=' + access_token.oauth_token_secret;
                 });
                 getNext();
             }
 
-            // // changeset stuff, saving for later
-            // ohauth.xhr('POST', url, o, null, {}, function(xhr) {
-            //     var access_token = ohauth.stringQs(xhr.response);
-            //     o.oauth_token = access_token.oauth_token;
-            //     o.oauth_timestamp = ohauth.timestamp();
-            //     o.oauth_nonce = ohauth.nonce();
-            //     token_secret = access_token.oauth_token_secret;
+
+            function getGo() {
+                var change = '<osm>' +
+                    '<changeset>' +
+                    '<tag k="created_by" v="blah"/>' +
+                    '<tag k="comment" v="blah blah blah"/>' +
+                    '<\/changeset>' +
+                '<\/osm>';
+                var oauth_token = ohauth.stringQs(location.search.slice(1));
+                o.oauth_timestamp = ohauth.timestamp();
+                o.oauth_nonce = ohauth.nonce();
+                o.oauth_token = oauth_token.oauth_token;
+                var url = host + '/oauth/access_token';
+                var token_secret = document.cookie.match(/ohauth_token_secret=([^;]+)/);
+                if (!token_secret) return console.error('Required token not found');
+                o.oauth_signature = ohauth.signature(oauth_secret, token_secret[1],
+                    ohauth.baseString('POST', url, o));
+                console.log(o);
+                ohauth.xhr('POST', url, o, null, {}, function(xhr) {
+                    // just put this into cookies, then use it from there
+                    var access_token = ohauth.stringQs(xhr.response);
+                    document.cookie = 'random_token=' + access_token.oauth_token;
+                    document.cookie = 'random_secret=' + access_token.oauth_token_secret;
+                    // o.oauth_token = access_token.oauth_token;
+                    o.oauth_timestamp = ohauth.timestamp();
+                    o.oauth_nonce = ohauth.nonce();
+                    // token_secret = access_token.oauth_token_secret;
+                    o.oauth_token = document.cookie.match(/random_token=([^;]+)/)[1];
+                    token_secret = document.cookie.match(/random_secret=([^;]+)/)[1];
+                    var url = host + '/api/0.6/changeset/create';
+                    o.oauth_signature = ohauth.signature(oauth_secret, token_secret,
+                        ohauth.baseString('PUT', url, o));
+                    console.log(o);
+                    // ohauth.xhr('PUT', url, o, change, { header: { 'Content-Type': 'text/xml' } },
+                    //     function(xhr) {
+                    //         console.log('Changeset: ' + xhr.response);
+                    //     });
+                });
+            }
+
+            function userDetails() {
+                o.oauth_token = document.cookie.match(/random_token=([^;]+)/)[1];
+                var token_secret = document.cookie.match(/random_secret=([^;]+)/)[1];
+                o.oauth_timestamp = ohauth.timestamp();
+                o.oauth_nonce = ohauth.nonce();
+                var url = host + '/api/0.6/user/details';
+                o.oauth_signature = ohauth.signature(oauth_secret, token_secret,
+                    ohauth.baseString('GET', url, o));
+                console.log(o)
+                // custom header to force preflight
+                ohauth.xhr('GET', url, o, '', {header:{'Content-Type': 'text/xml'}},
+                    function(xhr) {
+                        console.log(xhr);
+                });
+            }
+
+            // https://github.com/tmcw/ohauth/blob/gh-pages/index.html#L74
+            function newChangeset(comment) {
+                var change = '<osm>' +
+                    '<changeset>' +
+                    '<tag k="created_by" v="blah"/>' +
+                    '<tag k="comment" v="blah blah blah"/>' +
+                    '<\/changeset>' +
+                '<\/osm>';
+                o.oauth_token = document.cookie.match(/random_token=([^;]+)/)[1];
+                var token_secret = document.cookie.match(/random_secret=([^;]+)/)[1];
+                o.oauth_timestamp = ohauth.timestamp();
+                o.oauth_nonce = ohauth.nonce();
+                var url = host + '/api/0.6/changeset/create';
+                o.oauth_signature = ohauth.signature(oauth_secret, token_secret,
+                    ohauth.baseString('PUT', url, o));
+                console.log(o);
+                ohauth.xhr('PUT', url, o, change, {header:{'Content-Type': 'text/xml'}},
+                    function(xhr) {
+                        console.log(xhr);
+                });
+            }
             //     var url = host + '/api/0.6/changeset/create';
             //     o.oauth_signature = ohauth.signature(oauth_secret, token_secret,
             //         ohauth.baseString('PUT', url, o));
@@ -335,11 +412,10 @@
             //                 });
             //             });
             //     });
-            // });
             
             // https://gist.github.com/3104283
-            // I need to learn a bit of canvas, I have no clue what's happening here
-            // need to upscale it (somehow) to fix pixelated spinner
+            // I need to learn a bit of canvas because I have no clue what's happening here
+            // need to upscale it because it's pixelated right now
             var canvas = document.getElementById('d-spinner');
             var context = canvas.getContext('2d');
             var start = new Date();
@@ -406,7 +482,9 @@
         },
 
         latLngToCoords: function(latlng) {
-            return [latlng.lng, latlng.lat];
+            var lng = Math.round(latlng.lng*1000000)/1000000
+            var lat = Math.round(latlng.lat*1000000)/1000000
+            return [lng, lat];
         },
 
         latLngsToCoords: function(arrLatlng) {

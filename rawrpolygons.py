@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+
+# TODO: http://code.google.com/p/pyproj/
+
 from xml.etree.ElementTree import ElementTree, fromstring, Element, SubElement, tostring
 import sqlite3
 from flask import Flask, render_template, request
@@ -7,6 +11,8 @@ from shapely.geometry import asShape, mapping
 import shapely.wkt
 import time
 
+import sys
+
 app = Flask(__name__)
 
 sqlite = {
@@ -15,9 +21,18 @@ sqlite = {
     'columns': [
         'OGC_FID',
         'GEOMETRY',
-        'name',
-        'source'],
-    'where': 'aland < 350000 AND aland > 500 AND skip_count < 15'
+        'name'],
+    'where': 'shape_area < 27000000'
+}
+    # columns[1] is always OGC_FID
+    # columns[2] is always GEOMETRY
+    # everything else is optional
+    # 'where': 'aland < 350000 AND aland > 500 AND skip_count < 15'
+
+
+add_tag = {
+    'leisure': 'park',
+    'source': 'County of Los Angeles - Chief Information Office'
 }
 
 to_intersect = {
@@ -57,7 +72,12 @@ to_display = {
         'amenity=grave_yard']
 }
 
-CREATED_BY = 'osmly-tigerparks'
+# just to keep the queries from being too large
+# in meters
+# todo: redo ogr2ogr script and define srs +units=m
+AREA_LIMIT = 1000
+
+CREATED_BY = 'OSMly 0.1'
 
 
 # might want to simplify all these routes to a single one
@@ -70,19 +90,19 @@ def slash():
             # need to check for intersection again
             # !! - try/except this - !!
                 # I don't trust you
-            new = json.loads(request.form['geo'])
-            geo = asShape(new)
+            new = json.loads(request.form['data'])
+            geo = asShape(new['geo'])
             osm_json = get_osm(geo, 0)
+
             if intersection(osm_json['polygons']['intersect'], geo) is True:
                 # an intersection between user editted data and existing OSM data
                 print 'after edit intersection'
                 # done() it
                 return 'false'
-            if request.form['name'] == 'Park':
-                name = ''
-            else:
                 name = request.form['name']
-            wtf = build_upload(0, new['coordinates'][0], name)
+
+            tags = prep_tags(dict(new))
+            wtf = build_upload(0, new['geo']['coordinates'][0], tags)
             return wtf
             # done(request.form['id'], request.form['action'], request.form['geo'])
         else:
@@ -138,39 +158,50 @@ def next_polygon():
     # 5891 has display data, 6453 has a single display node
     row = conn.execute('SELECT ' + ', '.join(sqlite['columns']) + ' FROM ' + sqlite['table'] + ' WHERE ' + sqlite['where'] + ' ORDER BY RANDOM() LIMIT 1')
     row = row.fetchone()
-    poly_wkb = str(row[1])
+
     polygon = {
         'id': row[0],
-        'geo': shapely.wkb.loads(poly_wkb).simplify(0.0001),
-        'name': row[2]
+        'geo': shapely.wkb.loads(str(row[1])).simplify(0.00005, False),  # 0.0001 is pretty solid
     }
+
+    for x in range(2,len(row)):
+        item = sqlite['columns'][x]
+        polygon[item] = row[x]
+
+    for y, z in add_tag.iteritems():
+        polygon[y] = z
+
     return polygon
 
 
-def get_osm(shapely_obj, display = 1):
-    # added a display conditional to speed up reviews, a bit messy still
-    if display:
+def get_osm(shapely_obj, context=1):
+    # added a context conditional to speed up reviews, still a bit messy
+    # todo: use area to confirm this is a polygon, set area limitation based on CONSTANT
+    if context:
         shapely_obj = shapely_obj.buffer(0.001)
-        # 0.001 is good, 0.005 ok for testing
+        print str(shapely_obj.area)
+        # 0.001 is good, 0.005 is pretty big
     envelope = map(str, shapely_obj.bounds)
     bbox = '[bbox=' + envelope[0] + ',' + envelope[1] + ',' + envelope[2] + ',' + envelope[3] + ']'
     print bbox
     # provider = 'http://overpass.osm.rambler.ru/cgi/xapi?'
-        # a bit erratic
     provider = 'http://www.overpass-api.de/api/xapi?'
+        # todo: http://harrywood.co.uk/maps/uixapi/xapi.html
     request = provider + '*' + bbox
     # should check for http errors and such here
     osm = requests.get(request).text.encode('ascii', 'ignore')
         # had a problem with encoding on some name values
     multips = osm_multips(str(osm))
     results = {}
-    results['polygons'] = osm_polygons(str(osm), display)
-    if display:
-        results['nodes'] = osm_nodes(str(osm), display)
+    results['polygons'] = osm_polygons(str(osm), context)
+
+    if context:
+        results['nodes'] = osm_nodes(str(osm), context)
     if multips:
         results['polygons']['intersect']['features'].append(multips[0])
-        if display:
-            results['polygons']['display']['features'].append(multips[0])
+        if context:
+            results['polygons']['context']['features'].append(multips[0])
+
     return results
 
 
@@ -212,7 +243,7 @@ def osm_multips(osm_string):
     return multi_ways
 
 
-def osm_polygons(osm_string, display = 1):
+def osm_polygons(osm_string, display=1):
     # try converting this to json and see how much easier/harder
     # also, pull parser?
     inter_json = {'type': 'FeatureCollection', 'features': []}
@@ -381,31 +412,44 @@ def changeset(userid):
     return id
 
 
-def build_upload(changeset, coordinates, name):
+def build_upload(changeset, coordinates, tags):
     # diff upload, osmChange format
     # http://wiki.openstreetmap.org/wiki/API_v0.6#Diff_upload:_POST_.2Fapi.2F0.6.2Fchangeset.2F.23id.2Fupload
     # http://gitorious.org/osm-poi-tools/monetdb/blobs/4885d983bcbd563c31250fce9741f28b1127a001/oscparser.py
+    # replace name bullshit w/ support for a dict of k/v tags to apply to way
     osmchange = Element('osmChange', version='0.6')
     create = SubElement(osmchange, 'create')
     nodes = []
     nds = []
     count = 1
     tstamp = time.strftime("%Y-%m-%dT%H:%M:%SZ")
+    changeset = str(changeset)
     for coord in coordinates:
         id = '-' + str(count)
-        nodes.append(Element('node', id=id, lat=str(coord[1]), lon=str(coord[0]), timestamp=tstamp))
+        nodes.append(Element('node', id=id, lat=str(coord[1]), lon=str(coord[0]), changeset=changeset, timestamp=tstamp))
         nds.append(Element('nd', ref=id))
         count = count + 1
     # adding polygon wrap around node
     nds.append(nds[0])
     create.extend(nodes)
-    way = SubElement(create, 'way', id='-' + str(count), timestamp=tstamp)
+    way = SubElement(create, 'way', id='-' + str(count), changeset=changeset, timestamp=tstamp)
     way.extend(nds)
-    parkify = SubElement(way, 'tag', k='leisure', v='park')
-    if name != '':
-        nameify = SubElement(way, 'tag', k='name', v=name)
+
+    if type(tags) == type(dict()) and len(tags) > 0:
+        for k, v in tags.iteritems():
+            SubElement(way, 'tag', k=k, v=v)
+
     return tostring(osmchange)
 
+
+def prep_tags(tags):
+    del tags['geo']
+    del tags['id']
+
+    if tags['name'] == '':
+        del tags['name']
+
+    return tags
 
 def listit(t):
     # http://stackoverflow.com/q/1014352
