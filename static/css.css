@@ -1,3 +1,9 @@
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+	outline: none;
+}
 * {margin: 0; padding: 0;}
 
 body, html {
@@ -39,23 +45,13 @@ a {
 	cursor: pointer;
 }
 
-#zwrap {
-	position: absolute;
-	bottom: 35px;
-	width: 100%;
-}
-
 #action-block {
 	display: none;
 	list-style-type: none;
 	color: white;
 	z-index: 10;
-	margin-left: -10px;
-	position: relative;
-	width: 400px;
-	transition: opacity .25s ease-in-out;
-	-moz-transition: opacity .25s ease-in-out;
-	-webkit-transition: opacity .25s ease-in-out;	
+	position: absolute;
+	bottom: 20px;
 }
 
 #action-block li {
@@ -65,14 +61,21 @@ a {
 	cursor: pointer;
 }
 
-#done, #skip {
+#submit, #skip, #problem {
+	-webkit-transition: background-color 100ms linear;
+	-moz-transition: background-color 100ms linear;
+	-o-transition: background-color 100ms linear;
+	-ms-transition: background-color 100ms linear;
+	transition: background-color 100ms linear;
+}
+
+#submit, #skip {
 	border: 1px solid rgba(255,255,255,0.25);
 	color: rgba(255,255,255,1);
 	padding: 8px 15px;
-	/*margin: 15px;*/
 }
 
-#problem select {
+#problem {
 	font-weight: bold;
 	background-color: rgba(0, 0, 0, 0.7);
 	color: rgba(255,255,255,1);
@@ -84,19 +87,49 @@ a {
 	cursor: pointer;
 }
 
-input:focus,
-select:focus,
-textarea:focus,
-button:focus {
-	outline: none;
+input {
+	color: #222;
+	border: 1px solid #ccc;
+	font-size: 100%;
+	padding: 3px 5px;
+	box-shadow: inset rgba(0,0,0,0.2) 0px 1px 3px;
 }
 
-#done {background-color: rgba(0, 179, 0, 0.7);}
-#done:hover {background-color: rgba(0, 179, 0, 1);}
-#done:active {background-color: rgba(0, 109, 0, 1);}
+input:focus {
+	outline: 1px solid blue;
+}
+
+#submit {background-color: rgba(0, 179, 0, 0.7);}
+#submit:hover {background-color: rgba(0, 179, 0, 1);}
+#submit:active {background-color: rgba(0, 109, 0, 1);}
 #skip {background-color: rgba(0, 78, 179, 0.7);}
 #skip:hover {background-color: rgba(0, 78, 179, 1);}
 #skip:active {background-color: rgba(0, 49, 109, 1);}
+#problem:hover {background-color: rgba(0, 0, 0, 1);}
+
+#tags {
+	/*display: none;*/
+	color: black;
+	background-color: white;
+	z-index: 10;
+	position: absolute;
+	width: auto;
+	left: 20px;
+	bottom: 75px;
+	font-size: 14px;
+}
+
+#tags td {
+	padding: 5px 7px;
+}
+
+#tags td:first-child {
+	padding-right: none;
+}
+
+#tags td:first-child input {
+	font-weight: bold;
+}
 
 #modal {
 	top: 0;
@@ -129,8 +162,10 @@ button:focus {
 		border-bottom: 1px solid #999;
 	}
 
-#display {
-	display: none;
+.display {
+	display: none;	
+	pointer-events: none;
+	/* http://caniuse.com/pointer-events */
 	width: 640px;
 	height: 640px;
 	margin: -320px -320px 0 0;
@@ -140,17 +175,6 @@ button:focus {
 	overflow: visible;
 	z-index: 10;
 }
-	#display img {
-		display: none;
-		width: 640px;
-	}
-
-	#display canvas {
-		position: relative;
-		top: 20%;
-		display: none;
-		width: 640px;
-	}
 
 #instruction h3 {margin-bottom: 5px;}
 #instruction li {margin-left: 20px;}
@@ -170,18 +194,9 @@ button:focus {
 	color: black;
 }
 
-#details {
-	display: none;
-	position: absolute;
-	bottom: 90px;
-	left: 10px;
-	padding: 10px 15px;
-	background-color: white;
-	z-index: 10;
-}
-
 #login {
-	bottom: 0px;
+	bottom: 20px;
+	left: 20px;
 	cursor: pointer;
 	position: absolute;
 	display: block;
@@ -191,17 +206,17 @@ button:focus {
 	color: black;
 	padding: 15px 20px;
 	z-index: 900;
-	left: 10px;
 	display: none;
 }
 
 /*	I stupidly editted the leaflet source css previously,
 	need to diff and move it all here instead */
 .leaflet-control-attribution {
+	font-size: 12px !important;
 	background: none !important;
 	color: white !important;
 	text-shadow: 1px 1px black !important;
-	font-weight: bold !important;
+	font-weight: normal !important;
 }
 .leaflet-control-attribution a {
 	color: white !important;

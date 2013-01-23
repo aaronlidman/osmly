@@ -32,7 +32,7 @@ sqlite = {
 
 add_tag = {
     'leisure': 'park',
-    'source': 'County of Los Angeles - Chief Information Office'
+    'source': 'County of Los Angeles - http://egis3.lacounty.gov/dataportal/'
 }
 
 to_intersect = {
@@ -162,6 +162,7 @@ def next_polygon():
     polygon = {
         'id': row[0],
         'geo': shapely.wkb.loads(str(row[1])).simplify(0.00005, False),  # 0.0001 is pretty solid
+        # put tags in their own key, easier clientside
     }
 
     for x in range(2,len(row)):

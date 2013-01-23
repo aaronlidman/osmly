@@ -196,7 +196,7 @@
                         display_polys.addTo(map)
                         // display_nodes.addTo(map)
                     }, 600);
-                    // fitBounds zooms and centers the map to the extent of the polygon. In the process here the polygon nodes become all screwed up. Actually only the middle nodes become screwed up landing seperate from the polygon miles away, usually to the northeast. If it's left as is, when the real nodes are touched the middle nodes are recalculated and move into their correct place, but it's still annoying. I think it has to do with those mid points being placed while the map is zooming. I tried using the 'zoomend' event but that was actually worse, screwing up all the nodes, I think it fires too soon. This also seems to be bigger problem the more nodes there are. Up to about 7 or 8 node polygons are mostly fine, anything more is always screwed.
+                    // fitBounds() zooms and centers the map to the extent of the polygon. In the process here the polygon nodes become all screwed up. Actually only the middle nodes become screwed up landing seperate from the polygon miles away, usually to the northeast. If it's left as is, when the real nodes are touched the middle nodes are recalculated and move into their correct place, but it's still annoying. I think it has to do with those mid points being placed while the map is zooming. I tried using the 'zoomend' event but that was actually worse, screwing up all the nodes, I think it fires too soon. This also seems to be bigger problem the more nodes there are. Up to about 7 or 8 node polygons are mostly fine, anything more is always screwed.
                     // So I set a timeout to wait till everything blows over. It's not too big of a deal because tiles are still loading anyway. 500ms is too low. 600 is about right from everything I've seen, at least on Chrome. I bet slower javascript browsers are a problem.
                     // I've tried fixing this many times, the function isn't documented for good reason. Seems like it's going to be split into a plugin, soo...
 
@@ -318,6 +318,7 @@
                     '<tag k="comment" v="blah blah blah"/>' +
                     '<\/changeset>' +
                 '<\/osm>';
+                
                 var oauth_token = ohauth.stringQs(location.search.slice(1));
                 o.oauth_timestamp = ohauth.timestamp();
                 o.oauth_nonce = ohauth.nonce();
