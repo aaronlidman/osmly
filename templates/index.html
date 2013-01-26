@@ -18,6 +18,7 @@
         <script src="static/Bing.js"></script>
         <script src="static/equalize.js"></script>
         <script src="static/leaflet-osm.js"></script>
+        <script src="static/osm2geo.js"></script>
     </head>
     <body>
         <ul id="top_right">
@@ -78,7 +79,22 @@
                 db: 'laparks',
                 columns: 'name, source',
                 center: [34.0577, -118.2409],
-                zoom: 10
+                zoom: 10,
+                context: [
+                    'leisure=park',
+                    'leisure=nature_reserve',
+                    'lesiure=stadium',
+                    'leisure=golf_course',
+                    'leisure=dog_park',
+                    'landuse=cemetery',
+                    'landuse=farm',
+                    'landuse=farmland',
+                    'landuse=recreation_ground',
+                    'amenity=college',
+                    'amenity=kindergarten',
+                    'amenity=school',
+                    'amenity=university',
+                    'amenity=grave_yard']
             });
             OSMly.go();
         </script>        

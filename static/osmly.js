@@ -23,6 +23,7 @@ window.osmly = function() {
             host: 'http://api06.dev.openstreetmap.org',
             oauth_secret: 'Mon0UoBHaO3qvfgwWrMkf4QAPM0O4lITd3JRK4ff',
             xapi: 'http://www.overpass-api.de/api/xapi?map?',
+            context: [], // 'key=value', todo: value wildcards
             div: 'map',
             db: '', // string, no space, comma seperated; corresponds to 'database'.sqlite
             columns: '',
@@ -260,7 +261,7 @@ window.osmly = function() {
 
         if (typeof current.tags == 'object' && current.tags !== null) {
             for (var tag in current.tags) {
-                if (current.tags[tag] !== 'null') {
+                if (current.tags[tag] !== 'null' && current.tags[tag] !== null) {
                     $('#tags ul').append(
                     '<li>' +
                     '<span class="k" spellcheck="false" contenteditable="true">' + 
@@ -329,6 +330,7 @@ window.osmly = function() {
             // superfluous animation
         $("#problem").val('problem'); // resets problem menu
         map.removeLayer(current.layer);
+        map.removeLayer();
         $('#tags li').remove();
         // map.removeLayer(display_polys);
         // map.removeLayer(display_nodes);
@@ -337,38 +339,65 @@ window.osmly = function() {
     function displayOSM() {
         // mostly from OSM leaflet port
         // https://github.com/openstreetmap/openstreetmap-website/blob/master/app/assets/javascripts/index/browse.js
-        var dataLayer = new L.OSM.DataLayer(null, {
-            styles: {
-                way: {
-                    weight: 3,
-                    color: "#FFFF00",
-                    opacity: 1
-                },
-                area: {
-                    weight: 3,
-                    color: "#FFFF00"
-                },
-                node: {
-                    color: "#FFFF00"
-                },
-                relation: {
-                    weight: 3,
-                    color: "#FFFF00",
-                    opacity: 1
-                }
-            }
-        });
+        // var dataLayer = new L.OSM.DataLayer(null, {
+        //     styles: {
+        //         way: {
+        //             weight: 3,
+        //             color: "#FFFF00",
+        //             opacity: 1
+        //         },
+        //         area: {
+        //             weight: 3,
+        //             color: "#FFFF00"
+        //         },
+        //         node: {
+        //             color: "#FFFF00"
+        //         },
+        //         relation: {
+        //             weight: 3,
+        //             color: "#FFFF00",
+        //             opacity: 1
+        //         }
+        //     }
+        // });
         
-        var url = osmly.xapi + current.bbox;
-        console.log(url);
         $.ajax({
             type: 'GET',
-            url: url
+            url: osmly.xapi + current.bbox
         }).success(function(xml) {
-            var features = dataLayer.buildFeatures(xml);
-            console.log(features);
-            dataLayer.addData(features);
-            dataLayer.addTo(map);
+            var features = osm2geo(xml);
+
+            current.dataLayer = L.geoJson(features, {
+                style: {
+                    "color": "#FFFF00",
+                    "weight": 2,
+                    "opacity": 1
+                },
+                onEachFeature: function(feature, layer) {
+                    if (feature.properties && feature.properties.name) {
+                        popupContent = feature.properties.name;
+                        layer.bindPopup(popupContent);
+                    }
+                },
+                pointToLayer: function(feature, latlng) {
+                    return L.circleMarker(latlng, {
+                        radius: 5,
+                        opacity: 1,
+                        fillOpacity: 0.5
+                    });
+                },
+                filter: function(feature, layer) {
+                    for (var key in feature.properties) {
+                        var tag = key + '=' + feature.properties[key];
+                        if (osmly.context.indexOf(tag) > -1) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            });
+
+            current.dataLayer.addTo(map);
         });
     }
 
