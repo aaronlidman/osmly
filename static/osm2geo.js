@@ -17,36 +17,52 @@
  * GeoJson object.
  *
  * ***********************************************************************/
-var osm2geo = function(osm){
-    // Check wether the argument is a Jquery object and act accordingly
-    // Assuming it as a raw server response for now
-    var $xml = jQuery(osm);
-    // Initialize the empty GeoJSON object
-    var geo = {
-        "type" : "FeatureCollection",
-        "features" : []
-    };
-    // setting the bounding box [minX,minY,maxX,maxY]; x -> long, y -> lat
+var osm2geo = function(osm) {
+
+    var $xml = jQuery(osm),
+        geo = {
+            "type" : "FeatureCollection",
+            "features" : []
+        },
+        boringTags = [
+        'source',
+        'source_ref',
+        'source:ref',
+        'history',
+        'attribution',
+        'created_by',
+        'tiger:county',
+        'tiger:tlid',
+        'tiger:upload_uuid']; // other tags, http://taginfo.openstreetmap.org/keys
+
+    // set the bounding box [minX,minY,maxX,maxY]; x -> long, y -> lat
     function getBounds(bounds){
-        var bbox = new Array;
-        bbox.push(parseFloat(bounds.attr("minlon")));
-        bbox.push(parseFloat(bounds.attr("minlat")));
-        bbox.push(parseFloat(bounds.attr("maxlon")));
-        bbox.push(parseFloat(bounds.attr("maxlat")));
+        var bbox = [];
+        bbox.push(+bounds.attr("minlon"));
+        bbox.push(+bounds.attr("minlat"));
+        bbox.push(+bounds.attr("maxlon"));
+        bbox.push(+bounds.attr("maxlat"));
+
         return bbox;
     }
-    geo["bbox"] = getBounds($xml.find("bounds"));
 
-    // Function to set props for a feature
+    geo.bbox = getBounds($xml.find("bounds"));
+
+    // set properties for a feature
     function setProps(element){
-        var properties = {};
-        var tags = $(element).find("tag");
+        var properties = {},
+            tags = $(element).find("tag");
+
         tags.each(function(index, tag){
-            properties[$(tag).attr("k")] = $(tag).attr("v");
+            if (boringTags.indexOf($(tag).attr("k")) === -1) {
+                properties[$(tag).attr("k")] = $(tag).attr("v");
+            }
         });
+
         return properties;
     }
-    // Generic function to create a feature of given type
+
+    // create a feature of given type
     function getFeature(element, type){
         return {
             "geometry" : {
@@ -57,44 +73,46 @@ var osm2geo = function(osm){
             "properties" : setProps(element)
         };
     }
-    // Ways
+
     var $ways = $("way", $xml);
+
     $ways.each(function(index, ele){
-        var feature = new Object;
-        // List all the nodes
-        var nodes = $(ele).find("nd");
+        var feature = {},
+            nodes = $(ele).find("nd");
+
         // If first and last nd are same, then its a polygon
-        if($(nodes).last().attr("ref") === $(nodes).first().attr("ref")){
+        if ($(nodes).last().attr("ref") === $(nodes).first().attr("ref")) {
             feature = getFeature(ele, "Polygon");
             feature.geometry.coordinates.push([]);
-        }else{
+        } else {
             feature = getFeature(ele, "LineString");
         }
-        nodes.each(function(index, nd){
-            var node = $xml.find("node[id='"+$(nd).attr("ref")+"']"); // find the node with id ref'ed in way
-            var cords = [parseFloat(node.attr("lon")), parseFloat(node.attr("lat"))]; // get the lat,lon of the node
+
+        nodes.each(function(index, nd) {
+            var node = $xml.find("node[id='"+$(nd).attr("ref")+"']"), // find the node with id ref'ed in way
+                cords = [+node.attr("lon"), +node.attr("lat")]; // get the lat,lon of the node
+            
             // If polygon push it inside the cords[[]]
-            if(feature.geometry.type === "Polygon"){
+            if (feature.geometry.type === "Polygon") {
                 feature.geometry.coordinates[0].push(cords);
-            }// if just Line push inside cords[]
-            else{
+            } else {
                 feature.geometry.coordinates.push(cords);
             }
         });
-       // Save the LineString in the Main object
+
         geo.features.push(feature);
     });
     
-    // Points (POI)
     var $points = $("node:has('tag')", $xml);
+
     $points.each(function(index, ele){
         var feature = getFeature(ele, "Point");
-        feature.geometry.coordinates.push(parseFloat($(ele).attr('lon')));
-        feature.geometry.coordinates.push(parseFloat($(ele).attr('lat')));
-       // Save the point in Main object
+        feature.geometry.coordinates.push(+$(ele).attr('lon'));
+        feature.geometry.coordinates.push(+$(ele).attr('lat'));
+
         geo.features.push(feature);
     });
-    // Finally return the GeoJSON object
+
     return geo;
 
 };
