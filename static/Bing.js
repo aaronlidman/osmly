@@ -2,7 +2,7 @@ L.BingLayer = L.TileLayer.extend({
 	options: {
 		subdomains: [0, 1, 2, 3],
 		type: 'Aerial',
-		attribution: 'Bing',
+		attribution: '<a href="http://opengeodata.org/microsoft-imagery-details">Bing © 2013 Microsoft Corporation</a>',
 		culture: ''
 	},
 
@@ -94,7 +94,7 @@ L.BingLayer = L.TileLayer.extend({
 			if ((zoom <= p.zoomMax && zoom >= p.zoomMin) &&
 					bounds.intersects(p.bounds)) {
 				if (!p.active)
-					this._map.attributionControl.addAttribution(p.attrib);
+					// this._map.attributionControl.addAttribution(p.attrib);
 				p.active = true;
 			} else {
 				if (p.active)
@@ -112,6 +112,6 @@ L.BingLayer = L.TileLayer.extend({
 				p.active = false;
 			}
 		}
-        	L.TileLayer.prototype.onRemove.apply(this, [map]);
+        L.TileLayer.prototype.onRemove.apply(this, [map]);
 	}
 });

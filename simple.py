@@ -131,11 +131,11 @@ def next():
         slash()
 
     envelope = map(str, bounds.bounds)
-    bbox = ('[bbox=' +
+    bbox = ('bbox=' +
         envelope[0] + ',' +
         envelope[1] + ',' +
         envelope[2] + ',' +
-        envelope[3] + ']')
+        envelope[3])
         # do it clientside later
 
     polygon = {

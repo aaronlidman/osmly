@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+    <head>
+        <title>rawr</title>
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.css" />
+<!--[if lte IE 8]>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.ie.css" />
+<![endif]-->
+
+<script src="http://cdn.leafletjs.com/leaflet-0.5/leaflet.js"></script>
+
+        <!-- still need to css reset -->
+        <link rel="stylesheet" href="static/css.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+        <script src="static/ohauth/sha.js"></script>
+        <script src="static/ohauth/ohauth.js"></script>
+        <script src="static/osmly.js"></script>
+        <script src="static/Bing.js"></script>
+        <script src="static/equalize.js"></script>
+        <script src="static/leaflet-osm.js"></script>
+    </head>
+    <body>
+        <ul id="top_right">
+            <li id="title">Outline the nearby park</li>
+            <li id="instruct">Instructions</li>
+        </ul>
+        <!-- <span id="title">Outline the nearby park</span> -->
+        <!-- <span id="instruct">Instructions</span> -->
+
+        <div id="modal">
+            <div id="instruction">
+                <h3>Instructions</h3>
+                <li>Make a more accurate outline of the nearby park.</li>
+                <li>It's possible the data is out of date or just wrong; report problems accordingly.</li>
+                <li>Be careful to not include nearby schools, golf courses, or residential yards; just the park.</li>
+                <li>Do include small bodies of water, parking lots, and sidewalks that are obviously part of the park.</li>
+                <li>The park should be fairly obvious, if you're struggling to find anything nearby that looks like a public park it probably isn't right.</li>
+
+                <h3 style="margin-top: 15px;">Tips</h3>
+                <li>Click on the nodes (white dots) to delete them</li>
+                <li>Drag a transparent middle node to add a new node</li>
+                <li>Yellow features are other OSM references there to help you. You can't edit them here but clicking them provides more information. Use this info to help make your features more accurate</li>
+                <li>If you want to edit from another editor, click the coordinates in the bottom right corner which will take you to osm.org</li>
+
+                <h3 style="margin-top: 15px;">About</h3>
+                <li>Data from TIGER 2011 area landmarks.</li>
+                <li>xx original parks, xx processed, xx new to OSM</li>
+                <li><a href="http://thenounproject.com/noun/arrow/#icon-No8828" target="_blank">Skip arrow</a> and <a href="http://thenounproject.com/noun/delete/#icon-No8843" target="_blank">problem X</a> designed by <a href="http://thenounproject.com/cr" target="_blank">Chris Robinson</a> from The Noun Project</li>
+                <a href="#" class="close">X</a> 
+            </div>
+        </div>
+
+        <img id="d-spinner" class="display" src="/static/images/spinner.gif" />
+        <img id="d-problem" class="display" src="/static/images/problem_white.svg" />
+        <img id="d-skip" class="display" src="/static/images/skip_white.svg" />
+        <img id="d-submit" class="display" src="/static/images/upload_white.svg" />
+
+        <div id="login">Login with your OSM account »</div>
+        <div id="action-block">
+            <li>
+                <select name="problem" id="problem">
+                    <option value="problem" disabled selected>Problem</option>
+                    <option value="no_park">No Park Here</option>
+                    <option value="poor_imagery">Poor Imagery</option>
+                    <option value="too_diff">Too Difficult</option>
+                </select>
+            </li>
+            <li id="skip">Skip</li>
+            <li id="submit">Submit</li>
+        </div>
+        <div id="tags">
+            <ul></ul>
+        </div>
+
+        <div id="map"></div>
+        <script type="text/javascript">
+            var OSMly = osmly().set({
+                db: 'laparks',
+                columns: 'name, source',
+                center: [34.0577, -118.2409],
+                zoom: 10
+            });
+            OSMly.go();
+        </script>        
+    </body>
+</html>

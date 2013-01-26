@@ -22,6 +22,7 @@ window.osmly = function() {
     var osmly = {
             host: 'http://api06.dev.openstreetmap.org',
             oauth_secret: 'Mon0UoBHaO3qvfgwWrMkf4QAPM0O4lITd3JRK4ff',
+            xapi: 'http://www.overpass-api.de/api/xapi?map?',
             div: 'map',
             db: '', // string, no space, comma seperated; corresponds to 'database'.sqlite
             columns: '',
@@ -57,7 +58,7 @@ window.osmly = function() {
         osmly.map = map;
 
         if (cookie('token') && cookie('secret')) {
-            setTimeout(next, 1000);
+            setTimeout(next, 2000);
         } else if (getVar().oauth_token) {
             // limbo situation?
             console.log('back from osm.org');
@@ -75,7 +76,7 @@ window.osmly = function() {
                 string = '<span id="prefix_text">' + 
                     '<a href="http://www.openstreetmap.org/?lat=' + lat +
                     '&lon=' + lng + '&zoom=' + zoom + '" target="_blank">' + 
-                    lat + ',' + lng + '</a>' + 
+                    lat + ', ' + lng + '</a>' + 
                     '</span>';
             map.attributionControl.setPrefix(string);
         });
@@ -184,6 +185,7 @@ window.osmly = function() {
         request += '&time=' + new Date().getTime();
         console.log(request);
 
+        // get the next polygon
         $.get(request, function(data) {
             current = '';
             current = jQuery.parseJSON(data);
@@ -207,14 +209,13 @@ window.osmly = function() {
                 }
             });
 
-            // get and load OSM features around here
             map.fitBounds(current.layer.getBounds());
 
             setTimeout(function(){
                 current.layer.addTo(map);
             }, 500);
             // 500ms timeout helps with known mid point problem, still looking into it
-            // switching to canvas doesn't help
+            // switching to canvas doesn't help        
 
             setup();
         });
@@ -222,8 +223,12 @@ window.osmly = function() {
 
     function setup() {
         $("#login").fadeOut(250);
-        $("#action-block").fadeIn(500);
+
         populate_tags();
+        displayOSM();
+
+        $("#action-block").fadeIn(500);
+        $("#tags").fadeIn(500);
 
         $('#skip, #submit').click(function(){
             finish_em(this.id);
@@ -232,20 +237,59 @@ window.osmly = function() {
         $('#problem').change(function(){
             finish_em($('#problem').val());
         });
+
+        $('.k').keypress(function(){
+            $('ul').equalize({
+                children: '.k',
+                equalize: 'width',
+                reset: true
+            });
+            $('.k').width($('.k').width()+15);
+        });
+
+        $('ul').equalize({
+            children: '.k',
+            equalize: 'width',
+            reset: true
+        });
+        $('.k').width($('.k').width()+15);
     }
 
     function populate_tags() {
+        current.tags = sortObject(current.tags);
+
         if (typeof current.tags == 'object' && current.tags !== null) {
             for (var tag in current.tags) {
-                console.log(tag);
-                $('#tags').append(
-                '<tr><td>' +
-                '<input class="k" type="text" maxlength="255" value="'+tag+'">' +
-                '</td>' + '<td>' +
-                '<input class="v" type="text" maxlength="255" value="'+current.tags[tag]+'">' +
-                '</td></tr>');
+                if (current.tags[tag] !== 'null') {
+                    $('#tags ul').append(
+                    '<li>' +
+                    '<span class="k" spellcheck="false" contenteditable="true">' + 
+                    tag + '</span>' +
+                    '<span class="v" spellcheck="false" contenteditable="true">' + 
+                    current.tags[tag] + '</span>' +
+                    '</li>');
+                }
             }
         }
+    }
+
+    // http://stackoverflow.com/a/1359808
+    function sortObject(o) {
+        var sorted = {},
+        key, a = [];
+
+        for (key in o) {
+            if (o.hasOwnProperty(key)) {
+                a.push(key);
+            }
+        }
+
+        a.sort();
+
+        for (key = 0; key < a.length; key++) {
+            sorted[a[key]] = o[a[key]];
+        }
+        return sorted;
     }
 
     function finish_em(result) {
@@ -273,18 +317,59 @@ window.osmly = function() {
         }
 
         $('#d-' + result).show();
-        $('#d-' + result).fadeOut(500);        
+        $('#d-' + result).fadeOut(500);
     }
 
     function teardown() {
         $('#problem, #skip, #submit').unbind();
         $("#action-block").hide();
+        $("#tags").hide();
         map.closePopup();
-        map.setView(osmly.center, osmly.zoom, true);
-        $("#problem").val('problem'); // resets problem menu        
+        // map.setView(osmly.center, osmly.zoom, true);
+            // superfluous animation
+        $("#problem").val('problem'); // resets problem menu
         map.removeLayer(current.layer);
+        $('#tags li').remove();
         // map.removeLayer(display_polys);
         // map.removeLayer(display_nodes);
+    }
+
+    function displayOSM() {
+        // mostly from OSM leaflet port
+        // https://github.com/openstreetmap/openstreetmap-website/blob/master/app/assets/javascripts/index/browse.js
+        var dataLayer = new L.OSM.DataLayer(null, {
+            styles: {
+                way: {
+                    weight: 3,
+                    color: "#FFFF00",
+                    opacity: 1
+                },
+                area: {
+                    weight: 3,
+                    color: "#FFFF00"
+                },
+                node: {
+                    color: "#FFFF00"
+                },
+                relation: {
+                    weight: 3,
+                    color: "#FFFF00",
+                    opacity: 1
+                }
+            }
+        });
+        
+        var url = osmly.xapi + current.bbox;
+        console.log(url);
+        $.ajax({
+            type: 'GET',
+            url: url
+        }).success(function(xml) {
+            var features = dataLayer.buildFeatures(xml);
+            console.log(features);
+            dataLayer.addData(features);
+            dataLayer.addTo(map);
+        });
     }
 
     return osmly;
