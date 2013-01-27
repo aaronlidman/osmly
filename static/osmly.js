@@ -185,12 +185,16 @@ function getVar() {
 }
 
 function next() {
+    message('getting next', true);
+
     var request = '/?next' + '&db=' + osmly.db + '&columns=' + osmly.columns;
     request += '&time=' + new Date().getTime();
     if (osmly.demo) console.log(request);
 
     // get the next polygon
     $.get(request, function(data) {
+        message('parsing', true);
+
         current = jQuery.parseJSON(data);
         if (osmly.demo) console.log(current);
         console.log(current);
@@ -214,24 +218,13 @@ function next() {
 
         map.fitBounds(current.layer.getBounds());
 
-        setTimeout(function(){
-            current.layer.addTo(map);
-        }, 500);
-        // 500ms timeout helps with known mid point problem, still looking into it
-        // switching to canvas doesn't help        
-
-        setup();
+        getOSM();
     });
 }
 
 function setup() {
-    $("#login").fadeOut(250);
-
+    message('setting up', true);
     populate_tags();
-    displayOSM();
-
-    $("#action-block").fadeIn(500);
-    $("#tags").fadeIn(500);
 
     $('#skip, #submit').click(function(){
         finish_em(this.id);
@@ -249,12 +242,24 @@ function setup() {
         });
         $('.k').width($('.k').width()+15);
     });
+    
+    display();
+}
 
+function display() {
+    current.layer.addTo(map);
+    current.dataLayer.addTo(map);
+
+    $('#notify').fadeOut(250);
+    $("#login").fadeOut(250);
+    $("#action-block").fadeIn(500);
+    $("#tags").fadeIn(500);
+
+    // equalize doesn't seem to work until the selector is visible
     $('ul').equalize({
-        children: '.k',
-        equalize: 'width',
-        reset: true
-    });
+            children: '.k',
+            equalize: 'width',
+            reset: true});
     $('.k').width($('.k').width()+15);
 }
 
@@ -327,14 +332,14 @@ function teardown() {
     $("#tags").hide();
     map.closePopup();
     // map.setView(osmly.center, osmly.zoom, true);
-        // superfluous animation
+        // superfluous
     $("#problem").val('problem'); // resets problem menu
     map.removeLayer(current.layer);
     map.removeLayer(current.dataLayer);
     $('#tags li').remove();
 }
 
-function displayOSM() {
+function getOSM() {
     message('getting context', true);
 
     $.ajax({
@@ -347,41 +352,35 @@ function displayOSM() {
         osmly.OsmContext = osm2geo(xml);
         osmly.simpleContext = simplifyContext(osmly.OsmContext.features);
 
-        if (osmly.demo) console.log(osmly.OsmContext);
         console.log(osmly.OsmContext);
         console.log(osmly.simpleContext);
 
-        setDataLayer(osmly.simpleContext);
-    });
-}
-
-function setDataLayer(geoJson) {
-    current.dataLayer = L.geoJson(geoJson, {
-        style: {
-            "color": "#FFFF00",
-            "weight": 2,
-            "opacity": 1
-        },
-        onEachFeature: function(feature, layer) {
-            var popupContent = null;
-            if (feature.properties && feature.properties.name) {
-                popupContent = feature.properties.name;
-            } else if (feature.properties.name == null) {
-                popupContent = '[NO NAME]';
+        current.dataLayer = L.geoJson(osmly.simpleContext, {
+            style: {
+                "color": "#FFFF00",
+                "weight": 2,
+                "opacity": 1
+            },
+            onEachFeature: function(feature, layer) {
+                var popupContent = null;
+                if (feature.properties && feature.properties.name) {
+                    popupContent = feature.properties.name;
+                } else if (feature.properties.name == null) {
+                    popupContent = '[NO NAME]';
+                }
+                layer.bindPopup(popupContent);
+            },
+            pointToLayer: function(feature, latlng) {
+                return L.circleMarker(latlng, {
+                    radius: 5,
+                    opacity: 1,
+                    fillOpacity: 0.5
+                });
             }
-            layer.bindPopup(popupContent);
-        },
-        pointToLayer: function(feature, latlng) {
-            return L.circleMarker(latlng, {
-                radius: 5,
-                opacity: 1,
-                fillOpacity: 0.5
-            });
-        }
-    });
+        });
 
-    $('#notify').fadeOut(250);
-    current.dataLayer.addTo(map);
+        setup();
+    });
 }
 
 function simplifyContext(context) {
