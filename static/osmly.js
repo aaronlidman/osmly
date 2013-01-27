@@ -21,6 +21,8 @@ TODO
     - clean up jQuery work
         - https://github.com/airbnb/javascript#jquery
     - cleaner commenting
+    - log stuff
+        - [new Date.getTime(), 'stuff happened'];
 */
 
 var osmly = {
@@ -37,7 +39,7 @@ var osmly = {
     },
     user = 0,
     current = {},
-    messages = [];
+    log = [];
     o = {
         oauth_consumer_key: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg',
         oauth_signature_method: 'HMAC-SHA1'};
@@ -340,6 +342,7 @@ function displayOSM() {
         url: osmly.xapi + current.bbox
     }).success(function(xml) {
         message('building context', true);
+
         // seperate lists so the user can switch between them
         osmly.OsmContext = osm2geo(xml);
         osmly.simpleContext = simplifyContext(osmly.OsmContext.features);
@@ -401,26 +404,16 @@ function simplifyContext(context) {
     return geo;
 }
 
-// spinner: bool, fadeOut: ms for timeout
-function message(string, spinner, fadeOut) {
-    clearTimeout(current.message);
-
+function message(string, spinner) {
     // string = '', just a spinner
     if (string !== '') string = '<span>' + string + '</span>';
     if (spinner) string = '<img src="/static/images/spinner.gif" />' + string;
 
     $('#notify').html(string);
-    $('#notify').fadeIn(250, function(){
-        if (fadeOut) {
-            current.message = setTimeout(function(){
-                $('#notify').fadeOut(1000);
-            }, fadeOut);
-        }
-        // if !fadeOut it has to be closed manually
-        // $('#notify').fadeOut(250);
-    });
+    $('#notify').fadeIn(250);
 
-    messages.push(string);
+    // don't forget to hide the message later
+    // $('#notify').fadeOut(250);
 }
 
 return osmly;
