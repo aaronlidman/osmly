@@ -2,7 +2,7 @@ L.BingLayer = L.TileLayer.extend({
 	options: {
 		subdomains: [0, 1, 2, 3],
 		type: 'Aerial',
-		attribution: '<a href="http://opengeodata.org/microsoft-imagery-details">Bing © 2013 Microsoft Corporation</a>',
+		attribution: '<a target="_blank" href="http://opengeodata.org/microsoft-imagery-details">Bing © 2013 Microsoft Corporation</a>',
 		culture: ''
 	},
 

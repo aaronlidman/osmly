@@ -11,29 +11,35 @@ TODO
     - namespace cookies
     - cleanup html, better/unique selectors
     - localize jquery
-    - reset/normalize css
+    - z18+ bing, https://github.com/systemed/iD/blob/master/js/id/renderer/background_source.js#L37
+    - overzooming, https://github.com/systemed/iD/commit/5254f06522ac42c47cdd7f50858b62e7ffb9f236
+    - possibly move all SS transport within GeoJSON properties
+        - make tags work w/ those properties
+    - some new blocking from displayOSM()
+    - Don't ever use $.get or $.post. Instead use $.ajax and provide both a success handler and an error handler.
+        - github js style guide
+    - clean up jQuery work
+        - https://github.com/airbnb/javascript#jquery
+    - cleaner commenting
 */
 
 var osmly = {
         host: 'http://api06.dev.openstreetmap.org',
         oauth_secret: 'Mon0UoBHaO3qvfgwWrMkf4QAPM0O4lITd3JRK4ff',
         xapi: 'http://www.overpass-api.de/api/xapi?map?',
-        context: [], // 'key=value', todo: value wildcards
+        contextualize: [], // 'key=value', todo: value wildcards
         div: 'map',
         db: '', // string, no space, comma seperated; corresponds to 'database'.sqlite
         columns: '',
         center: [0,0],
-        zoom: 2
+        zoom: 2,
+        demo: false
     },
     user = 0,
     current = {},
     o = {
         oauth_consumer_key: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg',
-        oauth_signature_method: 'HMAC-SHA1'},
-    edit_style = {
-        "color": "#00FF00",
-        "weight": 2,
-        "opacity": 1};
+        oauth_signature_method: 'HMAC-SHA1'};
 
 osmly.set = function (object) {
     for (var obj in object) {
@@ -57,7 +63,7 @@ osmly.go = function() {
         setTimeout(next, 2000);
     } else if (getVar().oauth_token) {
         // limbo situation?
-        console.log('back from osm.org');
+        if (osmly.demo) console.log('back from osm.org');
         access_oauth();
     } else {
         // no auth of any kind
@@ -105,9 +111,10 @@ function request_oauth() {
         var token = ohauth.stringQs(xhr.response);
         cookie('ohauth_token_secret', token.oauth_token_secret);
         // document.cookie = 'ohauth_token_secret=' + token.oauth_token_secret;
-        var at = osmly.host + '/oauth/authorize?';
-        console.log('redirecting');
-        window.location = at + ohauth.qsString({
+        var at = osmly.host + '/oauth/authorize?' + ohauth.qsString;
+        if (osmly.demo) console.log('redirecting');
+
+        window.location = at ({
             oauth_token: token.oauth_token,
             oauth_callback: location.href
         });
@@ -134,7 +141,7 @@ function access_oauth() {
         // token_secret = access_token.oauth_token_secret;
         o.oauth_token = document.cookie.match(/token=([^;]+)/)[1];
         token_secret = document.cookie.match(/secret=([^;]+)/)[1];
-        console.log(String.fromCharCode(0x2713) + ' login');
+        if (osmly.demo) console.log(String.fromCharCode(0x2713) + ' login');
         history.pushState(null, null, '/');
         next();
         // changeset stuff
@@ -158,8 +165,6 @@ function cookie(k, v) {
         msecs += 31557600000; // a year
         expire.setTime(msecs);
 
-        console.log(expire);
-        console.log(expire.toGMTString());
         document.cookie = 
             k.toString() + '=' + v.toString() +
             ';expires=' + expire.toGMTString() +
@@ -179,12 +184,12 @@ function getVar() {
 function next() {
     var request = '/?next' + '&db=' + osmly.db + '&columns=' + osmly.columns;
     request += '&time=' + new Date().getTime();
-    console.log(request);
+    if (osmly.demo) console.log(request);
 
     // get the next polygon
     $.get(request, function(data) {
         current = jQuery.parseJSON(data);
-
+        if (osmly.demo) console.log(current);
         console.log(current);
 
         current.layer = L.geoJson(current.geo, {
@@ -253,17 +258,15 @@ function setup() {
 function populate_tags() {
     current.tags = sortObject(current.tags);
 
-    if (typeof current.tags == 'object' && current.tags !== null) {
-        for (var tag in current.tags) {
-            if (current.tags[tag] !== 'null' && current.tags[tag] !== null) {
-                $('#tags ul').append(
-                '<li>' +
-                '<span class="k" spellcheck="false" contenteditable="true">' + 
-                tag + '</span>' +
-                '<span class="v" spellcheck="false" contenteditable="true">' + 
-                current.tags[tag] + '</span>' +
-                '</li>');
-            }
+    for (var tag in current.tags) {
+        if (current.tags[tag] !== 'null' && current.tags[tag] !== null) {
+            $('#tags ul').append(
+            '<li>' +
+            '<span class="k" spellcheck="false" contenteditable="true">' + 
+            tag + '</span>' +
+            '<span class="v" spellcheck="false" contenteditable="true">' + 
+            current.tags[tag] + '</span>' +
+            '</li>');
         }
     }
 }
@@ -328,48 +331,71 @@ function teardown() {
     $('#tags li').remove();
 }
 
-function displayOSM() {        
+function displayOSM() {
+    // show message, 'getting OSM context'
     $.ajax({
         type: 'GET',
         url: osmly.xapi + current.bbox
     }).success(function(xml) {
-        var features = osm2geo(xml);
-            // need to filter out uninteresting tags
-            // from leaflet-osm.js: 
-                // uninterestingTags: ['source', 'source_ref', 'source:ref', 'history', 'attribution', 'created_by', 'tiger:county', 'tiger:tlid', 'tiger:upload_uuid']
+        // show message, 'building OSM context'
+        // seperate lists so the use can switch between them
+        osmly.OsmContext = osm2geo(xml);
+        osmly.simpleContext = simplifyContext(osmly.OsmContext.features);
 
-        current.dataLayer = L.geoJson(features, {
-            style: {
-                "color": "#FFFF00",
-                "weight": 2,
-                "opacity": 1
-            },
-            onEachFeature: function(feature, layer) {
-                if (feature.properties && feature.properties.name) {
-                    popupContent = feature.properties.name;
-                    layer.bindPopup(popupContent);
-                }
-            },
-            pointToLayer: function(feature, latlng) {
-                return L.circleMarker(latlng, {
-                    radius: 5,
-                    opacity: 1,
-                    fillOpacity: 0.5
-                });
-            },
-            filter: function(feature, layer) {
-                for (var key in feature.properties) {
-                    var tag = key + '=' + feature.properties[key];
-                    if (osmly.context.indexOf(tag) > -1) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        });
+        if (osmly.demo) console.log(osmly.OsmContext);
+        console.log(osmly.OsmContext);
+        console.log(osmly.simpleContext);
 
-        current.dataLayer.addTo(map);
+        setDataLayer(osmly.simpleContext);
     });
+}
+
+function setDataLayer(geoJson) {
+    current.dataLayer = L.geoJson(geoJson, {
+        style: {
+            "color": "#FFFF00",
+            "weight": 2,
+            "opacity": 1
+        },
+        onEachFeature: function(feature, layer) {
+            var popupContent = null;
+            if (feature.properties && feature.properties.name) {
+                popupContent = feature.properties.name;
+            } else if (feature.properties.name == null) {
+                popupContent = '[NO NAME]';
+            }
+            layer.bindPopup(popupContent);
+        },
+        pointToLayer: function(feature, latlng) {
+            return L.circleMarker(latlng, {
+                radius: 5,
+                opacity: 1,
+                fillOpacity: 0.5
+            });
+        }
+    });
+
+    current.dataLayer.addTo(map);
+}
+
+function simplifyContext(context) {
+    var geo = {
+            "type" : "FeatureCollection",
+            "features" : []
+        };
+
+    for (var featKey in context) {
+        var feature = context[featKey];
+
+        for (var key in feature.properties) {
+            var tag = key + '=' + feature.properties[key];
+            if (osmly.contextualize.indexOf(tag) > -1) {
+                geo.features.push(feature);
+            }
+        }
+    }
+
+    return geo;
 }
 
 return osmly;
