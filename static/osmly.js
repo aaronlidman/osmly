@@ -242,7 +242,7 @@ function setup() {
         });
         $('.k').width($('.k').width()+15);
     });
-    
+
     display();
 }
 
@@ -350,7 +350,7 @@ function getOSM() {
 
         // seperate lists so the user can switch between them
         osmly.OsmContext = osm2geo(xml);
-        osmly.simpleContext = simplifyContext(osmly.OsmContext.features);
+        osmly.simpleContext = simplifyContext(osmly.OsmContext);
 
         console.log(osmly.OsmContext);
         console.log(osmly.simpleContext);
@@ -383,19 +383,22 @@ function getOSM() {
     });
 }
 
-function simplifyContext(context) {
+function simplifyContext(osm) {
+    var features = osm.features;
     var geo = {
             "type" : "FeatureCollection",
             "features" : []
         };
 
-    for (var featKey in context) {
-        var feature = context[featKey];
-
+    for (var featKey in features) {
+        var feature = features[featKey];
+        
+        // intentionally structured this way
         for (var key in feature.properties) {
-            var tag = key + '=' + feature.properties[key];
-            if (osmly.contextualize.indexOf(tag) > -1) {
-                geo.features.push(feature);
+            if (key in osmly.contextualize) {
+                if (osmly.contextualize[key].indexOf(feature.properties[key]) > -1) {
+                    geo.features.push(feature);
+                }
             }
         }
     }
