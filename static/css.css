@@ -4,7 +4,11 @@ textarea:focus,
 button:focus {
 	outline: none;
 }
-* {margin: 0; padding: 0;}
+
+* {
+	margin: 0;
+	padding: 0;
+}
 
 body, html {
 	color: #222;
@@ -13,10 +17,12 @@ body, html {
 	min-width: 640px;
 	font-family: Helvetica, Arial, sans-serif;
 }
+
 a {
 	text-decoration: none;
 	color: #222;
 }
+
 #main {height: 100%;}
 #map {min-height: 500px; height: 100%;}
 
@@ -96,7 +102,7 @@ a {
 #problem:hover {background-color: rgba(0, 0, 0, 1);}
 
 #tags {
-	/*display: none;*/
+	display: none;
 	color: black;
 	background-color: white;
 	z-index: 10;
@@ -107,6 +113,7 @@ a {
 	font-size: 14px;
 	padding: 7px;
 }
+
 #tags ul {
 	list-style-type: none;
 	border:	1px solid #ccc;
@@ -192,6 +199,7 @@ a {
 	border: none;
 	background-color: #eee;
 }
+
 .close:hover {
 	color: black;
 }
@@ -211,7 +219,24 @@ a {
 	display: none;
 }
 
-/* leaflet, in case it wasn't obvious */
+#notify {
+	display: none;
+	z-index: 10;
+	background-color: white;
+	bottom: 30px;
+	right: 20px;
+	padding: 3px;
+	position: absolute;
+	height: 40px;
+}
+
+#notify span {
+	font-size: 14px;
+	position: relative;
+	top: -15px;
+	padding: 0 10px;
+}
+
 .leaflet-control-attribution {
 	font-size: 12px !important;
 	background: none !important;

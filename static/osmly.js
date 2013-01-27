@@ -37,6 +37,7 @@ var osmly = {
     },
     user = 0,
     current = {},
+    messages = [];
     o = {
         oauth_consumer_key: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg',
         oauth_signature_method: 'HMAC-SHA1'};
@@ -332,13 +333,14 @@ function teardown() {
 }
 
 function displayOSM() {
-    // show message, 'getting OSM context'
+    message('getting context', true);
+
     $.ajax({
         type: 'GET',
         url: osmly.xapi + current.bbox
     }).success(function(xml) {
-        // show message, 'building OSM context'
-        // seperate lists so the use can switch between them
+        message('building context', true);
+        // seperate lists so the user can switch between them
         osmly.OsmContext = osm2geo(xml);
         osmly.simpleContext = simplifyContext(osmly.OsmContext.features);
 
@@ -375,6 +377,7 @@ function setDataLayer(geoJson) {
         }
     });
 
+    $('#notify').fadeOut(250);
     current.dataLayer.addTo(map);
 }
 
@@ -396,6 +399,28 @@ function simplifyContext(context) {
     }
 
     return geo;
+}
+
+// spinner: bool, fadeOut: ms for timeout
+function message(string, spinner, fadeOut) {
+    clearTimeout(current.message);
+
+    // string = '', just a spinner
+    if (string !== '') string = '<span>' + string + '</span>';
+    if (spinner) string = '<img src="/static/images/spinner.gif" />' + string;
+
+    $('#notify').html(string);
+    $('#notify').fadeIn(250, function(){
+        if (fadeOut) {
+            current.message = setTimeout(function(){
+                $('#notify').fadeOut(1000);
+            }, fadeOut);
+        }
+        // if !fadeOut it has to be closed manually
+        // $('#notify').fadeOut(250);
+    });
+
+    messages.push(string);
 }
 
 return osmly;
