@@ -10,7 +10,6 @@ window.osmly = function () {
 TODO
     - namespace cookies
     - cleanup html, better/unique selectors
-    - localize jquery, leaflet
     - overzooming, https://github.com/systemed/iD/commit/5254f06522ac42c47cdd7f50858b62e7ffb9f236
     - possibly move all SS transport within GeoJSON properties
         - make tags work w/ those properties
