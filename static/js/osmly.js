@@ -79,10 +79,10 @@ osmly.go = function() {
             lat = coords.lat.toFixed(4).toString(),
             lng = coords.lng.toFixed(4).toString(),
             zoom = map.getZoom().toString();
-            string = '<span id="prefix_text">' + 
+            string = '<span id="prefix_text">' +
                 '<a href="http://www.openstreetmap.org/?lat=' + lat +
-                '&lon=' + lng + '&zoom=' + zoom + '" target="_blank">' + 
-                lat + ', ' + lng + '</a>' + 
+                '&lon=' + lng + '&zoom=' + zoom + '" target="_blank">' +
+                lat + ', ' + lng + '</a>' +
                 '</span>';
         map.attributionControl.setPrefix(string);
     });
@@ -158,7 +158,7 @@ function access_oauth() {
         //         console.log('Changeset: ' + xhr.response);
         //     });
     });
-}  
+}
 
 function cookie(k, v) {
 // todo: namespace to api host
@@ -169,7 +169,7 @@ function cookie(k, v) {
         msecs += 31557600000; // a year
         expire.setTime(msecs);
 
-        document.cookie = 
+        document.cookie =
             k.toString() + '=' + v.toString() +
             ';expires=' + expire.toGMTString() +
             ';path=/';
@@ -268,9 +268,9 @@ function populate_tags() {
         if (current.tags[tag] !== 'null' && current.tags[tag] !== null) {
             $('#tags ul').append(
             '<li>' +
-            '<span class="k" spellcheck="false" contenteditable="true">' + 
+            '<span class="k" spellcheck="false" contenteditable="true">' +
             tag + '</span>' +
-            '<span class="v" spellcheck="false" contenteditable="true">' + 
+            '<span class="v" spellcheck="false" contenteditable="true">' +
             current.tags[tag] + '</span>' +
             '</li>');
         }
@@ -364,6 +364,7 @@ function getOSM() {
                 if (feature.properties && feature.properties.name) {
                     popupContent = feature.properties.name;
                 } else if (feature.properties.name == null) {
+                    // == is intentional, jshint isn't happy
                     popupContent = '[NO NAME]';
                 }
                 layer.bindPopup(popupContent);
