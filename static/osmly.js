@@ -10,12 +10,10 @@ window.osmly = function () {
 TODO
     - namespace cookies
     - cleanup html, better/unique selectors
-    - localize jquery
-    - z18+ bing, https://github.com/systemed/iD/blob/master/js/id/renderer/background_source.js#L37
+    - localize jquery, leaflet
     - overzooming, https://github.com/systemed/iD/commit/5254f06522ac42c47cdd7f50858b62e7ffb9f236
     - possibly move all SS transport within GeoJSON properties
         - make tags work w/ those properties
-    - some new blocking from displayOSM()
     - Don't ever use $.get or $.post. Instead use $.ajax and provide both a success handler and an error handler.
         - github js style guide
     - clean up jQuery work
@@ -45,10 +43,14 @@ var osmly = {
         oauth_signature_method: 'HMAC-SHA1'};
 
 osmly.set = function (object) {
-    for (var obj in object) {
-        osmly[obj] = object[obj];
+    if (typeof(object) === 'object') {
+        for (var obj in object) {
+            osmly[obj] = object[obj];
+        }
+        return osmly;
+    } else {
+        return false;
     }
-    return osmly;
 };
 
 osmly.go = function() {
@@ -56,7 +58,7 @@ osmly.go = function() {
         center: osmly.center,
         layers: [new L.BingLayer("Anqm0F_JjIZvT0P3abS6KONpaBaKuTnITRrnYuiJCE0WOhH6ZbE4DzeT6brvKVR5")],
         zoom: osmly.zoom,
-        maxZoom: 18
+        maxZoom: 20
             // need to figure out z18+ bing
     });
 
@@ -161,7 +163,7 @@ function access_oauth() {
 
 function cookie(k, v) {
 // todo: namespace to api host
-    if (arguments.length == 2) {
+    if (arguments.length === 2) {
         // via: http://stackoverflow.com/a/3795002
         var expire = new Date();
         var msecs = expire.getTime();
@@ -193,8 +195,6 @@ function next() {
 
     // get the next polygon
     $.get(request, function(data) {
-        message('parsing', true);
-
         current = jQuery.parseJSON(data);
         if (osmly.demo) console.log(current);
         console.log(current);
@@ -206,7 +206,7 @@ function next() {
                 "opacity": 1
             },
             onEachFeature: function (feature, layer){
-                if (current.geo.type == 'MultiPolygon') {
+                if (current.geo.type === 'MultiPolygon') {
                     for (var ayer in layer._layers) {
                         layer._layers[ayer].editing.enable();
                     }
@@ -223,7 +223,6 @@ function next() {
 }
 
 function setup() {
-    message('setting up', true);
     populate_tags();
 
     $('#skip, #submit').click(function(){
@@ -383,22 +382,20 @@ function getOSM() {
     });
 }
 
-function simplifyContext(osm) {
-    var features = osm.features;
+function simplifyContext(osmGeoJson) {
+    var features = osmGeoJson.features;
     var geo = {
             "type" : "FeatureCollection",
             "features" : []
         };
 
-    for (var featKey in features) {
-        var feature = features[featKey];
+    for (var i = 0, f = features.length; i < f; i++) {
+        var feature = features[i];
         
-        // intentionally structured this way
         for (var key in feature.properties) {
-            if (key in osmly.contextualize) {
-                if (osmly.contextualize[key].indexOf(feature.properties[key]) > -1) {
+            if (key in osmly.contextualize &&
+                osmly.contextualize[key].indexOf(feature.properties[key]) > -1) {
                     geo.features.push(feature);
-                }
             }
         }
     }
@@ -412,7 +409,10 @@ function message(string, spinner) {
     if (spinner) string = '<img src="/static/images/spinner.gif" />' + string;
 
     $('#notify').html(string);
-    $('#notify').fadeIn(250);
+    // if is visible, .show()
+    // else .fadeIn
+    $('#notify').show();
+    // $('#notify').fadeIn(250);
 
     // don't forget to hide the message later
     // $('#notify').fadeOut(250);
