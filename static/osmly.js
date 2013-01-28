@@ -187,7 +187,7 @@ function getVar() {
 }
 
 function next() {
-    message('getting next', true);
+    notify('getting next', true);
 
     var request = '/?next' + '&db=' + osmly.db + '&columns=' + osmly.columns;
     request += '&time=' + new Date().getTime();
@@ -339,13 +339,13 @@ function teardown() {
 }
 
 function getOSM() {
-    message('getting context', true);
+    notify('getting context', true);
 
     $.ajax({
         type: 'GET',
         url: osmly.xapi + current.bbox
     }).success(function(xml) {
-        message('building context', true);
+        notify('building context', true);
 
         // seperate lists so the user can switch between them
         osmly.OsmContext = osm2geo(xml);
@@ -403,18 +403,15 @@ function simplifyContext(osmGeoJson) {
     return geo;
 }
 
-function message(string, spinner) {
+function notify(string, spinner) {
     // string = '', just a spinner
     if (string !== '') string = '<span>' + string + '</span>';
     if (spinner) string = '<img src="/static/images/spinner.gif" />' + string;
 
     $('#notify').html(string);
-    // if is visible, .show()
-    // else .fadeIn
     $('#notify').show();
-    // $('#notify').fadeIn(250);
 
-    // don't forget to hide the message later
+    // don't forget to hide #notify later
     // $('#notify').fadeOut(250);
 }
 
