@@ -406,7 +406,7 @@ function simplifyContext(osmGeoJson) {
 function notify(string, spinner) {
     // string = '', just a spinner
     if (string !== '') string = '<span>' + string + '</span>';
-    if (spinner) string = '<img src="/static/images/spinner.gif" />' + string;
+    if (spinner) string = '<img src="/static/images/loader.gif" />' + string;
 
     $('#notify').html(string);
     $('#notify').show();

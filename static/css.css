@@ -40,6 +40,7 @@ a {
 	margin-bottom: 1px;
 	background-color: white;
 	padding: 10px 15px;
+	box-shadow: 0 0 8px rgba(0,0,0,0.4);
 }
 
 #title {
@@ -112,6 +113,7 @@ a {
 	bottom: 75px;
 	font-size: 14px;
 	padding: 7px;
+	box-shadow: 0 0 8px rgba(0,0,0,0.4);
 }
 
 #tags ul {
@@ -217,6 +219,7 @@ a {
 	padding: 15px 20px;
 	z-index: 900;
 	display: none;
+	box-shadow: 0 0 8px rgba(0,0,0,0.4);
 }
 
 #notify {
@@ -228,6 +231,7 @@ a {
 	padding: 3px;
 	position: absolute;
 	height: 40px;
+	box-shadow: 0 0 8px rgba(0,0,0,0.4);
 }
 
 #notify span {
@@ -261,6 +265,10 @@ a {
 .leaflet-editing-icon {
 	-webkit-border-radius: 10px;
 	border-radius: 10px;
+	width: 9px !important;
+	height: 9px !important;
+	margin-left: -5px !important;
+	margin-top: -5px !important;
 }
 
 .leaflet-div-icon {

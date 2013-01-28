@@ -142,7 +142,7 @@ def next():
         'id': row[0],
         'bbox': bbox,
         'db': sqlite['db'].split('.')[0],
-        'geo': geo.simplify(0.00005, False),  # 0.0001 is pretty solid
+        'geo': geo.simplify(0.0001, False),  # 0.0001 is pretty solid
         'tags': {}
     }
 
@@ -176,7 +176,8 @@ def clean_up(polygon):
         polygon['geo']['type'] = 'MultiPolygon'
     else:
         del polygon['geo']['coordinates'][0][-1]
-    # removes the start/end polygon connecting point
+    # removes the start/end polygon connecting point, leaflet should know this
+    # fix is coming: https://github.com/Leaflet/Leaflet/commit/4551633b9c08fd653a1c30556d5868a4c9ef2b04#L0L10
     return polygon
 
 
