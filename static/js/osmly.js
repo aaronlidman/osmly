@@ -13,12 +13,8 @@ TODO
     - overzooming, https://github.com/systemed/iD/commit/5254f06522ac42c47cdd7f50858b62e7ffb9f236
     - possibly move all SS transport within GeoJSON properties
         - make tags work w/ those properties
-    - Don't ever use $.get or $.post. Instead use $.ajax and provide both a success handler and an error handler.
-        - github js style guide
-    - clean up jQuery work
-        - https://github.com/airbnb/javascript#jquery
     - cleaner commenting
-    - log stuff
+    - log stuff, localstorage?
         - [new Date.getTime(), 'stuff happened'];
 */
 
@@ -71,7 +67,7 @@ osmly.go = function() {
         access_oauth();
     } else {
         // no auth of any kind
-        $('#login').fadeIn();
+        $('#login').fadeIn(500);
     }
 
     map.on('move', function() {
@@ -88,7 +84,7 @@ osmly.go = function() {
     });
 
     $("#login").click(function() {
-        // throw up a spinner
+        notify('');
         request_oauth();
     });
 
@@ -192,8 +188,10 @@ function next() {
     request += '&time=' + new Date().getTime();
     if (osmly.demo) console.log(request);
 
-    // get the next polygon
-    $.get(request, function(data) {
+    $.ajax({
+        type: 'GET',
+        url: request
+    }).success(function(data) {
         current = jQuery.parseJSON(data);
         if (osmly.demo) console.log(current);
         console.log(current);
@@ -329,8 +327,6 @@ function teardown() {
     $("#action-block").hide();
     $("#tags").hide();
     map.closePopup();
-    // map.setView(osmly.center, osmly.zoom, true);
-        // superfluous
     $("#problem").val('problem'); // resets problem menu
     map.removeLayer(current.layer);
     map.removeLayer(current.dataLayer);
@@ -405,7 +401,7 @@ function simplifyContext(osmGeoJson) {
 
 function notify(string, spinner) {
     // string = '', just a spinner
-    if (string !== '') string = '<span>' + string + '</span>';
+    if (string !== '') string = '<span>' + string + '</span>'; spinner = true;
     if (spinner) string = '<img src="/static/images/loader.gif" />' + string;
 
     $('#notify').html(string);
