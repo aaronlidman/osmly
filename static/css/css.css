@@ -27,6 +27,7 @@ a {
 #map {min-height: 500px; height: 100%;}
 
 #top_right {
+	display: none;
 	list-style-type: none;
 	position: absolute;
 	top: 0;

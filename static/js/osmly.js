@@ -16,6 +16,8 @@ TODO
     - cleaner commenting
     - log stuff, localstorage?
         - [new Date.getTime(), 'stuff happened'];
+    - popup authentication, http://mapbox.com/osmdev/2013/01/15/oauth-in-javascript/
+        - iframe sucked
 */
 
 var osmly = {
@@ -54,14 +56,13 @@ osmly.go = function() {
         layers: [new L.BingLayer("Anqm0F_JjIZvT0P3abS6KONpaBaKuTnITRrnYuiJCE0WOhH6ZbE4DzeT6brvKVR5")],
         zoom: osmly.zoom,
         maxZoom: 20
-            // need to figure out z18+ bing
     });
 
     osmly.map = map;
 
     if (cookie('token') && cookie('secret')) {
         setTimeout(next, 2000);
-    } else if (getVar().oauth_token) {
+    } else if (ohauth.stringQs(location.search.slice(1)).oauth_token) {
         // limbo situation?
         if (osmly.demo) console.log('back from osm.org');
         access_oauth();
@@ -100,6 +101,7 @@ osmly.go = function() {
 };
 
 function request_oauth() {
+    console.log('requesting');
     var url = osmly.host + '/oauth/request_token';
 
     o.oauth_timestamp = ohauth.timestamp();
@@ -108,53 +110,63 @@ function request_oauth() {
         ohauth.baseString('POST', url, o));
 
     ohauth.xhr('POST', url, o, null, {}, function(xhr) {
+        console.log('got request');
         var token = ohauth.stringQs(xhr.response);
         cookie('ohauth_token_secret', token.oauth_token_secret);
-        // document.cookie = 'ohauth_token_secret=' + token.oauth_token_secret;
-        var at = osmly.host + '/oauth/authorize?' + ohauth.qsString;
-        if (osmly.demo) console.log('redirecting');
 
-        window.location = at ({
+        if (osmly.demo) console.log('redirecting');
+        var at = osmly.host + '/oauth/authorize?';
+
+        window.location = at + ohauth.qsString({
             oauth_token: token.oauth_token,
             oauth_callback: location.href
         });
+
     });
 }
 
 function access_oauth() {
-    var oauth_token = ohauth.stringQs(location.search.slice(1));
+    var oauth_token = ohauth.stringQs(location.search.slice(1)),
+        url = osmly.host + '/oauth/access_token',
+        token_secret = cookie('ohauth_token_secret');
+
     o.oauth_timestamp = ohauth.timestamp();
     o.oauth_nonce = ohauth.nonce();
     o.oauth_token = oauth_token.oauth_token;
-    var url = osmly.host + '/oauth/access_token';
-    var token_secret = cookie('ohauth_token_secret');
+
     if (!token_secret) return console.error('Required token not found');
+
     o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
         ohauth.baseString('POST', url, o));
+
     ohauth.xhr('POST', url, o, null, {}, function(xhr) {
         var access_token = ohauth.stringQs(xhr.response);
         cookie('token', access_token.oauth_token);
         cookie('secret', access_token.oauth_token_secret);
-        // o.oauth_token = access_token.oauth_token;
         o.oauth_timestamp = ohauth.timestamp();
         o.oauth_nonce = ohauth.nonce();
-        // token_secret = access_token.oauth_token_secret;
-        o.oauth_token = document.cookie.match(/token=([^;]+)/)[1];
-        token_secret = document.cookie.match(/secret=([^;]+)/)[1];
+        o.oauth_token = access_token.oauth_token;
+        token_secret = access_token.oauth_token_secret;
+        
         if (osmly.demo) console.log(String.fromCharCode(0x2713) + ' login');
         history.pushState(null, null, '/');
+        
         next();
-        // changeset stuff
-        // var url = osmly.host + '/api/0.6/changeset/create';
-        // o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
-        //     ohauth.baseString('PUT', url, o));
-        // console.log(o);
-        // ohauth.xhr('PUT', url, o, change, { header: { 'Content-Type': 'text/xml' } },
-        //     function(xhr) {
-        //         console.log('Changeset: ' + xhr.response);
-        //     });
     });
 }
+
+// function createChangeset() {
+//     // changeset stuff
+//     var url = osmly.host + '/api/0.6/changeset/create',
+//         token_secret = cookie('secret');
+//     o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
+//         ohauth.baseString('PUT', url, o));
+
+//     ohauth.xhr('PUT', url, o, change, { header: { 'Content-Type': 'text/xml' } },
+//         function(xhr) {
+//             console.log('Changeset: ' + xhr.response);
+//         });
+// }
 
 function cookie(k, v) {
 // todo: namespace to api host
@@ -175,10 +187,6 @@ function cookie(k, v) {
 
     if (check) return check[1];
     return check;
-}
-
-function getVar() {
-    return ohauth.stringQs(location.search.slice(1));
 }
 
 function next() {
@@ -247,7 +255,8 @@ function display() {
     current.dataLayer.addTo(map);
 
     $('#notify').fadeOut(250);
-    $("#login").fadeOut(250);
+    $('#login').fadeOut(250);
+    $('#top_right').fadeIn(500);
     $("#action-block").fadeIn(500);
     $("#tags").fadeIn(500);
 
