@@ -65,7 +65,8 @@ osmly.go = function() {
     } else if (ohauth.stringQs(location.search.slice(1)).oauth_token) {
         // limbo situation?
         if (osmly.demo) console.log('back from osm.org');
-        access_oauth();
+        console.log('back from osm.org');
+        // access_oauth();
     } else {
         // no auth of any kind
         $('#login').fadeIn(500);
@@ -104,6 +105,26 @@ function request_oauth() {
     console.log('requesting');
     var url = osmly.host + '/oauth/request_token';
 
+    // https://github.com/systemed/iD/blob/master/js/id/oauth.js#L72
+    var w = 600, h = 550,
+    settings = [
+        ['width', w], ['height', h],
+        ['left', screen.width / 2 - w / 2],
+        ['top', screen.height / 2 - h / 2]].map(function(x) {
+            return x.join('=');
+        }).join(','),
+    popup = window.open("about:blank", 'oauth_window', settings),
+    locationCheck = window.setInterval(function() {
+        if (popup.closed) return window.clearInterval(locationCheck);
+        if (popup.location.search) {
+            var search = popup.location.search,
+            oauth_token = ohauth.stringQs(search.slice(1));
+            popup.close();
+            access_oauth(oauth_token);
+            window.clearInterval(locationCheck);
+        }
+    }, 100);
+
     o.oauth_timestamp = ohauth.timestamp();
     o.oauth_nonce = ohauth.nonce();
     o.oauth_signature = ohauth.signature(osmly.oauth_secret, '',
@@ -115,9 +136,8 @@ function request_oauth() {
         cookie('ohauth_token_secret', token.oauth_token_secret);
 
         if (osmly.demo) console.log('redirecting');
-        var at = osmly.host + '/oauth/authorize?';
 
-        window.location = at + ohauth.qsString({
+        popup.location = osmly.host + '/oauth/authorize?' + ohauth.qsString({
             oauth_token: token.oauth_token,
             oauth_callback: location.href
         });
@@ -125,9 +145,10 @@ function request_oauth() {
     });
 }
 
-function access_oauth() {
-    var oauth_token = ohauth.stringQs(location.search.slice(1)),
-        url = osmly.host + '/oauth/access_token',
+// https://github.com/systemed/iD/blob/master/js/id/oauth.js#L107
+function access_oauth(oauth_token) {
+    // var oauth_token = ohauth.stringQs(location.search.slice(1)),
+    var url = osmly.host + '/oauth/access_token',
         token_secret = cookie('ohauth_token_secret');
 
     o.oauth_timestamp = ohauth.timestamp();
