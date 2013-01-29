@@ -62,13 +62,7 @@ osmly.go = function() {
 
     if (cookie('token') && cookie('secret')) {
         setTimeout(next, 2000);
-    } else if (ohauth.stringQs(location.search.slice(1)).oauth_token) {
-        // limbo situation?
-        if (osmly.demo) console.log('back from osm.org');
-        console.log('back from osm.org');
-        // access_oauth();
     } else {
-        // no auth of any kind
         $('#login').fadeIn(500);
     }
 
@@ -102,7 +96,6 @@ osmly.go = function() {
 };
 
 function request_oauth() {
-    console.log('requesting');
     var url = osmly.host + '/oauth/request_token';
 
     // https://github.com/systemed/iD/blob/master/js/id/oauth.js#L72
@@ -131,11 +124,8 @@ function request_oauth() {
         ohauth.baseString('POST', url, o));
 
     ohauth.xhr('POST', url, o, null, {}, function(xhr) {
-        console.log('got request');
         var token = ohauth.stringQs(xhr.response);
         cookie('ohauth_token_secret', token.oauth_token_secret);
-
-        if (osmly.demo) console.log('redirecting');
 
         popup.location = osmly.host + '/oauth/authorize?' + ohauth.qsString({
             oauth_token: token.oauth_token,
@@ -147,7 +137,6 @@ function request_oauth() {
 
 // https://github.com/systemed/iD/blob/master/js/id/oauth.js#L107
 function access_oauth(oauth_token) {
-    // var oauth_token = ohauth.stringQs(location.search.slice(1)),
     var url = osmly.host + '/oauth/access_token',
         token_secret = cookie('ohauth_token_secret');
 
@@ -168,10 +157,7 @@ function access_oauth(oauth_token) {
         o.oauth_nonce = ohauth.nonce();
         o.oauth_token = access_token.oauth_token;
         token_secret = access_token.oauth_token_secret;
-        
-        if (osmly.demo) console.log(String.fromCharCode(0x2713) + ' login');
-        history.pushState(null, null, '/');
-        
+                
         next();
     });
 }
