@@ -124,6 +124,7 @@ a {
 
 #tags li {
 	border-bottom: 1px solid #ccc;
+	cursor: text;
 }
 
 #tags li:last-child {

@@ -22,8 +22,6 @@
             <li id="title">Outline the nearby park</li>
             <li id="instruct">Instructions</li>
         </ul>
-        <!-- <span id="title">Outline the nearby park</span> -->
-        <!-- <span id="instruct">Instructions</span> -->
 
         <div id="modal">
             <div id="instruction">
@@ -76,6 +74,7 @@
         <div id="map"></div>
         <script type="text/javascript">
             var OSMly = osmly().set({
+                demo: true,
                 db: 'laparks',
                 columns: 'name, source',
                 center: [34.0577, -118.2409],

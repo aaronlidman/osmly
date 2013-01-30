@@ -16,15 +16,18 @@ TODO
     - cleaner commenting
     - log stuff, localstorage?
         - [new Date.getTime(), 'stuff happened'];
-    - popup authentication, http://mapbox.com/osmdev/2013/01/15/oauth-in-javascript/
-        - iframe sucked
+        - simple log function
+    - redo osm2geo loops
+    - include #tags in #action-block
+    - consistent camelCase, noob
+    - success + failure callbacks on every request
 */
 
 var osmly = {
         host: 'http://api06.dev.openstreetmap.org',
         oauth_secret: 'Mon0UoBHaO3qvfgwWrMkf4QAPM0O4lITd3JRK4ff',
-        xapi: 'http://www.overpass-api.de/api/xapi?map?',
-        contextualize: [], // 'key=value', todo: value wildcards
+        readApi: 'http://www.overpass-api.de/api/xapi?map?',
+        contextualize: [], // 'key=value'
         div: 'map',
         db: '', // string, no space, comma seperated; corresponds to 'database'.sqlite
         columns: '',
@@ -32,7 +35,10 @@ var osmly = {
         zoom: 2,
         demo: false
     },
-    user = 0,
+    user = {
+        userId: -1,
+        userName: 'demo'
+    },
     current = {},
     log = [];
     o = {
@@ -53,7 +59,7 @@ osmly.set = function (object) {
 osmly.go = function() {
     map = L.map(osmly.div, {
         center: osmly.center,
-        layers: [new L.BingLayer("Anqm0F_JjIZvT0P3abS6KONpaBaKuTnITRrnYuiJCE0WOhH6ZbE4DzeT6brvKVR5")],
+        layers: [new L.BingLayer('Anqm0F_JjIZvT0P3abS6KONpaBaKuTnITRrnYuiJCE0WOhH6ZbE4DzeT6brvKVR5')],
         zoom: osmly.zoom,
         maxZoom: 20
     });
@@ -61,7 +67,7 @@ osmly.go = function() {
     osmly.map = map;
 
     if (cookie('token') && cookie('secret')) {
-        setTimeout(next, 2000);
+        next();
     } else {
         $('#login').fadeIn(500);
     }
@@ -79,19 +85,23 @@ osmly.go = function() {
         map.attributionControl.setPrefix(string);
     });
 
-    $("#login").click(function() {
+    $('#login').click(function() {
         notify('');
-        request_oauth();
+
+        if (osmly.demo) {
+            $('#login').fadeOut(500);
+            next();
+        } else {
+            request_oauth();
+        }
     });
 
-    $("#instruct").click(function() {
-        $("#modal").fadeIn(200);
-        $("#instruction").fadeIn(200);
+    $('#instruct').click(function() {
+        $('#modal, #instruction').fadeIn(200);
     });
 
-    $("#instruction").click(function() {
-        $("#instruction").fadeOut(200);
-        $("#modal").fadeOut(200);
+    $('#instruction').click(function() {
+        $('#instruction, #modal').fadeOut(200);
     });
 };
 
@@ -99,14 +109,15 @@ function request_oauth() {
     var url = osmly.host + '/oauth/request_token';
 
     // https://github.com/systemed/iD/blob/master/js/id/oauth.js#L72
-    var w = 600, h = 550,
+    // 642 is the smallest width before mobile layout + small text kicks in
+    var w = 642, h = 450,
     settings = [
         ['width', w], ['height', h],
         ['left', screen.width / 2 - w / 2],
         ['top', screen.height / 2 - h / 2]].map(function(x) {
             return x.join('=');
         }).join(','),
-    popup = window.open("about:blank", 'oauth_window', settings),
+    popup = window.open('about:blank', 'oauth_window', settings),
     locationCheck = window.setInterval(function() {
         if (popup.closed) return window.clearInterval(locationCheck);
         if (popup.location.search) {
@@ -176,7 +187,6 @@ function access_oauth(oauth_token) {
 // }
 
 function cookie(k, v) {
-// todo: namespace to api host
     if (arguments.length === 2) {
         // via: http://stackoverflow.com/a/3795002
         var expire = new Date();
@@ -213,9 +223,9 @@ function next() {
 
         current.layer = L.geoJson(current.geo, {
             style: {
-                "color": "#00FF00",
-                "weight": 3,
-                "opacity": 1
+                'color': '#00FF00',
+                'weight': 3,
+                'opacity': 1
             },
             onEachFeature: function (feature, layer){
                 if (current.geo.type === 'MultiPolygon') {
@@ -238,11 +248,11 @@ function setup() {
     populate_tags();
 
     $('#skip, #submit').click(function(){
-        finish_em(this.id);
+        submit(this.id);
     });
 
     $('#problem').change(function(){
-        finish_em($('#problem').val());
+        submit($('#problem').val());
     });
 
     $('.k').keypress(function(){
@@ -261,11 +271,8 @@ function display() {
     current.layer.addTo(map);
     current.dataLayer.addTo(map);
 
-    $('#notify').fadeOut(250);
-    $('#login').fadeOut(250);
-    $('#top_right').fadeIn(500);
-    $("#action-block").fadeIn(500);
-    $("#tags").fadeIn(500);
+    $('#notify, #login').fadeOut(250);
+    $('#top_right, #action-block, #tags').fadeIn(500);
 
     // equalize doesn't seem to work until the selector is visible
     $('ul').equalize({
@@ -310,40 +317,45 @@ function sortObject(o) {
     return sorted;
 }
 
-function finish_em(result) {
+function submit(result) {
     // need to save geojson before next next()
     teardown();
 
-    $.ajax({
-        type: "POST",
-        url: "/",
-        data: {id: current.id, action: result}
-    }).done(function(msg) {
-        // not worth slowing down/complicating over, it's reproducable
-    });
-
-    if (result == 'submit') {
-        // data['edit']['geo']['coordinates'] = littleboots.toGeoJSON(polygon)['geometries'][0]['coordinates'];
-        // teardown() before might cause a problem here, move it to after
-        // upload to osm.org
-        // then do fadeOut and next()
-        // wait for the .done
+    if (osmly.demo) {
+        if (result != 'skip' && result != 'submit') result = 'problem';
         next();
     } else {
-        if (result != 'skip') result = 'problem';
-        next();
+        $.ajax({
+            type: 'POST',
+            url: '/',
+            data: {id: current.id, action: result}
+        }).done(function(msg) {
+            // not worth slowing down/complicating over, it's reproducable
+        });
+
+        if (result == 'submit') {
+            // data['edit']['geo']['coordinates'] = littleboots.toGeoJSON(polygon)['geometries'][0]['coordinates'];
+            // teardown() before might cause a problem here, move it to after
+            // upload to osm.org
+            // then do fadeOut and next()
+            // wait for the .done
+            next();
+        } else {
+            if (result != 'skip') result = 'problem';
+            next();
+        }
     }
 
-    $('#d-' + result).show();
-    $('#d-' + result).fadeOut(500);
+    $('#d-' + result)
+        .show()
+        .fadeOut(500);
 }
 
 function teardown() {
     $('#problem, #skip, #submit').unbind();
-    $("#action-block").hide();
-    $("#tags").hide();
+    $('#action-block, #tags').hide();
     map.closePopup();
-    $("#problem").val('problem'); // resets problem menu
+    $('#problem').val('problem'); // resets problem menu
     map.removeLayer(current.layer);
     map.removeLayer(current.dataLayer);
     $('#tags li').remove();
@@ -354,30 +366,31 @@ function getOSM() {
 
     $.ajax({
         type: 'GET',
-        url: osmly.xapi + current.bbox
+        url: osmly.readApi + current.bbox
     }).success(function(xml) {
         notify('building context', true);
 
         // seperate lists so the user can switch between them
-        osmly.OsmContext = osm2geo(xml);
-        osmly.simpleContext = simplifyContext(osmly.OsmContext);
+        osmly.osmContext = osm2geo(xml);
+        osmly.simpleContext = simplifyContext(osmly.osmContext);
 
-        console.log(osmly.OsmContext);
+        console.log(osmly.osmContext);
         console.log(osmly.simpleContext);
 
         current.dataLayer = L.geoJson(osmly.simpleContext, {
             style: {
-                "color": "#FFFF00",
-                "weight": 2,
-                "opacity": 1
+                'color': '#FFFF00',
+                'weight': 2,
+                'opacity': 1
             },
             onEachFeature: function(feature, layer) {
                 var popupContent = null;
                 if (feature.properties && feature.properties.name) {
                     popupContent = feature.properties.name;
-                } else if (feature.properties.name == null) {
-                    // == is intentional, jshint isn't happy
-                    popupContent = '[NO NAME]';
+                } else if (
+                    feature.properties.name === null &&
+                    feature.properties.name === 'null') {
+                        popupContent = '[NO NAME]';
                 }
                 layer.bindPopup(popupContent);
             },
@@ -397,8 +410,8 @@ function getOSM() {
 function simplifyContext(osmGeoJson) {
     var features = osmGeoJson.features;
     var geo = {
-            "type" : "FeatureCollection",
-            "features" : []
+            'type' : 'FeatureCollection',
+            'features' : []
         };
 
     for (var i = 0, f = features.length; i < f; i++) {
@@ -420,8 +433,9 @@ function notify(string, spinner) {
     if (string !== '') string = '<span>' + string + '</span>'; spinner = true;
     if (spinner) string = '<img src="/static/images/loader.gif" />' + string;
 
-    $('#notify').html(string);
-    $('#notify').show();
+    $('#notify')
+        .html(string)
+        .show();
 
     // don't forget to hide #notify later
     // $('#notify').fadeOut(250);
