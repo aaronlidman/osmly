@@ -33,14 +33,21 @@ var osmly = {
         columns: '',
         center: [0,0],
         zoom: 2,
-        demo: false
+        demo: false,
+        defaultComment: ''
     },
     user = {
-        userId: -1,
-        userName: 'demo'
+        id: -1,
+        name: 'demo',
+        avatar: ''
+    },
+    changeset = {
+        id: -1,
+        expires: 0,
+        comment: ''
     },
     current = {},
-    log = [];
+    log = [],
     o = {
         oauth_consumer_key: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg',
         oauth_signature_method: 'HMAC-SHA1'};
@@ -160,6 +167,8 @@ function access_oauth(oauth_token) {
     o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
         ohauth.baseString('POST', url, o));
 
+    console.log(o);
+
     ohauth.xhr('POST', url, o, null, {}, function(xhr) {
         var access_token = ohauth.stringQs(xhr.response);
         cookie('token', access_token.oauth_token);
@@ -168,23 +177,54 @@ function access_oauth(oauth_token) {
         o.oauth_nonce = ohauth.nonce();
         o.oauth_token = access_token.oauth_token;
         token_secret = access_token.oauth_token_secret;
-                
+
+        getUserDetails();
         next();
     });
 }
 
-// function createChangeset() {
-//     // changeset stuff
-//     var url = osmly.host + '/api/0.6/changeset/create',
-//         token_secret = cookie('secret');
-//     o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
-//         ohauth.baseString('PUT', url, o));
+function getUserDetails() {
+    var url = osmly.host + '/api/0.6/user/details';
+        token_secret = cookie('secret');
 
-//     ohauth.xhr('PUT', url, o, change, { header: { 'Content-Type': 'text/xml' } },
-//         function(xhr) {
-//             console.log('Changeset: ' + xhr.response);
-//         });
-// }
+    // o.oauth_timestamp = ohauth.timestamp();
+    // o.oauth_nonce = ohauth.nonce();
+    // o.oauth_token = cookie('token');
+    // I fuckin hate dealing with oauth
+
+    o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
+        ohauth.baseString('GET', url, o));
+
+    console.log(o);
+
+    ohauth.xhr('GET', url, o, null, {},
+        function(xhr) {
+            var u = data.getElementsByTagName('user')[0];
+            user.username = u.getAttribute('display_name');
+            user.id = u.getAttribute('id');
+            user.avatar = u.getElementsByTagName('img')[0];
+
+            console.log(u);
+            console.log(user);
+        });
+}
+
+function createChangeset() {
+    var url = osmly.host + '/api/0.6/changeset/create',
+        token_secret = cookie('secret');
+    o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
+        ohauth.baseString('PUT', url, o));
+
+        // var change?
+    ohauth.xhr('PUT', url, o, change, {header: {'Content-Type': 'text/xml'}},
+        function(xhr) {
+            changeset.id = xhr.response;
+            changeset.expires = new Date().getTime() + (3600*1000);
+            return true;
+        });
+
+    return false;
+}
 
 function cookie(k, v) {
     if (arguments.length === 2) {
@@ -319,12 +359,14 @@ function sortObject(o) {
 
 function submit(result) {
     // need to save geojson before next next()
+    // get the geojson
     teardown();
 
     if (osmly.demo) {
         if (result != 'skip' && result != 'submit') result = 'problem';
         next();
     } else {
+        // submition to osmly.com to mark it as done
         $.ajax({
             type: 'POST',
             url: '/',
@@ -334,6 +376,12 @@ function submit(result) {
         });
 
         if (result == 'submit') {
+            // another submission, now to osm.org, should probably do this one first
+            if (changeset.id < -1 && new Date().getTime() < changeset.expires) {
+                submit2OSM(data, changeset);
+            } else if (createChangeset()) {
+                submit2OSM(data, changeset);
+            }
             // data['edit']['geo']['coordinates'] = littleboots.toGeoJSON(polygon)['geometries'][0]['coordinates'];
             // teardown() before might cause a problem here, move it to after
             // upload to osm.org
@@ -388,7 +436,7 @@ function getOSM() {
                 if (feature.properties && feature.properties.name) {
                     popupContent = feature.properties.name;
                 } else if (
-                    feature.properties.name === null &&
+                    feature.properties.name === null ||
                     feature.properties.name === 'null') {
                         popupContent = '[NO NAME]';
                 }
