@@ -8,12 +8,7 @@ window.osmly = function () {
 - osm2geo: gist.github.com/1396990
 
 TODO
-    - namespace cookies
     - cleanup html, better/unique selectors
-    - overzooming, https://github.com/systemed/iD/commit/5254f06522ac42c47cdd7f50858b62e7ffb9f236
-    - possibly move all SS transport within GeoJSON properties
-        - make tags work w/ those properties
-    - cleaner commenting
     - log stuff, localstorage?
         - [new Date.getTime(), 'stuff happened'];
         - simple log function
@@ -24,7 +19,7 @@ TODO
 */
 
 var osmly = {
-        host: 'http://api06.dev.openstreetmap.org',
+        url: 'http://api06.dev.openstreetmap.org',
         oauth_secret: 'Mon0UoBHaO3qvfgwWrMkf4QAPM0O4lITd3JRK4ff',
         readApi: 'http://www.overpass-api.de/api/xapi?map?',
         context: {}, // {key: ['some', 'tags'], otherkey: ['more', 'tags']}
@@ -76,7 +71,7 @@ osmly.go = function() {
 
     osmly.map = map;
 
-    if (localStorage.token && localStorage.secret) {
+    if (token('token') && token('secret')) {
         getUserDetails();
         next();
     } else {
@@ -118,7 +113,7 @@ osmly.go = function() {
 };
 
 function request_oauth() {
-    var url = osmly.host + '/oauth/request_token';
+    var url = osmly.url + '/oauth/request_token';
 
     // https://github.com/systemed/iD/blob/master/js/id/oauth.js#L72
     // 642 is the smallest width before mobile layout + small text kicks in
@@ -148,9 +143,9 @@ function request_oauth() {
 
     ohauth.xhr('POST', url, o, null, {}, function(xhr) {
         var token = ohauth.stringQs(xhr.response);
-        localStorage.ohauth_token_secret = token.oauth_token_secret;
+        token('ohauth_token_secret', token.oauth_token_secret);
 
-        popup.location = osmly.host + '/oauth/authorize?' + ohauth.qsString({
+        popup.location = osmly.url + '/oauth/authorize?' + ohauth.qsString({
             oauth_token: token.oauth_token,
             oauth_callback: location.href
         });
@@ -160,8 +155,8 @@ function request_oauth() {
 
 // https://github.com/systemed/iD/blob/master/js/id/oauth.js#L107
 function access_oauth(oauth_token) {
-    var url = osmly.host + '/oauth/access_token',
-        token_secret = localStorage.ohauth_token_secret;
+    var url = osmly.url + '/oauth/access_token',
+        token_secret = token('ohauth_token_secret');
 
     o.oauth_timestamp = ohauth.timestamp();
     o.oauth_nonce = ohauth.nonce();
@@ -174,8 +169,8 @@ function access_oauth(oauth_token) {
 
     ohauth.xhr('POST', url, o, null, {}, function(xhr) {
         var access_token = ohauth.stringQs(xhr.response);
-        localStorage.token = access_token.oauth_token;
-        localStorage.secret = access_token.oauth_token_secret;
+        token('token', access_token.oauth_token);
+        token('secret', access_token.oauth_token_secret);
 
         getUserDetails();
         next();
@@ -183,12 +178,12 @@ function access_oauth(oauth_token) {
 }
 
 function getUserDetails() {
-    var url = osmly.host + '/api/0.6/user/details',
-        token_secret = localStorage.secret;
+    var url = osmly.url + '/api/0.6/user/details',
+        token_secret = token('secret');
 
     o.oauth_timestamp = ohauth.timestamp();
     o.oauth_nonce = ohauth.nonce();
-    o.oauth_token = localStorage.token;
+    o.oauth_token = token('token');
 
     o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
         ohauth.baseString('GET', url, o));
@@ -206,8 +201,8 @@ function getUserDetails() {
 }
 
 function createChangeset() {
-    var url = osmly.host + '/api/0.6/changeset/create',
-        token_secret = localStorage.secret,
+    var url = osmly.url + '/api/0.6/changeset/create',
+        token_secret = token('secret'),
         tags = '';
 
     for (c = 0; c < osmly.changesetAppend.length; c++) {
@@ -223,7 +218,7 @@ function createChangeset() {
 
     o.oauth_timestamp = ohauth.timestamp();
     o.oauth_nonce = ohauth.nonce();
-    o.oauth_token = localStorage.token;
+    o.oauth_token = token('token');
 
     o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
         ohauth.baseString('PUT', url, o));
@@ -238,6 +233,7 @@ function createChangeset() {
 
 function next() {
     notify('getting next', true);
+    $('#tags li').remove();
 
     var request = '/?next' + '&db=' + osmly.db + '&columns=' + osmly.columns;
     request += '&time=' + new Date().getTime();
@@ -345,17 +341,69 @@ function sortObject(o) {
     return sorted;
 }
 
+// next 3 functions from a Leaflet issue: https://github.com/Leaflet/Leaflet/issues/712
+function toGeoJson(target) {
+    if (target instanceof L.Polygon) {
+        //Polygon
+        var coords = latLngsToCoords(target.getLatLngs());
+        return {
+            coordinates: [coords],
+            type: 'Polygon'
+        };
+    } else if (target instanceof L.FeatureGroup) {
+        //Multi point and GeometryCollection
+        var multi = [];
+        var layers = target._layers;
+        var points = true;
+        for (var stamp in layers) {
+            var json = toGeoJson(layers[stamp]);
+            multi.push(json);
+            if (json.type !== 'Point') {
+                points = false;
+            }
+        }
+        if (points) {
+            var coords = multi.map(function(geo){
+                return geo.coordinates;
+            });
+            return {
+                coordinates: coords,
+                type: 'MultiPoint'
+            };
+        } else {
+            return {
+                geometries: multi,
+                type: 'GeometryCollection'
+            };
+        }
+    }
+}
+
+function latLngToCoords(latlng) {
+    var lng = Math.round(latlng.lng*1000000)/1000000;
+    var lat = Math.round(latlng.lat*1000000)/1000000;
+    return [lng, lat];
+}
+
+function latLngsToCoords(arrLatlng) {
+    var coords = [];
+    arrLatlng.forEach(function(latlng) {
+        coords.push(latLngToCoords(latlng));
+    },
+    this);
+    return coords;
+}
+
 function submit(result) {
-    var data = '123';
-    // get the tags, geojson
-    // build the osmChange
     teardown();
 
     if (osmly.demo) {
         if (result != 'skip' && result != 'submit') result = 'problem';
+        if (result === 'submit') {
+            console.log(toGeoJson(current.layer));
+        }
         next();
     } else {
-
         // submission to osmly.com to mark it as done
         $.ajax({
             type: 'POST',
@@ -366,8 +414,9 @@ function submit(result) {
         });
 
         if (result == 'submit') {
-            submit2OSM(data, next);
-            // data['edit']['geo']['coordinates'] = littleboots.toGeoJSON(polygon)['geometries'][0]['coordinates'];
+            // get tags, build osmChange
+            var data = toGeoJson(current.layer);
+            submitToOSM(data, next);
             // next();
         } else {
             if (result != 'skip') result = 'problem';
@@ -380,7 +429,7 @@ function submit(result) {
         .fadeOut(500);
 }
 
-function submit2OSM(osmChange, callback) {
+function submitToOSM(osmChange, callback) {
     if (changeset.id === -1 || new Date().getTime()+20000 > changeset.expires) {
         createChangeset();
     }
@@ -393,7 +442,6 @@ function teardown() {
     $('#problem').val('problem'); // resets problem menu
     map.removeLayer(current.layer);
     map.removeLayer(current.dataLayer);
-    $('#tags li').remove();
 }
 
 function getOSM() {
@@ -472,6 +520,16 @@ function notify(string, spinner) {
 
     // don't forget to hide #notify later
     // $('#notify').fadeOut(250);
+}
+
+// next 2 functions from iD: https://github.com/systemed/iD/blob/master/js/id/oauth.js
+function keyclean(x) { return x.replace(/\W/g, ''); }
+
+function token(k, x) {
+    if (arguments.length == 2) {
+        localStorage[keyclean(osmly.url) + k] = x;
+    }
+    return localStorage[keyclean(osmly.url) + k];
 }
 
 return osmly;
