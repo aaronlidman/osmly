@@ -73,7 +73,7 @@ osmly.go = function() {
 
     osmly.map = map;
 
-    if (cookie('token') && cookie('secret')) {
+    if (localStorage.token && localStorage.secret) {
         next();
     } else {
         $('#login').fadeIn(500);
@@ -117,7 +117,7 @@ function request_oauth() {
 
     // https://github.com/systemed/iD/blob/master/js/id/oauth.js#L72
     // 642 is the smallest width before mobile layout + small text kicks in
-    var w = 642, h = 450,
+    var w = 650, h = 500,
     settings = [
         ['width', w], ['height', h],
         ['left', screen.width / 2 - w / 2],
@@ -143,7 +143,7 @@ function request_oauth() {
 
     ohauth.xhr('POST', url, o, null, {}, function(xhr) {
         var token = ohauth.stringQs(xhr.response);
-        cookie('ohauth_token_secret', token.oauth_token_secret);
+        localStorage.ohauth_token_secret = token.oauth_token_secret;
 
         popup.location = osmly.host + '/oauth/authorize?' + ohauth.qsString({
             oauth_token: token.oauth_token,
@@ -156,7 +156,7 @@ function request_oauth() {
 // https://github.com/systemed/iD/blob/master/js/id/oauth.js#L107
 function access_oauth(oauth_token) {
     var url = osmly.host + '/oauth/access_token',
-        token_secret = cookie('ohauth_token_secret');
+        token_secret = localStorage.ohauth_token_secret;
 
     o.oauth_timestamp = ohauth.timestamp();
     o.oauth_nonce = ohauth.nonce();
@@ -167,16 +167,14 @@ function access_oauth(oauth_token) {
     o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
         ohauth.baseString('POST', url, o));
 
-    console.log(o);
-
     ohauth.xhr('POST', url, o, null, {}, function(xhr) {
         var access_token = ohauth.stringQs(xhr.response);
-        cookie('token', access_token.oauth_token);
-        cookie('secret', access_token.oauth_token_secret);
+        console.log(access_token);
+        localStorage.token = access_token.oauth_token;
+        localStorage.secret = access_token.oauth_token_secret;
         o.oauth_timestamp = ohauth.timestamp();
         o.oauth_nonce = ohauth.nonce();
         o.oauth_token = access_token.oauth_token;
-        token_secret = access_token.oauth_token_secret;
 
         getUserDetails();
         next();
@@ -185,21 +183,17 @@ function access_oauth(oauth_token) {
 
 function getUserDetails() {
     var url = osmly.host + '/api/0.6/user/details';
-        token_secret = cookie('secret');
 
-    // o.oauth_timestamp = ohauth.timestamp();
-    // o.oauth_nonce = ohauth.nonce();
-    // o.oauth_token = cookie('token');
-    // I fuckin hate dealing with oauth
+    o.oauth_timestamp = ohauth.timestamp();
+    o.oauth_nonce = ohauth.nonce();
+    o.oauth_token = localStorage.token;
 
-    o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
+    o.oauth_signature = ohauth.signature(osmly.oauth_secret, localStorage.secret,
         ohauth.baseString('GET', url, o));
 
-    console.log(o);
-
-    ohauth.xhr('GET', url, o, null, {},
+    ohauth.xhr('GET', url, o, '', {},
         function(xhr) {
-            var u = data.getElementsByTagName('user')[0];
+            var u = xhr.responseXML.getElementsByTagName('user')[0];
             user.username = u.getAttribute('display_name');
             user.id = u.getAttribute('id');
             user.avatar = u.getElementsByTagName('img')[0];
@@ -211,39 +205,26 @@ function getUserDetails() {
 
 function createChangeset() {
     var url = osmly.host + '/api/0.6/changeset/create',
-        token_secret = cookie('secret');
+        token_secret = localStorage.secret,
+        change = '<osm>' +
+            '<changeset>' +
+                '<tag k="created_by" v="blah"/>' +
+                '<tag k="comment" v="blah blah blah"/>' +
+            '<\/changeset>' +
+        '<\/osm>';
     o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
         ohauth.baseString('PUT', url, o));
 
-        // var change?
     ohauth.xhr('PUT', url, o, change, {header: {'Content-Type': 'text/xml'}},
         function(xhr) {
+            console.log(xhr);
             changeset.id = xhr.response;
             changeset.expires = new Date().getTime() + (3600*1000);
+            console.log(changeset);
             return true;
         });
 
     return false;
-}
-
-function cookie(k, v) {
-    if (arguments.length === 2) {
-        // via: http://stackoverflow.com/a/3795002
-        var expire = new Date();
-        var msecs = expire.getTime();
-        msecs += 31557600000; // a year
-        expire.setTime(msecs);
-
-        document.cookie =
-            k.toString() + '=' + v.toString() +
-            ';expires=' + expire.toGMTString() +
-            ';path=/';
-    }
-    var regex = new RegExp(k.toString() + '=([^;]+)');
-    var check = document.cookie.match(regex);
-
-    if (check) return check[1];
-    return check;
 }
 
 function next() {
@@ -435,9 +416,7 @@ function getOSM() {
                 var popupContent = null;
                 if (feature.properties && feature.properties.name) {
                     popupContent = feature.properties.name;
-                } else if (
-                    feature.properties.name === null ||
-                    feature.properties.name === 'null') {
+                } else if (feature.properties.name == null) {
                         popupContent = '[NO NAME]';
                 }
                 layer.bindPopup(popupContent);
