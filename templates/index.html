@@ -74,12 +74,12 @@
         <div id="map"></div>
         <script type="text/javascript">
             var OSMly = osmly().set({
-                demo: true,
+                demo: false,
                 db: 'laparks',
                 columns: 'name, source',
                 center: [34.0577, -118.2409],
                 zoom: 10,
-                contextualize: {
+                context: {
                     leisure: ['park', 'nature_reserve', 'stadium', 'golf_course', 'dog_park'],
                     landuse: ['cemetery', 'farm', 'farmland', 'recreation_ground'],
                     amenity: ['college', 'kindergarten', 'school', 'university', 'grave_yard']}
