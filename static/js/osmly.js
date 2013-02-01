@@ -394,6 +394,63 @@ function latLngsToCoords(arrLatlng) {
     return coords;
 }
 
+function getTags() {
+    var $tags = $('#tags li'),
+        tags = [];
+
+    $tags.each(function(i,ele){
+        var k = $(ele).children('.k').text();
+        var v = $(ele).children('.v').text();
+        tags.push([k,v]);
+    });
+
+    return tags;
+}
+
+// geojson object, tags [[k,v],[k,v], [k,v]], changeset int
+// returns xml string
+function toOsmChange(geojson, tags, changeset) {
+    // if geometries > 1 the same tags are added to each way
+    // relations? anything with more than one geometry to append w/ all ways in it
+    var osmChange = '<osmChange version="0.6" generator="osmly"><create>',
+        nodes = '',
+        ways = '',
+        count = -1;
+        // relations soon
+
+    for (var i = 0, g = geojson.geometries.length; i < g; i++) {
+        var nds = [];
+
+        for (var j = 0, c = geojson.geometries[i].coordinates[0].length; j < c; j++) {
+            var lon = geojson.geometries[i].coordinates[0][j][0],
+                lat = geojson.geometries[i].coordinates[0][j][1];
+            nodes += '<node id="' + count + '" lat="' + lat + '" lon="' + lon + '" changeset="' + changeset + '"/>';
+                // might need version="0"
+            nds.push(count);
+            count--;
+        }
+        // wrap around node for polygons
+        nds.push(nds[0]);
+
+        ways += '<way id="' + count + '" changeset="' + changeset + '">';
+        for (var k = 0, w = nds.length; k < w; k++) {
+            ways += '<nd ref="' + nds[k] + '"/>';
+        }
+
+        for (var tag in tags) {
+            ways += '<tag k="' + tags[tag][0] + '" v="' + tags[tag][1] + '"/>';
+        }
+
+        ways += '</way>';
+        count--;
+    }
+
+    osmChange += nodes + ways;
+    osmChange += '</create></osmChange>';
+
+    return osmChange;
+}
+
 function submit(result) {
     teardown();
 
@@ -401,6 +458,7 @@ function submit(result) {
         if (result != 'skip' && result != 'submit') result = 'problem';
         if (result === 'submit') {
             console.log(toGeoJson(current.layer));
+            console.log(toOsmChange(toGeoJson(current.layer), getTags(), 5329));
         }
         next();
     } else {
@@ -457,8 +515,8 @@ function getOSM() {
         osmly.osmContext = osm2geo(xml);
         osmly.simpleContext = simplifyContext(osmly.osmContext);
 
-        console.log(osmly.osmContext);
-        console.log(osmly.simpleContext);
+        // console.log(osmly.osmContext);
+        // console.log(osmly.simpleContext);
 
         current.dataLayer = L.geoJson(osmly.simpleContext, {
             style: {
