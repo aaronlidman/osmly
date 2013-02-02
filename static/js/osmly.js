@@ -13,6 +13,7 @@ TODO
         - [new Date.getTime(), 'stuff happened'];
         - simple log function
     - redo osm2geo loops
+    - remove jquery dependency from osm2geo
     - include #tags in #action-block
     - consistent camelCase, noob
     - success + failure callbacks on every request
@@ -29,7 +30,7 @@ var osmly = {
         center: [0,0],
         zoom: 2,
         demo: false,
-        changesetAppend: [ // include specifics to the import
+        changesetTags: [ // include specifics to the import
             ['created_by', 'osmly 0.1'],
             ['imagery_used', 'Bing']
         ]
@@ -45,7 +46,6 @@ var osmly = {
         comment: ''
     },
     current = {},
-    log = [],
     o = {
         oauth_consumer_key: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg',
         oauth_signature_method: 'HMAC-SHA1'};
@@ -72,9 +72,11 @@ osmly.go = function() {
     osmly.map = map;
 
     if (token('token') && token('secret')) {
+        log('New Session');
         getUserDetails();
         next();
     } else {
+        $('#login').text('Demonstration »');
         $('#login').fadeIn(500);
     }
 
@@ -172,6 +174,7 @@ function access_oauth(oauth_token) {
         token('token', access_token.oauth_token);
         token('secret', access_token.oauth_token_secret);
 
+        log('Logged In');
         getUserDetails();
         next();
     });
@@ -205,10 +208,12 @@ function createChangeset() {
         token_secret = token('secret'),
         tags = '';
 
-    for (c = 0; c < osmly.changesetAppend.length; c++) {
+    notify('creating a new changeset');
+
+    for (c = 0; c < osmly.changesetTags.length; c++) {
         tags +=
-            '<tag k="' + osmly.changesetAppend[c][0] +
-            '" v="' + osmly.changesetAppend[c][1] + '"/>';
+            '<tag k="' + osmly.changesetTags[c][0] +
+            '" v="' + osmly.changesetTags[c][1] + '"/>';
     }
 
     var change = '<osm>' +
@@ -227,12 +232,12 @@ function createChangeset() {
         function(xhr) {
             changeset.id = xhr.response;
             changeset.expires = new Date().getTime() + (3600*1000);
-            console.log(changeset);
+            log('New Changeset: <a href="' + osmly.url + '/browse/changeset/' + changeset.id + '>' + changeset.id + '</a>');
         });
 }
 
 function next() {
-    notify('getting next', true);
+    notify('getting next');
     $('#tags li').remove();
 
     var request = '/?next' + '&db=' + osmly.db + '&columns=' + osmly.columns;
@@ -263,7 +268,6 @@ function next() {
         });
 
         map.fitBounds(current.layer.getBounds());
-
         getOSM();
     });
 }
@@ -451,15 +455,12 @@ function toOsmChange(geojson, tags, changeset) {
     return osmChange;
 }
 
+// this really sucks
 function submit(result) {
     teardown();
 
     if (osmly.demo) {
-        if (result != 'skip' && result != 'submit') result = 'problem';
-        if (result === 'submit') {
-            console.log(toGeoJson(current.layer));
-            console.log(toOsmChange(toGeoJson(current.layer), getTags(), 5329));
-        }
+        if (result === 'submit') { console.log(toOsmChange(geojson, getTags(), 0)); }
         next();
     } else {
         // submission to osmly.com to mark it as done
@@ -472,25 +473,46 @@ function submit(result) {
         });
 
         if (result == 'submit') {
-            // get tags, build osmChange
-            var data = toGeoJson(current.layer);
-            submitToOSM(data, next);
+            notify('prepping for upload');
+            var geojson = toGeoJson(current.layer),
+                data = toOsmChange(geojson, getTags(), changeset.id);
+
+            if (changeset.id === -1 || new Date().getTime()+20000 > changeset.expires) {
+                // yikes
+                createChangeset(submitToOSM(data, next()));
+            }
             // next();
         } else {
-            if (result != 'skip') result = 'problem';
             next();
         }
     }
 
+    if (result != 'skip' && result != 'submit') result = 'problem';
+
     $('#d-' + result)
         .show()
-        .fadeOut(500);
+        .fadeOut(750);
 }
 
 function submitToOSM(osmChange, callback) {
-    if (changeset.id === -1 || new Date().getTime()+20000 > changeset.expires) {
-        createChangeset();
-    }
+    var url = '/api/0.6/changeset/' + changeset.id + '/upload',
+        token_secret = token('secret');
+
+    notify('uploading to OSM');
+
+    o.oauth_timestamp = ohauth.timestamp();
+    o.oauth_nonce = ohauth.nonce();
+    o.oauth_token = token('token');
+
+    o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
+        ohauth.baseString('POST', url, o));
+
+    ohauth.xhr('POST', url, o, change, {header: {'Content-Type': 'text/xml'}},
+        function(xhr) {
+            changeset.id = xhr.response;
+            changeset.expires = new Date().getTime() + (3600*1000);
+            log('New Changeset: <a href="' + osmly.url + '/browse/changeset/' + changeset.id + '>' + changeset.id + '</a>');
+        });
 }
 
 function teardown() {
@@ -503,13 +525,13 @@ function teardown() {
 }
 
 function getOSM() {
-    notify('getting context', true);
+    notify('getting context');
 
     $.ajax({
         type: 'GET',
         url: osmly.readApi + current.bbox
     }).success(function(xml) {
-        notify('building context', true);
+        notify('building context');
 
         // seperate lists so the user can switch between them
         osmly.osmContext = osm2geo(xml);
@@ -567,10 +589,9 @@ function simplifyContext(osmGeoJson) {
     return geo;
 }
 
-function notify(string, spinner) {
-    // string = '', just a spinner
-    if (string !== '') string = '<span>' + string + '</span>'; spinner = true;
-    if (spinner) string = '<img src="/static/images/loader.gif" />' + string;
+function notify(string) {
+    if (string !== '') string = '<span>' + string + '</span>';
+    string = '<img src="/static/images/loader.gif" />' + string;
 
     $('#notify')
         .html(string)
@@ -578,6 +599,18 @@ function notify(string, spinner) {
 
     // don't forget to hide #notify later
     // $('#notify').fadeOut(250);
+}
+
+function log(x) {
+    if (x === undefined) {
+        return JSON.parse(localStorage.log);
+    } else {
+        if (localStorage.log === undefined) localStorage.log = JSON.stringify({});
+        var list = JSON.parse(localStorage.log),
+            time = new Date().getTime();
+        list[time] = x;
+        localStorage.log = JSON.stringify(list);
+    }
 }
 
 // next 2 functions from iD: https://github.com/systemed/iD/blob/master/js/id/oauth.js
