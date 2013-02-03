@@ -30,6 +30,8 @@ TODO
     - cache userDetails in localStorage on login, not every session
         - had some failures that propagated to uploads, changesets, etc...
     - check all 'undefined' comparisons, I think I get it now
+    - cache tokens, localStorage is crazy slow
+    - refactor, refactor, refactor
 */
 
 var osmly = {
@@ -53,11 +55,6 @@ var osmly = {
         id: -1,
         name: 'demo',
         avatar: ''
-    },
-    changeset = {
-        id: -1,
-        expires: 0,
-        comment: ''
     },
     current = {},
     o = {
@@ -231,98 +228,6 @@ function getUserDetails() {
         });
 }
 
-function existingChangeset() {
-    var url = osmly.url + '/api/0.6/changesets?open=true&user=' + user.id;
-    // no auth needed
-
-    notify('looking for an open changeset');
-
-    $.ajax({
-        type: 'GET',
-        url: url
-    }).success(function(xml){
-        var $changesets = $(xml).find('changeset');
-
-        for (var cs in $changesets) {
-            // what the fuck am i doing
-        }
-
-        console.log($changesets);
-
-        if ($changesets.length > 0) {
-            // if ($changesets.length > 1) $changesets = $changesets[0];
-            
-            // var change = {};
-            // change.id = $changesets.attr('id');
-            // change.expires = $changesets.attr('created_at');
-            // change.expires = new Date(expires).getTime() + (3600*1000);
-
-            // console.log(change);
-
-            // setChangeset(change);
-            return true;
-        } else {
-            return true;
-        }
-    });
-}
-
-function setChangeset(values, callback) {
-    if (typeof value == 'string') {
-        values.id = values;
-    }
-
-    if (values.expires == 'undefined') {
-        values.expires = new Date().getTime() + (3600*1000);
-    }
-
-    changeset.id = values.id;
-    changeset.expires = values.expires;
-
-    console.log(changeset);
-
-    if (typeof callback != 'undefined') callback();
-}
-
-function createChangeset(callback) {
-    if (!existingChangeset()) {
-        var url = osmly.url + '/api/0.6/changeset/create',
-            token_secret = token('secret'),
-            tags = '';
-
-        notify('creating a new changeset');
-
-        for (c = 0; c < osmly.changesetTags.length; c++) {
-            tags +=
-                '<tag k="' + osmly.changesetTags[c][0] +
-                '" v="' + osmly.changesetTags[c][1] + '"/>';
-        }
-
-        var change = '<osm>' +
-                '<changeset>' + tags +
-                '<\/changeset>' +
-            '<\/osm>';
-
-        o.oauth_timestamp = ohauth.timestamp();
-        o.oauth_nonce = ohauth.nonce();
-        o.oauth_token = token('token');
-
-        o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
-            ohauth.baseString('PUT', url, o));
-
-        ohauth.xhr('PUT', url, o, change, {header: {'Content-Type': 'text/xml'}},
-            function(xhr) {
-                log('New Changeset: <a href="' + osmly.url + '/browse/changeset/' + xhr.response + '>' + xhr.response + '</a>');
-
-                if (typeof callback != 'undefined') {
-                    setChangeset(xhr.response, callback());
-                } else {
-                    setChangeset(xhr.response);
-                }
-            });
-    }
-}
-
 function next() {
     notify('getting next');
     $('#tags li').remove();
@@ -357,6 +262,47 @@ function next() {
         map.fitBounds(current.layer.getBounds());
         getOSM();
     });
+}
+
+function createChangeset(callback) {
+    var url = osmly.url + '/api/0.6/changeset/create',
+        token_secret = token('secret'),
+        tags = '';
+
+    notify('creating a new changeset');
+
+    for (c = 0; c < osmly.changesetTags.length; c++) {
+        tags +=
+            '<tag k="' + osmly.changesetTags[c][0] +
+            '" v="' + osmly.changesetTags[c][1] + '"/>';
+    }
+
+    var change = '<osm>' +
+            '<changeset>' + tags +
+            '<\/changeset>' +
+        '<\/osm>';
+
+    o.oauth_timestamp = ohauth.timestamp();
+    o.oauth_nonce = ohauth.nonce();
+    o.oauth_token = token('token');
+
+    o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
+        ohauth.baseString('PUT', url, o));
+
+    ohauth.xhr('PUT', url, o, change, {header: {'Content-Type': 'text/xml'}},
+        function(xhr) {
+            var id = xhr.response + '';
+            log('New Changeset: <a href="' + osmly.url + '/browse/changeset/' + id + '>' + id + '</a>');
+
+            token('changeset_id', id);
+            token('changeset_expires', (new Date().getTime() + (3600*1000)));
+
+            console.log('CHANGESET DEETS');
+            console.log(token('changeset_id'));
+            console.log(token('changeset_expires'));
+
+            callback();
+        });
 }
 
 function setup() {
@@ -498,9 +444,9 @@ function getTags() {
     return tags;
 }
 
-// geojson object, tags [[k,v],[k,v], [k,v]], changeset int
+// geojson object, tags [[k,v],[k,v], [k,v]]
 // returns xml string
-function toOsmChange(geojson, tags, changeset) {
+function toOsmChange(geojson, tags) {
     console.log(geojson);
     // if geometries > 1 the same tags are added to each way
     // relations? anything with more than one geometry to append w/ all ways in it
@@ -516,7 +462,7 @@ function toOsmChange(geojson, tags, changeset) {
         for (var j = 0, c = geojson.geometries[i].coordinates[0].length; j < c; j++) {
             var lon = geojson.geometries[i].coordinates[0][j][0],
                 lat = geojson.geometries[i].coordinates[0][j][1];
-            nodes += '<node id="' + count + '" lat="' + lat + '" lon="' + lon + '" changeset="' + changeset + '"/>';
+            nodes += '<node id="' + count + '" lat="' + lat + '" lon="' + lon + '" changeset="' + token('changeset_id') + '"/>';
                 // might need version="0"
             nds.push(count);
             count--;
@@ -524,7 +470,7 @@ function toOsmChange(geojson, tags, changeset) {
         // wrap around node for polygons
         nds.push(nds[0]);
 
-        ways += '<way id="' + count + '" changeset="' + changeset + '">';
+        ways += '<way id="' + count + '" changeset="' + token('changeset_id') + '">';
         for (var k = 0, w = nds.length; k < w; k++) {
             ways += '<nd ref="' + nds[k] + '"/>';
         }
@@ -550,7 +496,7 @@ function submit(result) {
     if (osmly.demo) {
         if (result === 'submit') {
             var geojson = toGeoJson(current.layer);
-            console.log(toOsmChange(geojson, getTags(), changeset.id));
+            console.log(toOsmChange(geojson, getTags()));
         }
         next();
     } else {
@@ -565,18 +511,7 @@ function submit(result) {
 
         if (result == 'submit') {
             notify('prepping for upload');
-            var geojson = toGeoJson(current.layer),
-                data = toOsmChange(geojson, getTags(), changeset.id);
-
-            if (changeset.id === -1 || new Date().getTime()+10000 > changeset.expires) {
-
-                createChangeset();
-                // createChangeset(function(){
-                //     submitToOSM(data, next());
-                // });
-            }
-            // get rid of this next, it dupes successful submits
-            // next();
+            submitToOSM();
         } else {
             next();
         }
@@ -589,23 +524,34 @@ function submit(result) {
         .fadeOut(750);
 }
 
-function submitToOSM(osmChange, callback) {
-    var url = '/api/0.6/changeset/' + changeset.id + '/upload',
-        token_secret = token('secret');
+function submitToOSM() {
+    if (typeof(token('changeset_id')) == 'undefined' ||
+        typeof(token('changeset_expires')) == 'undefined' ||
+        new Date().getTime()+10000 > token('changeset_expires')
+        ) {
+        // this if is way too stringent, rather be too accepting
+            console.log('inside harry conditional');
+            createChangeset(submitToOSM);
+    } else {
+        var url = osmly.url + '/api/0.6/changeset/' + token('changeset_id') + '/upload',
+            token_secret = token('secret'),
+            geojson = toGeoJson(current.layer),
+            osmChange = toOsmChange(geojson, getTags());
 
-    notify('uploading to OSM');
+        notify('uploading to OSM');
 
-    o.oauth_timestamp = ohauth.timestamp();
-    o.oauth_nonce = ohauth.nonce();
-    o.oauth_token = token('token');
+        o.oauth_timestamp = ohauth.timestamp();
+        o.oauth_nonce = ohauth.nonce();
+        o.oauth_token = token('token');
 
-    o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
-        ohauth.baseString('POST', url, o));
+        o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
+            ohauth.baseString('POST', url, o));
 
-    ohauth.xhr('POST', url, o, osmChange, {header: {'Content-Type': 'text/xml'}},
-        function(xhr) {
-            callback();
-        });
+        ohauth.xhr('POST', url, o, osmChange, {header: {'Content-Type': 'text/xml'}},
+            function(xhr) {
+                next();
+            });
+    }
 }
 
 function teardown() {
@@ -695,10 +641,10 @@ function notify(string) {
 }
 
 function log(x) {
-    if (x == 'undefined') {
+    if (typeof(x) == 'undefined') {
         return JSON.parse(localStorage.log);
     } else {
-        if (localStorage.log == 'undefined') localStorage.log = JSON.stringify({});
+        if (typeof(localStorage.log) == 'undefined') localStorage.log = JSON.stringify({});
         var list = JSON.parse(localStorage.log),
             time = new Date().getTime();
         list[time] = x;
