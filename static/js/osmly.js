@@ -10,17 +10,13 @@ window.osmly = function () {
 TODO
     - use http://cdnjs.com/ for libraries?
     - cleanup html, better/unique selectors
-    - log stuff, localstorage?
-        - [new Date.getTime(), 'stuff happened'];
-        - simple log function
     - redo osm2geo loops
     - remove jquery dependency from osm2geo
-    - include #tags in #action-block
-    - consistent camelCase, noob
-    - consistent brackets, if (){} vs if () {}, function(){} vs function() {}
-    - better for loops, no for in
-        - possibly while(i--)
-        - http://jsperf.com/for-loop-vs-optimized-for-loop/17
+    - tags
+        - include #tags in #action-block
+        - handle empty tag values
+            - clicking an empty value is a crapshoot
+        - add/remove tag buttons
     - success + failure callbacks on every request
     - common ohauth.xhr function
     - group oauth functions like iD
@@ -31,16 +27,20 @@ TODO
         - had some failures that propagated to uploads, changesets, etc...
     - check all 'undefined' comparisons, I think I get it now
     - cache tokens, localStorage is crazy slow
+        - http://jsperf.com/localstorage-vs-objects/10
+    - display log
+    - enable changeset commenting
+    - make var o public for consumer key
     - refactor, refactor, refactor
 */
 
 var osmly = {
-        url: 'http://api06.dev.openstreetmap.org',
+        writeApi: 'http://api06.dev.openstreetmap.org',
         oauth_secret: 'Mon0UoBHaO3qvfgwWrMkf4QAPM0O4lITd3JRK4ff',
         readApi: 'http://www.overpass-api.de/api/xapi?map?',
         context: {}, // {key: ['some', 'tags'], otherkey: ['more', 'tags']}
         div: 'map',
-        db: '', // string, no space, comma seperated; corresponds to 'database'.sqlite
+        db: '', // corresponds to 'database'.sqlite
         columns: '',
         center: [0,0],
         zoom: 2,
@@ -53,15 +53,14 @@ var osmly = {
     },
     user = {
         id: -1,
-        name: 'demo',
-        avatar: ''
+        name: 'demo'
     },
     current = {},
     o = {
         oauth_consumer_key: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg',
         oauth_signature_method: 'HMAC-SHA1'};
 
-osmly.set = function (object) {
+osmly.set = function(object) {
     if (typeof(object) === 'object') {
         for (var obj in object) {
             osmly[obj] = object[obj];
@@ -83,7 +82,7 @@ osmly.go = function() {
     osmly.map = map;
 
     if (token('token') && token('secret')) {
-        log('New Session');
+
         // getUserDetails, only on login, then cached?
         getUserDetails();
         next();
@@ -132,13 +131,13 @@ function keyclean(x) { return x.replace(/\W/g, ''); }
 
 function token(k, x) {
     if (arguments.length == 2) {
-        localStorage[keyclean(osmly.url) + k] = x;
+        localStorage[keyclean(osmly.writeApi) + k] = x;
     }
-    return localStorage[keyclean(osmly.url) + k];
+    return localStorage[keyclean(osmly.writeApi) + k];
 }
 
 function request_oauth() {
-    var url = osmly.url + '/oauth/request_token';
+    var url = osmly.writeApi + '/oauth/request_token';
 
     // https://github.com/systemed/iD/blob/master/js/id/oauth.js#L72
     var w = 650, h = 500,
@@ -169,7 +168,7 @@ function request_oauth() {
         var string = ohauth.stringQs(xhr.response);
         token('ohauth_token_secret', string.oauth_token_secret);
 
-        popup.location = osmly.url + '/oauth/authorize?' + ohauth.qsString({
+        popup.location = osmly.writeApi + '/oauth/authorize?' + ohauth.qsString({
             oauth_token: string.oauth_token,
             oauth_callback: location.href
         });
@@ -179,7 +178,7 @@ function request_oauth() {
 
 // https://github.com/systemed/iD/blob/master/js/id/oauth.js#L107
 function access_oauth(oauth_token) {
-    var url = osmly.url + '/oauth/access_token',
+    var url = osmly.writeApi + '/oauth/access_token',
         token_secret = token('ohauth_token_secret');
 
     o.oauth_timestamp = ohauth.timestamp();
@@ -203,7 +202,7 @@ function access_oauth(oauth_token) {
 }
 
 function getUserDetails() {
-    var url = osmly.url + '/api/0.6/user/details',
+    var url = osmly.writeApi + '/api/0.6/user/details',
         token_secret = token('secret');
 
     o.oauth_timestamp = ohauth.timestamp();
@@ -218,7 +217,7 @@ function getUserDetails() {
             var u = xhr.responseXML.getElementsByTagName('user')[0],
                 img = u.getElementsByTagName('img');
 
-            if (img.length > 0) {
+            if (img.length) {
                 user.avatar = img[0].getAttribute('href');
             }
 
@@ -248,7 +247,7 @@ function next() {
                 'weight': 3,
                 'opacity': 1
             },
-            onEachFeature: function (feature, layer){
+            onEachFeature: function (feature, layer) {
                 if (current.geo.type === 'MultiPolygon') {
                     for (var ayer in layer._layers) {
                         layer._layers[ayer].editing.enable();
@@ -265,13 +264,14 @@ function next() {
 }
 
 function createChangeset(callback) {
-    var url = osmly.url + '/api/0.6/changeset/create',
+    var url = osmly.writeApi + '/api/0.6/changeset/create',
         token_secret = token('secret'),
-        tags = '';
+        tags = '',
+        c = osmly.changesetTags.length;
 
     notify('creating a new changeset');
 
-    for (c = 0; c < osmly.changesetTags.length; c++) {
+    while (c--) {
         tags +=
             '<tag k="' + osmly.changesetTags[c][0] +
             '" v="' + osmly.changesetTags[c][1] + '"/>';
@@ -292,7 +292,7 @@ function createChangeset(callback) {
     ohauth.xhr('PUT', url, o, change, {header: {'Content-Type': 'text/xml'}},
         function(xhr) {
             var id = xhr.response + '';
-            log('New Changeset: <a href="' + osmly.url + '/browse/changeset/' + id + '>' + id + '</a>');
+            log('New Changeset: <a href="' + osmly.writeApi + '/browse/changeset/' + id + '>' + id + '</a>');
 
             token('changeset_id', id);
             token('changeset_expires', (new Date().getTime() + (3600*1000)));
@@ -306,17 +306,17 @@ function createChangeset(callback) {
 }
 
 function setup() {
-    populate_tags();
+    populateTags();
 
-    $('#skip, #submit').click(function(){
+    $('#skip, #submit').click(function() {
         submit(this.id);
     });
 
-    $('#problem').change(function(){
+    $('#problem').change(function() {
         submit($('#problem').val());
     });
 
-    $('.k').keypress(function(){
+    $('.k').keypress(function() {
         $('ul').equalize({
             children: '.k',
             equalize: 'width',
@@ -343,7 +343,7 @@ function display() {
     $('.k').width($('.k').width()+15);
 }
 
-function populate_tags() {
+function populateTags() {
     current.tags = sortObject(current.tags);
 
     for (var tag in current.tags) {
@@ -380,6 +380,7 @@ function sortObject(o) {
 
 // next 3 functions from a Leaflet issue: https://github.com/Leaflet/Leaflet/issues/712
 function toGeoJson(target) {
+    // will want to convert layer groups in the future
     if (target instanceof L.Polygon) {
         //Polygon
         var coords = latLngsToCoords(target.getLatLngs());
@@ -392,6 +393,7 @@ function toGeoJson(target) {
         var multi = [];
         var layers = target._layers;
         var points = true;
+
         for (var stamp in layers) {
             var json = toGeoJson(layers[stamp]);
             multi.push(json);
@@ -399,10 +401,12 @@ function toGeoJson(target) {
                 points = false;
             }
         }
+
         if (points) {
-            var coords = multi.map(function(geo){
+            var coords = multi.map(function(geo) {
                 return geo.coordinates;
             });
+
             return {
                 coordinates: coords,
                 type: 'MultiPoint'
@@ -435,7 +439,7 @@ function getTags() {
     var $tags = $('#tags li'),
         tags = [];
 
-    $tags.each(function(i,ele){
+    $tags.each(function(i,ele) {
         var k = $(ele).children('.k').text();
         var v = $(ele).children('.v').text();
         tags.push([k,v]);
@@ -453,13 +457,14 @@ function toOsmChange(geojson, tags) {
     var osmChange = '<osmChange version="0.6" generator="osmly"><create>',
         nodes = '',
         ways = '',
-        count = -1;
-        // relations soon
+        count = -1,
+        i = geojson.geometries.length;
 
-    for (var i = 0, g = geojson.geometries.length; i < g; i++) {
-        var nds = [];
+    while (i--) {
+        var nds = [],
+        j = geojson.geometries[i].coordinates[0].length;
 
-        for (var j = 0, c = geojson.geometries[i].coordinates[0].length; j < c; j++) {
+        while (j--) {
             var lon = geojson.geometries[i].coordinates[0][j][0],
                 lat = geojson.geometries[i].coordinates[0][j][1];
             nodes += '<node id="' + count + '" lat="' + lat + '" lon="' + lon + '" changeset="' + token('changeset_id') + '"/>';
@@ -467,11 +472,14 @@ function toOsmChange(geojson, tags) {
             nds.push(count);
             count--;
         }
+
         // wrap around node for polygons
         nds.push(nds[0]);
 
         ways += '<way id="' + count + '" changeset="' + token('changeset_id') + '">';
-        for (var k = 0, w = nds.length; k < w; k++) {
+
+        var k = nds.length;
+        while (k--) {
             ways += '<nd ref="' + nds[k] + '"/>';
         }
 
@@ -533,7 +541,7 @@ function submitToOSM() {
             console.log('inside harry conditional');
             createChangeset(submitToOSM);
     } else {
-        var url = osmly.url + '/api/0.6/changeset/' + token('changeset_id') + '/upload',
+        var url = osmly.writeApi + '/api/0.6/changeset/' + token('changeset_id') + '/upload',
             token_secret = token('secret'),
             geojson = toGeoJson(current.layer),
             osmChange = toOsmChange(geojson, getTags());
@@ -608,15 +616,17 @@ function getOSM() {
 }
 
 function simplifyContext(osmGeoJson) {
-    var features = osmGeoJson.features;
-    var geo = {
+    var features = osmGeoJson.features,
+        geo = {
             'type' : 'FeatureCollection',
             'features' : []
-        };
+        },
+        i = features.length;
 
-    for (var i = 0, f = features.length; i < f; i++) {
+    while (i--) {
         var feature = features[i];
         
+        // too terse
         for (var key in feature.properties) {
             if (key in osmly.context &&
                 osmly.context[key].indexOf(feature.properties[key]) > -1) {
