@@ -1,21 +1,4 @@
-/**************************************************************************
- *                 OSM2GEO - OSM to GeoJSON converter
- * OSM to GeoJSON converter takes in a .osm XML file as input and produces
- * corresponding GeoJSON object.
- *
- * AUTHOR: P.Arunmozhi <aruntheguy@gmail.com>
- * DATE  : 26 / Nov / 2011
- * LICENSE : WTFPL - Do What The Fuck You Want To Public License
- * LICENSE URL: http://sam.zoy.org/wtfpl/
- *
- * USAGE: This script contains a single function -> geojson osm2geo(osmXML)
- * It takes in a .osm (xml) as parameter and retruns the corresponding
- * GeoJson object.
- *
- * Quotes vary a bit (between single ' and double ") in order to stick to
- * strict JSON compliance.
- *
- * ***********************************************************************/
+// https://gist.github.com/aaronlidman/4712709
 var osm2geo = function(osm) {
     var xml = parse(osm),
         geo = {
@@ -34,10 +17,12 @@ var osm2geo = function(osm) {
         var bbox = [];
 
         if (bounds.length) {
-            bbox.push(+bounds[0].getAttribute('minlon'));
-            bbox.push(+bounds[0].getAttribute('minlat'));
-            bbox.push(+bounds[0].getAttribute('maxlon'));
-            bbox.push(+bounds[0].getAttribute('maxlat'));
+            bbox = [
+                +bounds[0].getAttribute('minlon'),
+                +bounds[0].getAttribute('minlat'),
+                +bounds[0].getAttribute('maxlon'),
+                +bounds[0].getAttribute('maxlat')
+            ];
         }
 
         return bbox;
@@ -128,8 +113,10 @@ var osm2geo = function(osm) {
     while (p--) {
         var feature = getFeature(points[p], "Point");
 
-        feature.geometry.coordinates.push(points[p].getAttribute('lon'));
-        feature.geometry.coordinates.push(points[p].getAttribute('lat'));
+        feature.geometry.coordinates = [
+            points[p].getAttribute('lon'),
+            points[p].getAttribute('lat')
+        ];
 
         geo.features.push(feature);
     }
