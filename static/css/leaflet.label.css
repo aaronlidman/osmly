@@ -1,9 +1,9 @@
 .leaflet-label {
-	background: rgb(235, 235, 235);
-	background: rgba(235, 235, 235, 1);
+	background: rgb(255, 255, 255);
+	background: rgba(255, 255, 255, 1);
 	background-clip: padding-box;
 	border-color: black;
-	border-color: rgba(235, 235, 235, 1);
+	border-color: rgba(255, 255, 255, 1);
 	border-radius: 4px;
 	border-style: solid;
 	border-width: 4px;

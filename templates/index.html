@@ -6,7 +6,6 @@
         <link rel="stylesheet" href="/static/css/leaflet0.5.css" />
         <link rel="stylesheet" href="/static/css/leaflet.label.css" />
         <link rel="stylesheet" href="/static/css/css.css" />
-
         <!--[if lte IE 8]>
             <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.ie.css" />
         <![endif]-->
@@ -82,6 +81,9 @@
                 columns: 'name, source',
                 center: [34.0577, -118.2409],
                 zoom: 10,
+                appendTag: {
+                    'leisure': 'park'
+                },
                 context: {
                     leisure: ['park', 'nature_reserve', 'stadium', 'golf_course', 'dog_park'],
                     landuse: ['cemetery', 'farm', 'farmland', 'recreation_ground'],

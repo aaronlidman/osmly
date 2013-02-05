@@ -33,6 +33,10 @@ TODO
     - shortcuts
         - W + S, zoom in/out on pointer
         - A + D, open problem menu, skip
+    - benchmark osm api for dataLayer
+        - URL:http://www.openstreetmap.org/api/0.6/map?bbox
+        - just because of gzip
+        - might be faster for small things
 */
 
 var osmly = {
@@ -46,6 +50,7 @@ var osmly = {
         center: [0,0],
         zoom: 2,
         demo: false,
+        appendTag: {}, // {'key': 'value', 'key2': 'value2'}, will overwrite existing tag with the same name
         changesetTags: [ // include specifics to the import
             ['created_by', 'osmly'],
             ['osmly:version', '0'],
@@ -197,7 +202,7 @@ function access_oauth(oauth_token) {
         token('secret', access_token.oauth_token_secret);
 
         log('Logged In');
-        
+
         getUserDetails();
         next();
     });
@@ -342,6 +347,9 @@ function display() {
 }
 
 function populateTags() {
+    for (var append in osmly.appendTag) {
+        current.tags[append] = osmly.appendTag[append];
+    }
     current.tags = sortObject(current.tags);
 
     for (var tag in current.tags) {
