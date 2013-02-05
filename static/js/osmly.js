@@ -10,8 +10,6 @@ window.osmly = function () {
 TODO
     - use http://cdnjs.com/ for libraries?
     - cleanup html, better/unique selectors
-    - redo osm2geo loops
-    - remove jquery dependency from osm2geo
     - tags
         - include #tags in #action-block
         - handle empty tag values
@@ -32,6 +30,9 @@ TODO
     - enable changeset commenting
     - make var o public for consumer key
     - refactor, refactor, refactor
+    - shortcuts
+        - W + S, zoom in/out on pointer
+        - A + D, open problem menu, skip
 */
 
 var osmly = {
@@ -61,7 +62,7 @@ var osmly = {
         oauth_signature_method: 'HMAC-SHA1'};
 
 osmly.set = function(object) {
-    if (typeof(object) === 'object') {
+    if (typeof object === 'object') {
         for (var obj in object) {
             osmly[obj] = object[obj];
         }
@@ -81,7 +82,7 @@ osmly.go = function() {
 
     osmly.map = map;
 
-    if (token('token') && token('secret')) {
+    if (!osmly.demo && token('token') && token('secret')) {
 
         // getUserDetails, only on login, then cached?
         getUserDetails();
@@ -196,6 +197,7 @@ function access_oauth(oauth_token) {
         token('secret', access_token.oauth_token_secret);
 
         log('Logged In');
+        
         getUserDetails();
         next();
     });
@@ -296,10 +298,6 @@ function createChangeset(callback) {
 
             token('changeset_id', id);
             token('changeset_expires', (new Date().getTime() + (3600*1000)));
-
-            console.log('CHANGESET DEETS');
-            console.log(token('changeset_id'));
-            console.log(token('changeset_expires'));
 
             callback();
         });
@@ -467,13 +465,14 @@ function toOsmChange(geojson, tags) {
         while (j--) {
             var lon = geojson.geometries[i].coordinates[0][j][0],
                 lat = geojson.geometries[i].coordinates[0][j][1];
-            nodes += '<node id="' + count + '" lat="' + lat + '" lon="' + lon + '" changeset="' + token('changeset_id') + '"/>';
+            nodes += '<node id="' + count + '" lat="' + lat + '" lon="' + lon +
+            '" changeset="' + token('changeset_id') + '"/>';
                 // might need version="0"
             nds.push(count);
             count--;
         }
 
-        // wrap around node for polygons
+        // wrap around node for polygons, check geojson feature type in the future
         nds.push(nds[0]);
 
         ways += '<way id="' + count + '" changeset="' + token('changeset_id') + '">';
@@ -533,8 +532,8 @@ function submit(result) {
 }
 
 function submitToOSM() {
-    if (typeof(token('changeset_id')) == 'undefined' ||
-        typeof(token('changeset_expires')) == 'undefined' ||
+    if (typeof token('changeset_id') == 'undefined' ||
+        typeof token('changeset_expires') == 'undefined' ||
         new Date().getTime()+10000 > token('changeset_expires')
         ) {
         // this if is way too stringent, rather be too accepting
@@ -582,7 +581,7 @@ function getOSM() {
 
         // seperate lists so the user can switch between them
         osmly.osmContext = osm2geo(xml);
-        osmly.simpleContext = simplifyContext(osmly.osmContext);
+        osmly.simpleContext = filterContext(osmly.osmContext);
 
         // console.log(osmly.osmContext);
         // console.log(osmly.simpleContext);
@@ -590,22 +589,40 @@ function getOSM() {
         current.dataLayer = L.geoJson(osmly.simpleContext, {
             style: {
                 'color': '#FFFF00',
-                'weight': 2,
-                'opacity': 1
+                'weight': 3,
+                'opacity': 0.75
             },
             onEachFeature: function(feature, layer) {
-                var popupContent = null;
-                if (feature.properties && feature.properties.name) {
-                    popupContent = feature.properties.name;
-                } else if (feature.properties.name == null) {
-                        popupContent = '[NO NAME]';
+                // hovering displays the name
+                // clicking displays all tags
+                var popup = '',
+                    label = null,
+                    t = 0,
+                    tagKeys = Object.keys(feature.properties);
+
+                if (feature.properties) {
+                    if (typeof feature.properties.name == 'undefined') {
+                        label = '[NO NAME] click for tags';
+                    } else {
+                        label = feature.properties.name;
+                    }
+
+                    console.log(tagKeys);
+
+                    while (t < tagKeys.length) {
+                        popup += '<li><span class="b">' + tagKeys[t] +
+                        '</span>: ' + feature.properties[tagKeys[t]] + '</li>';
+                        t++;
+                    }
+
+                    layer.bindPopup(popup);
+                    layer.bindLabel(label);
                 }
-                layer.bindPopup(popupContent);
             },
             pointToLayer: function(feature, latlng) {
                 return L.circleMarker(latlng, {
-                    radius: 5,
-                    opacity: 1,
+                    radius: 6,
+                    opacity: 0.75,
                     fillOpacity: 0.5
                 });
             }
@@ -615,7 +632,7 @@ function getOSM() {
     });
 }
 
-function simplifyContext(osmGeoJson) {
+function filterContext(osmGeoJson) {
     var features = osmGeoJson.features,
         geo = {
             'type' : 'FeatureCollection',
@@ -651,10 +668,10 @@ function notify(string) {
 }
 
 function log(x) {
-    if (typeof(x) == 'undefined') {
+    if (typeof x == 'undefined') {
         return JSON.parse(localStorage.log);
     } else {
-        if (typeof(localStorage.log) == 'undefined') localStorage.log = JSON.stringify({});
+        if (typeof localStorage.log == 'undefined') localStorage.log = JSON.stringify({});
         var list = JSON.parse(localStorage.log),
             time = new Date().getTime();
         list[time] = x;
