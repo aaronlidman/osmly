@@ -4,60 +4,56 @@
  * corresponding GeoJSON object.
  *
  * AUTHOR: P.Arunmozhi <aruntheguy@gmail.com>
- * DATE  : 26 / Nov / 2011 
+ * DATE  : 26 / Nov / 2011
  * LICENSE : WTFPL - Do What The Fuck You Want To Public License
  * LICENSE URL: http://sam.zoy.org/wtfpl/
  *
- * DEPENDENCY: OSM2GEO entirely depends on jQuery for the XML parsing and
- * DOM traversing. Make sure you include <script src="somewhere/jquery.js">
- * </script> before you include osm2geo.js
- *
  * USAGE: This script contains a single function -> geojson osm2geo(osmXML)
- * It takes in a .osm (xml) as parameter and retruns the corresponding 
+ * It takes in a .osm (xml) as parameter and retruns the corresponding
  * GeoJson object.
+ *
+ * Quotes vary a bit (between single ' and double ") in order to stick to
+ * strict JSON compliance.
  *
  * ***********************************************************************/
 var osm2geo = function(osm) {
-
-    var $xml = jQuery(osm),
+    var xml = parse(osm),
         geo = {
             "type" : "FeatureCollection",
             "features" : []
-        },
-        boringTags = [
-        'source',
-        'source_ref',
-        'source:ref',
-        'history',
-        'attribution',
-        'created_by',
-        'tiger:county',
-        'tiger:tlid',
-        'tiger:upload_uuid']; // other tags, http://taginfo.openstreetmap.org/keys
+        };
+
+    function parse(xml) {
+        var string = new XMLSerializer().serializeToString(xml),
+            parser = new DOMParser();
+        return parser.parseFromString(string, 'text/xml');
+    }
 
     // set the bounding box [minX,minY,maxX,maxY]; x -> long, y -> lat
-    function getBounds(bounds){
+    function getBounds(bounds) {
         var bbox = [];
-        bbox.push(+bounds.attr("minlon"));
-        bbox.push(+bounds.attr("minlat"));
-        bbox.push(+bounds.attr("maxlon"));
-        bbox.push(+bounds.attr("maxlat"));
+
+        if (bounds.length) {
+            bbox.push(+bounds[0].getAttribute('minlon'));
+            bbox.push(+bounds[0].getAttribute('minlat'));
+            bbox.push(+bounds[0].getAttribute('maxlon'));
+            bbox.push(+bounds[0].getAttribute('maxlat'));
+        }
 
         return bbox;
     }
 
-    geo.bbox = getBounds($xml.find("bounds"));
+    geo.bbox = getBounds(xml.getElementsByTagName('bounds'));
 
     // set properties for a feature
     function setProps(element){
         var properties = {},
-            tags = $(element).find("tag");
+            tags = element.getElementsByTagName('tag'),
+            t = tags.length;
 
-        tags.each(function(index, tag){
-            if (boringTags.indexOf($(tag).attr("k")) === -1) {
-                properties[$(tag).attr("k")] = $(tag).attr("v");
-            }
-        });
+        while (t--) {
+            properties[tags[t].getAttribute('k')] = tags[t].getAttribute('v');
+        }
 
         return properties;
     }
@@ -74,45 +70,69 @@ var osm2geo = function(osm) {
         };
     }
 
-    var $ways = $("way", $xml);
+    function cacheNodes() {
+        var nodes = xml.getElementsByTagName('node'),
+            n = nodes.length,
+            coords = {};
+            withTags = [];
 
-    $ways.each(function(index, ele){
-        var feature = {},
-            nodes = $(ele).find("nd");
+        while (n--) {
+            var tags = nodes[n].getElementsByTagName('tag');
 
-        // If first and last nd are same, then its a polygon
-        if ($(nodes).last().attr("ref") === $(nodes).first().attr("ref")) {
-            feature = getFeature(ele, "Polygon");
-            feature.geometry.coordinates.push([]);
-        } else {
-            feature = getFeature(ele, "LineString");
+            coords[nodes[n].getAttribute('id')] =
+                [nodes[n].getAttribute('lon'), nodes[n].getAttribute('lat')];
+
+            if (tags.length) withTags.push(nodes[n]);
         }
 
-        nodes.each(function(index, nd) {
-            var node = $xml.find("node[id='"+$(nd).attr("ref")+"']"), // find the node with id ref'ed in way
-                cords = [+node.attr("lon"), +node.attr("lat")]; // get the lat,lon of the node
-            
+        return {
+            coords: coords,
+            withTags: withTags
+        };
+    }
+
+    var ways = xml.getElementsByTagName('way'),
+        nodesCache = cacheNodes();
+
+    var w = ways.length;
+    while (w--) {
+        var feature = {},
+            nds = ways[w].getElementsByTagName('nd');
+
+        // If first and last nd are same, then its a polygon
+        if (nds[0].getAttribute('ref') === nds[nds.length-1].getAttribute('ref')) {
+            feature = getFeature(ways[w], "Polygon");
+            feature.geometry.coordinates.push([]);
+        } else {
+            feature = getFeature(ways[w], "LineString");
+        }
+
+        var n = nds.length;
+        while (n--) {
+            var cords = nodesCache.coords[nds[n].getAttribute('ref')];
+
             // If polygon push it inside the cords[[]]
             if (feature.geometry.type === "Polygon") {
                 feature.geometry.coordinates[0].push(cords);
             } else {
                 feature.geometry.coordinates.push(cords);
             }
-        });
+        }
 
         geo.features.push(feature);
-    });
+    }
     
-    var $points = $("node:has('tag')", $xml);
+    var points = nodesCache.withTags;
 
-    $points.each(function(index, ele){
-        var feature = getFeature(ele, "Point");
-        feature.geometry.coordinates.push(+$(ele).attr('lon'));
-        feature.geometry.coordinates.push(+$(ele).attr('lat'));
+    var p = points.length;
+    while (p--) {
+        var feature = getFeature(points[p], "Point");
+
+        feature.geometry.coordinates.push(points[p].getAttribute('lon'));
+        feature.geometry.coordinates.push(points[p].getAttribute('lat'));
 
         geo.features.push(feature);
-    });
+    }
 
     return geo;
-
 };
