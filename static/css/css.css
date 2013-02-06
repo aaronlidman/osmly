@@ -33,24 +33,30 @@ a {
 	top: 0;
 	right: 0;
 	z-index: 10;
-	width: 300px;
+	width: 320px;
+	overflow: visible;
 }
 
 #top_right li {
 	float: right;
 	margin-bottom: 1px;
+	margin-left: 1px;
 	background-color: white;
-	padding: 10px 15px;
-	box-shadow: 0 0 8px rgba(0,0,0,0.4);
+	padding: 7px 10px;
 }
 
 #title {
 	font-weight: bold;
 	font-size: 24px;
+	padding: 10px 15px !important;
 }
 
 #instruct {
 	cursor: pointer;
+}
+
+#user, #changeset {
+	display: none;
 }
 
 #action-block {

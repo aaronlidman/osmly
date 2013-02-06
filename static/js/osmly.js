@@ -88,8 +88,6 @@ osmly.go = function() {
     osmly.map = map;
 
     if (!osmly.demo && token('token') && token('secret')) {
-
-        // getUserDetails, only on login, then cached?
         getUserDetails();
         next();
     } else {
@@ -230,7 +228,11 @@ function getUserDetails() {
             if (img.length) {
                 user.avatar = img[0].getAttribute('href');
             }
-            console.log(user);
+            
+            $('#user')
+                .html('<a href="' + osmly.writeApi + '/user/' +
+                    user.name + '" target="_blank">' + user.name + '</a>')
+                .fadeIn(500);
         });
 }
 
@@ -299,7 +301,9 @@ function createChangeset(callback) {
     ohauth.xhr('PUT', url, o, change, {header: {'Content-Type': 'text/xml'}},
         function(xhr) {
             var id = xhr.response + '';
-            log('New Changeset: <a href="' + osmly.writeApi + '/browse/changeset/' + id + '>' + id + '</a>');
+            log('New Changeset: ' +
+                '<a href="' + osmly.writeApi + '/browse/changeset/' + id +
+                '>' + id + '</a>');
 
             token('changeset_id', id);
 
@@ -309,6 +313,11 @@ function createChangeset(callback) {
 
 function changesetIsOpen(id) {
     if (typeof id == 'undefined') return false;
+
+    $('#changeset')
+        .html('<a href="' + osmly.writeApi +
+            '/browse/changeset/' + id + '" target="_blank"> Changeset #' + id + '</a>')
+        .fadeIn(500);
 
     $.ajax({
         type: 'GET',
