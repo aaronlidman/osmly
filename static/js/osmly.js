@@ -224,12 +224,12 @@ function getUserDetails() {
             var u = xhr.responseXML.getElementsByTagName('user')[0],
                 img = u.getElementsByTagName('img');
 
+            user.name = u.getAttribute('display_name');
+            user.id = u.getAttribute('id');
+
             if (img.length) {
                 user.avatar = img[0].getAttribute('href');
             }
-
-            user.name = u.getAttribute('display_name');
-            user.id = u.getAttribute('id');
             console.log(user);
         });
 }
@@ -302,10 +302,26 @@ function createChangeset(callback) {
             log('New Changeset: <a href="' + osmly.writeApi + '/browse/changeset/' + id + '>' + id + '</a>');
 
             token('changeset_id', id);
-            token('changeset_expires', (new Date().getTime() + (3600*1000)));
 
             callback();
         });
+}
+
+function changesetIsOpen(id) {
+    if (typeof id == 'undefined') return false;
+
+    $.ajax({
+        type: 'GET',
+        url: osmly.writeApi + '/api/0.6/changeset/' + id
+    }).success(function(xml) {
+        var cs = xml.getElementsByTagName('changeset');
+
+        if (cs[0].getAttribute('open') == 'true') {
+            return true;
+        } else {
+            return false;
+        }
+    });
 }
 
 function setup() {
@@ -540,12 +556,7 @@ function submit(result) {
 }
 
 function submitToOSM() {
-    if (typeof token('changeset_id') == 'undefined' ||
-        typeof token('changeset_expires') == 'undefined' ||
-        new Date().getTime()+10000 > token('changeset_expires')
-        ) {
-        // this if is way too stringent, rather be too accepting
-            console.log('inside harry conditional');
+    if (changesetIsOpen(token('changeset_id')) === false) {
             createChangeset(submitToOSM);
     } else {
         var url = osmly.writeApi + '/api/0.6/changeset/' + token('changeset_id') + '/upload',
@@ -614,8 +625,6 @@ function getOSM() {
                     } else {
                         label = feature.properties.name;
                     }
-
-                    console.log(tagKeys);
 
                     while (t < tagKeys.length) {
                         popup += '<li><span class="b">' + tagKeys[t] +
