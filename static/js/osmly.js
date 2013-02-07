@@ -31,6 +31,7 @@ TODO
         - URL:http://www.openstreetmap.org/api/0.6/map?bbox
         - just because of gzip
         - might be faster for small things
+    - eventually, decouple ui
 */
 
 var osmly = {
@@ -193,8 +194,6 @@ function access_oauth(oauth_token) {
         token('token', access_token.oauth_token);
         token('secret', access_token.oauth_token_secret);
 
-        log('Logged In');
-
         getUserDetails();
         next();
     });
@@ -295,9 +294,6 @@ function createChangeset(callback) {
     ohauth.xhr('PUT', url, o, change, {header: {'Content-Type': 'text/xml'}},
         function(xhr) {
             var id = xhr.response + '';
-            log('New Changeset: ' +
-                '<a href="' + osmly.writeApi + '/browse/changeset/' + id +
-                '>' + id + '</a>');
 
             token('changeset_id', id);
 
@@ -306,7 +302,9 @@ function createChangeset(callback) {
 }
 
 function changesetIsOpen(id, callback) {
-    if (!id) return false;
+    if (!id) createChangeset(callback);
+
+    notify('checking changeset status');
 
     $.ajax({
         type: 'GET',
@@ -543,8 +541,6 @@ function submit(result) {
         });
 
         if (result === 'submit') {
-            notify('prepping for upload');
-            // this entire changeset callback thread is shit
             changesetIsOpen(token('changeset_id'), submitToOSM);
         } else {
             next();
@@ -681,18 +677,6 @@ function notify(string) {
 
     // don't forget to hide #notify later
     // $('#notify').fadeOut(250);
-}
-
-function log(x) {
-    if (!x) {
-        return JSON.parse(localStorage.log);
-    } else {
-        if (!localStorage.log) localStorage.log = JSON.stringify({});
-        var list = JSON.parse(localStorage.log),
-            time = new Date().getTime();
-        list[time] = x;
-        localStorage.log = JSON.stringify(list);
-    }
 }
 
 return osmly;
