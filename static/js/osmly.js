@@ -11,7 +11,6 @@ TODO
     - use http://cdnjs.com/ for libraries?
     - cleanup html, better/unique selectors
     - tags
-        - include #tags in #action-block
         - handle empty tag values
             - clicking an empty value is a crapshoot
         - add/remove tag buttons
@@ -20,17 +19,12 @@ TODO
     - group oauth functions like iD
         - https://github.com/systemed/iD/blob/master/js/id/oauth.js#L53
         - same idea can be applied to changesets, submitting?, setup, L.toGeoJson
-    - parse xml w/ getElement/getTag etc... not jQuery
     - cache userDetails in localStorage on login, not every session
         - had some failures that propagated to uploads, changesets, etc...
-    - check all 'undefined' comparisons, I think I get it now
-    - cache tokens, localStorage is crazy slow
-        - http://jsperf.com/localstorage-vs-objects/10
-    - display log
     - enable changeset commenting
     - make var o public for consumer key
     - refactor, refactor, refactor
-    - shortcuts
+    - keypress shortcuts    
         - W + S, zoom in/out on pointer
         - A + D, open problem menu, skip
     - benchmark osm api for dataLayer
@@ -134,7 +128,7 @@ osmly.go = function() {
 function keyclean(x) { return x.replace(/\W/g, ''); }
 
 function token(k, x) {
-    if (arguments.length == 2) {
+    if (arguments.length === 2) {
         localStorage[keyclean(osmly.writeApi) + k] = x;
     }
     return localStorage[keyclean(osmly.writeApi) + k];
@@ -311,24 +305,24 @@ function createChangeset(callback) {
         });
 }
 
-function changesetIsOpen(id) {
-    if (typeof id == 'undefined') return false;
-
-    $('#changeset')
-        .html('<a href="' + osmly.writeApi +
-            '/browse/changeset/' + id + '" target="_blank"> Changeset #' + id + '</a>')
-        .fadeIn(500);
+function changesetIsOpen(id, callback) {
+    if (!id) return false;
 
     $.ajax({
         type: 'GET',
-        url: osmly.writeApi + '/api/0.6/changeset/' + id
+        url: osmly.writeApi + '/api/0.6/changeset/' + id,
+        cache: false
     }).success(function(xml) {
         var cs = xml.getElementsByTagName('changeset');
 
-        if (cs[0].getAttribute('open') == 'true') {
-            return true;
+        if (cs[0].getAttribute('open') === 'true') {
+            $('#changeset')
+                .html('<a href="' + osmly.writeApi + '/browse/changeset/' +
+                    id + '" target="_blank"> Changeset #' + id + '</a>')
+                .fadeIn(500);
+            callback();
         } else {
-            return false;
+            createChangeset(callback);
         }
     });
 }
@@ -471,8 +465,8 @@ function getTags() {
         tags = [];
 
     $tags.each(function(i,ele) {
-        var k = $(ele).children('.k').text();
-        var v = $(ele).children('.v').text();
+        var k = $(ele).children('.k').text(),
+            v = $(ele).children('.v').text();
         tags.push([k,v]);
     });
 
@@ -482,7 +476,6 @@ function getTags() {
 // geojson object, tags [[k,v],[k,v], [k,v]]
 // returns xml string
 function toOsmChange(geojson, tags) {
-    console.log(geojson);
     // if geometries > 1 the same tags are added to each way
     // relations? anything with more than one geometry to append w/ all ways in it
     var osmChange = '<osmChange version="0.6" generator="osmly"><create>',
@@ -549,15 +542,16 @@ function submit(result) {
             // not worth slowing down/complicating over, it's reproducable
         });
 
-        if (result == 'submit') {
+        if (result === 'submit') {
             notify('prepping for upload');
-            submitToOSM();
+            // this entire changeset callback thread is shit
+            changesetIsOpen(token('changeset_id'), submitToOSM);
         } else {
             next();
         }
     }
 
-    if (result != 'skip' && result != 'submit') result = 'problem';
+    if (result !== 'skip' && result !== 'submit') result = 'problem';
 
     $('#d-' + result)
         .show()
@@ -565,28 +559,24 @@ function submit(result) {
 }
 
 function submitToOSM() {
-    if (changesetIsOpen(token('changeset_id')) === false) {
-            createChangeset(submitToOSM);
-    } else {
-        var url = osmly.writeApi + '/api/0.6/changeset/' + token('changeset_id') + '/upload',
-            token_secret = token('secret'),
-            geojson = toGeoJson(current.layer),
-            osmChange = toOsmChange(geojson, getTags());
+    var url = osmly.writeApi + '/api/0.6/changeset/' + token('changeset_id') + '/upload',
+        token_secret = token('secret'),
+        geojson = toGeoJson(current.layer),
+        osmChange = toOsmChange(geojson, getTags());
 
-        notify('uploading to OSM');
+    notify('uploading to OSM');
 
-        o.oauth_timestamp = ohauth.timestamp();
-        o.oauth_nonce = ohauth.nonce();
-        o.oauth_token = token('token');
+    o.oauth_timestamp = ohauth.timestamp();
+    o.oauth_nonce = ohauth.nonce();
+    o.oauth_token = token('token');
 
-        o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
-            ohauth.baseString('POST', url, o));
+    o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
+        ohauth.baseString('POST', url, o));
 
-        ohauth.xhr('POST', url, o, osmChange, {header: {'Content-Type': 'text/xml'}},
-            function(xhr) {
-                next();
-            });
-    }
+    ohauth.xhr('POST', url, o, osmChange, {header: {'Content-Type': 'text/xml'}},
+        function(xhr) {
+            next();
+        });
 }
 
 function teardown() {
@@ -629,7 +619,7 @@ function getOSM() {
                     tagKeys = Object.keys(feature.properties);
 
                 if (feature.properties) {
-                    if (typeof feature.properties.name == 'undefined') {
+                    if (!feature.properties.name) {
                         label = '[NO NAME] click for tags';
                     } else {
                         label = feature.properties.name;
@@ -694,10 +684,10 @@ function notify(string) {
 }
 
 function log(x) {
-    if (typeof x == 'undefined') {
+    if (!x) {
         return JSON.parse(localStorage.log);
     } else {
-        if (typeof localStorage.log == 'undefined') localStorage.log = JSON.stringify({});
+        if (!localStorage.log) localStorage.log = JSON.stringify({});
         var list = JSON.parse(localStorage.log),
             time = new Date().getTime();
         list[time] = x;
