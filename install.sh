@@ -2,20 +2,14 @@
 (
 # install everything
 apt-get --assume-yes update
-apt-get --assume-yes install make automake gcc gcc+ git python-setuptools uwsgi nginx uwsgi-plugin-python python-pip python-virtualenv libgeos-c1
+apt-get --assume-yes install make automake gcc gcc+ git python-setuptools python2.7-dev nginx uwsgi-plugin-python python-pip python-virtualenv libgeos-c1
 
 # setup app
-pip install uwsgi shapely
+pip install uwsgi shapely Flask
 cd /var/www
 git clone https://github.com/aaronlidman/parks-project.git
 cd parks-project
 mkdir /var/log/osmly
-
-# install flask
-virtualenv ./env
-. env/bin/activate
-pip install Flask
-deactivate
 
 # setup permissions
 usermod -a -G www-data $USER
