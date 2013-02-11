@@ -4,7 +4,7 @@ import sqlite3
 from flask import Flask, render_template, request
 import json
 from shapely.geometry import mapping, MultiPolygon, box
-import shapely.wkt
+import shapely.wkb
 import time
 import random
 
@@ -23,13 +23,6 @@ sqlite = {
 # adds a common tag to everything
 # tags will override columns that are named the same
 add_tag = {}
-
-# 'error' is an identifier
-# 'display' is the actual ui message
-error = {
-    'error': '',
-    'display': ''
-}
 
 # in kilometers, to limit clientside query size
 AREA_LIMIT = 5
@@ -214,7 +207,7 @@ def listit(t):
 
 def km2deg(km):
     # because our srs is defined in deg, shapely returns area as deg
-    # this roughly converts sq km to sq deg, becuase sq deg is ridiculous
+    # this roughly converts sq km to sq deg, roughly
     degrees = km / (510072000 / (129600 / 3.1415926535))
     return degrees
 
