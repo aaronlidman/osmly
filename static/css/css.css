@@ -59,8 +59,18 @@ a {
     cursor: pointer;
 }
 
-#user, #changeset {
+#user, #changeset, .cs-comment {
     display: none;
+}
+
+#cs-comment-edit {
+    margin-left: 10px;
+    display: inline-block;
+    width: 200px;
+    font-size: 14px;
+    padding: 4px 6px;
+    border: 1px solid #ccc;
+    cursor: text;
 }
 
 #action-block {

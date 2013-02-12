@@ -123,6 +123,10 @@ osmly.go = function() {
     $('#instruction').click(function() {
         $('#instruction, #modal').fadeOut(200);
     });
+
+    $('#changeset').click(function(){
+        $('.cs-comment').toggle();
+    });
 };
 
 // next 2 functions from iD: https://github.com/systemed/iD/blob/master/js/id/oauth.js
@@ -240,6 +244,7 @@ function next() {
         type: 'GET',
         url: request
     }).success(function(data) {
+        current = {};
         current = jQuery.parseJSON(data);
         if (osmly.demo) console.log(current);
 
@@ -311,12 +316,14 @@ function changesetIsOpen(id, callback) {
         url: osmly.writeApi + '/api/0.6/changeset/' + id,
         cache: false
     }).success(function(xml) {
+        // need a failure case, dev server fails pretty often
         var cs = xml.getElementsByTagName('changeset');
 
         if (cs[0].getAttribute('open') === 'true') {
             $('#changeset')
-                .html('<a href="' + osmly.writeApi + '/browse/changeset/' +
-                    id + '" target="_blank"> Changeset #' + id + '</a>')
+                .html('Changeset #' + id +
+                    '<a class="cs-comment" href="' + osmly.writeApi + '/browse/changeset/' +
+                    id + '" target="_blank">changeset details »</a><br/>')
                 .fadeIn(500);
             callback();
         } else {
@@ -555,7 +562,14 @@ function submit(result) {
 }
 
 function submitToOSM() {
-    var url = osmly.writeApi + '/api/0.6/changeset/' + token('changeset_id') + '/upload',
+    var id = token('changeset_id');
+
+    $('#changeset')
+        .html('<a href="' + osmly.writeApi + '/browse/changeset/' +
+            id + '" target="_blank"> Changeset #' + id + '</a>')
+        .fadeIn(500);
+
+    var url = osmly.writeApi + '/api/0.6/changeset/' + id + '/upload',
         token_secret = token('secret'),
         geojson = toGeoJson(current.layer),
         osmChange = toOsmChange(geojson, getTags());
