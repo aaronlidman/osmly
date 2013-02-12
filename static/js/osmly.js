@@ -124,7 +124,7 @@ osmly.go = function() {
         $('#instruction, #modal').fadeOut(200);
     });
 
-    $('#changeset').click(function(){
+    $('#cs-click').click(function(){
         $('.cs-comment').toggle();
     });
 };
@@ -320,11 +320,6 @@ function changesetIsOpen(id, callback) {
         var cs = xml.getElementsByTagName('changeset');
 
         if (cs[0].getAttribute('open') === 'true') {
-            $('#changeset')
-                .html('Changeset #' + id +
-                    '<a class="cs-comment" href="' + osmly.writeApi + '/browse/changeset/' +
-                    id + '" target="_blank">changeset details »</a><br/>')
-                .fadeIn(500);
             callback();
         } else {
             createChangeset(callback);
@@ -564,9 +559,11 @@ function submit(result) {
 function submitToOSM() {
     var id = token('changeset_id');
 
+// changeset thing is a mess right now
     $('#changeset')
-        .html('<a href="' + osmly.writeApi + '/browse/changeset/' +
-            id + '" target="_blank"> Changeset #' + id + '</a>')
+        .prepend('<span id="cs-click">Changeset #' + id + '</span><br/>' +
+            '<a class="cs-comment" href="' + osmly.writeApi + '/browse/changeset/' +
+            id + '" target="_blank">changeset details »</a><br/>')
         .fadeIn(500);
 
     var url = osmly.writeApi + '/api/0.6/changeset/' + id + '/upload',
