@@ -24,42 +24,37 @@
     <body>
         <ul id="top_right">
             <li id="title">Outline the nearby park</li>
-            <li id="instruct">Instructions</li>
+            <li id="instruction">Instructions</li>
             <li id="user"></li>
-            <a href="#" data-reveal-id="myModal" data-animation="fade">
-                <li id="changeset">
-                    <span class="cs-comment">Comment:<span id="cs-comment-edit" contenteditable="true"></span></span>
-                </li>
-            </a>
+            <li id="changeset"></li>
         </ul>
 
-        <div id="myModal" class="reveal-modal">
-            <h1>Reveal Modal Goodness</h1>
+        <div id="changeset-modal" class="reveal-modal">
+            <h3>Reveal Modal Goodness</h3>
             <p>This is a default modal in all its glory, but any of the styles here can easily be changed in the CSS.</p>
             <a class="close-reveal-modal">&#215;</a>
         </div>
 
-        <div id="modal">
-            <div id="instruction">
-                <h3>Instructions</h3>
-                <li>Make a more accurate outline of the nearby park.</li>
-                <li>It's possible the data is out of date or just wrong; report problems accordingly.</li>
-                <li>Be careful to not include nearby schools, golf courses, or residential yards; just the park.</li>
-                <li>Do include small bodies of water, parking lots, and sidewalks that are obviously part of the park.</li>
-                <li>The park should be fairly obvious, if you're struggling to find anything nearby that looks like a public park it probably isn't right.</li>
+        <div id="instruction-modal" class="reveal-modal">
+            <h3>Instructions</h3>
+            <li>Make a more accurate outline of the nearby park.</li>
+            <li>It's possible the data is out of date or just wrong; report problems accordingly.</li>
+            <li>Be careful to not include nearby schools, golf courses, or residential yards; just the park.</li>
+            <li>Do include small bodies of water, parking lots, and sidewalks that are obviously part of the park.</li>
+            <li>The park should be fairly obvious, if you're struggling to find anything nearby that looks like a public park it probably isn't right.</li>
 
-                <h3 style="margin-top: 15px;">Tips</h3>
-                <li>Click on the nodes (white dots) to delete them</li>
-                <li>Drag a transparent middle node to add a new node</li>
-                <li>Yellow features are other OSM references there to help you. You can't edit them here but clicking them provides more information. Use this info to help make your features more accurate</li>
-                <li>If you want to edit from another editor, click the coordinates in the bottom right corner which will take you to osm.org</li>
+            <h3 style="margin-top: 15px;">Tips</h3>
+            <li>Click on the nodes (white dots) to delete them</li>
+            <li>Drag a transparent middle node to add a new node</li>
+            <li>Yellow features are other OSM references there to help you. You can't edit them here but clicking them provides more information. Use this info to help make your features more accurate</li>
+            <li>If you want to edit from another editor, click the coordinates in the bottom right corner which will take you to osm.org</li>
 
-                <h3 style="margin-top: 15px;">About</h3>
-                <li>Data from TIGER 2011 area landmarks.</li>
-                <li>xx original parks, xx processed, xx new to OSM</li>
-                <li><a href="http://thenounproject.com/noun/arrow/#icon-No8828" target="_blank">Skip arrow</a> and <a href="http://thenounproject.com/noun/delete/#icon-No8843" target="_blank">problem X</a> designed by <a href="http://thenounproject.com/cr" target="_blank">Chris Robinson</a> from The Noun Project</li>
-                <a href="#" class="close">X</a> 
-            </div>
+            <h3 style="margin-top: 15px;">About</h3>
+            <li>Data from TIGER 2011 area landmarks.</li>
+            <li>xx original parks, xx processed, xx new to OSM</li>
+            <li><a href="http://thenounproject.com/noun/arrow/#icon-No8828" target="_blank">Skip arrow</a> and <a href="http://thenounproject.com/noun/delete/#icon-No8843" target="_blank">problem X</a> designed by <a href="http://thenounproject.com/cr" target="_blank">Chris Robinson</a> from The Noun Project</li>
+
+            <a class="close-reveal-modal">&#215;</a>
         </div>
 
         <img id="d-problem" class="display" src="/static/images/problem_white.svg" />

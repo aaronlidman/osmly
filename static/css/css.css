@@ -55,22 +55,12 @@ a {
     padding: 10px 15px !important;
 }
 
-#instruct {
+#instruction, #changeset {
     cursor: pointer;
 }
 
-#user, #changeset, .cs-comment {
+#user, #changeset {
     display: none;
-}
-
-#cs-comment-edit {
-    margin-left: 10px;
-    display: inline-block;
-    width: 200px;
-    font-size: 14px;
-    padding: 4px 6px;
-    border: 1px solid #ccc;
-    cursor: text;
 }
 
 #action-block {
@@ -164,38 +154,6 @@ a {
     min-width: 25px;
 }
 
-#modal {
-    top: 0;
-    right: 0;
-    left: 0;
-    bottom: 0;
-    position: absolute;
-    background: rgba(0,0,0,0.4);
-    width: 100%;
-    height: 100%;
-    z-index: 9000;
-    display: none;
-}
-
-#instruction {
-    cursor: pointer;
-    background-color: white;
-    line-height: 1.4em;
-    margin: -290px -340px 0 0;
-    right: 50%;
-    top: 50%;
-    padding: 20px;
-    position: absolute;
-    overflow: hidden;
-    height: 510px;
-    width: 640px;
-    display: none;
-}
-
-#instruction a {
-    border-bottom: 1px solid #999;
-}
-
 .display {
     display: none;  
     pointer-events: none;
@@ -207,25 +165,6 @@ a {
     position: absolute;
     overflow: visible;
     z-index: 10;
-}
-
-#instruction h3 {margin-bottom: 5px;}
-#instruction li {margin-left: 20px;}
-
-.close {
-    color: #666;
-    padding: 10px 20px;
-    font-weight: bold;
-    font-size: 14px;
-    position: absolute;
-    top: 0;
-    right: 0;
-    border: none;
-    background-color: #eee;
-}
-
-.close:hover {
-    color: black;
 }
 
 #login {

@@ -116,17 +116,18 @@ osmly.go = function() {
         }
     });
 
-    $('#instruct').click(function() {
-        $('#modal, #instruction').fadeIn(200);
-    });
-
     $('#instruction').click(function() {
-        $('#instruction, #modal').fadeOut(200);
+        $('#instruction-modal').reveal({
+             animation: 'fade',
+             animationspeed: 100,
+             closeonbackgroundclick: true,
+             dismissmodalclass: 'close-reveal-modal'
+        });
     });
 
     $('#changeset').click(function(e) {
         e.preventDefault();
-        $('#myModal').reveal({
+        $('#changeset-modal').reveal({
              animation: 'fade',
              animationspeed: 100,
              closeonbackgroundclick: true,
