@@ -128,7 +128,7 @@ osmly.go = function() {
         e.preventDefault();
         $('#myModal').reveal({
              animation: 'fade',
-             animationspeed: 250,
+             animationspeed: 100,
              closeonbackgroundclick: true,
              dismissmodalclass: 'close-reveal-modal'
         });
