@@ -124,8 +124,14 @@ osmly.go = function() {
         $('#instruction, #modal').fadeOut(200);
     });
 
-    $('#cs-click').click(function(){
-        $('.cs-comment').toggle();
+    $('#changeset').click(function(e) {
+        e.preventDefault();
+        $('#myModal').reveal({
+             animation: 'fade',
+             animationspeed: 250,
+             closeonbackgroundclick: true,
+             dismissmodalclass: 'close-reveal-modal'
+        });
     });
 };
 

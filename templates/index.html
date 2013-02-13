@@ -6,6 +6,7 @@
         <link rel="stylesheet" href="/static/css/leaflet0.5.css" />
         <link rel="stylesheet" href="/static/css/leaflet.label.css" />
         <link rel="stylesheet" href="/static/css/css.css" />
+        <link rel="stylesheet" href="/static/css/reveal.css" />
         <!--[if lte IE 8]>
             <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.ie.css" />
         <![endif]-->
@@ -17,6 +18,7 @@
         <script src="/static/js/ohauth.js"></script>
         <script src="/static/js/Bing.js"></script>
         <script src="/static/js/equalize.js"></script>
+        <script src="/static/js/jquery.reveal.js"></script>
         <script src="/static/js/osm2geo.js"></script>
     </head>
     <body>
@@ -24,10 +26,18 @@
             <li id="title">Outline the nearby park</li>
             <li id="instruct">Instructions</li>
             <li id="user"></li>
-            <li id="changeset">
-                <span class="cs-comment">Comment:<span id="cs-comment-edit" contenteditable="true"></span></span>
-            </li>
+            <a href="#" data-reveal-id="myModal" data-animation="fade">
+                <li id="changeset">
+                    <span class="cs-comment">Comment:<span id="cs-comment-edit" contenteditable="true"></span></span>
+                </li>
+            </a>
         </ul>
+
+        <div id="myModal" class="reveal-modal">
+            <h1>Reveal Modal Goodness</h1>
+            <p>This is a default modal in all its glory, but any of the styles here can easily be changed in the CSS.</p>
+            <a class="close-reveal-modal">&#215;</a>
+        </div>
 
         <div id="modal">
             <div id="instruction">
