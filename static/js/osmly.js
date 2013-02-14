@@ -119,7 +119,7 @@ osmly.go = function() {
     $('#instruction').click(function() {
         $('#instruction-modal').reveal({
              animation: 'fade',
-             animationspeed: 100,
+             animationspeed: 200,
              closeonbackgroundclick: true,
              dismissmodalclass: 'close-reveal-modal'
         });
@@ -129,7 +129,7 @@ osmly.go = function() {
         e.preventDefault();
         $('#changeset-modal').reveal({
              animation: 'fade',
-             animationspeed: 100,
+             animationspeed: 200,
              closeonbackgroundclick: true,
              dismissmodalclass: 'close-reveal-modal'
         });
@@ -566,12 +566,13 @@ function submit(result) {
 function submitToOSM() {
     var id = token('changeset_id');
 
-// changeset thing is a mess right now
     $('#changeset')
-        .prepend('<span id="cs-click">Changeset #' + id + '</span><br/>' +
-            '<a class="cs-comment" href="' + osmly.writeApi + '/browse/changeset/' +
-            id + '" target="_blank">changeset details »</a><br/>')
+        .text('Changeset #' + id)
         .fadeIn(500);
+
+    $('#changeset-modal')
+        .append('<a href="' + osmly.writeApi + '/browse/changeset/' +
+            id + '" target="_blank">Changeset #' + id + ' details on osm.org »</a>');
 
     var url = osmly.writeApi + '/api/0.6/changeset/' + id + '/upload',
         token_secret = token('secret'),
