@@ -63,18 +63,21 @@ a {
     display: none;
 }
 
-#changeset {
-    box-size: border-box;
-}
-
 #changeset-form {
     border: 1px solid #ccc;
     padding: 4px 6px;
-    width: 420px; /* need to fix box-sizing on the modal */
     height: 50px;
     display: block;
     font-size: 14px;
-    margin-bottom: 20px;
+    margin-bottom: 5px;
+}
+
+#update-change {
+    padding: 4px 6px;
+    background-color: black;
+    color: white;
+    float: right;
+    cursor: pointer;
 }
 
 #action-block {

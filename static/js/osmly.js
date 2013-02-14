@@ -9,7 +9,6 @@ window.osmly = function () {
 
 TODO
     - use http://cdnjs.com/ for libraries?
-    - cleanup html, better/unique selectors
     - tags
         - handle empty tag values
             - clicking an empty value is a crapshoot
@@ -21,10 +20,9 @@ TODO
         - same idea can be applied to changesets, submitting?, setup, L.toGeoJson
     - cache userDetails in localStorage on login, not every session
         - had some failures that propagated to uploads, changesets, etc...
-    - enable changeset commenting
     - make var o public for consumer key
     - refactor, refactor, refactor
-    - keypress shortcuts    
+    - keypress shortcuts
         - W + S, zoom in/out on pointer
         - A + D, open problem menu, skip
     - benchmark osm api for dataLayer
@@ -132,6 +130,14 @@ osmly.go = function() {
              animationspeed: 200,
              closeonbackgroundclick: true,
              dismissmodalclass: 'close-reveal-modal'
+        });
+    });
+
+    $('#update-change').click(function() {
+        osmly.changesetTags.push(['comment', $('#changeset-form').text()]);
+        updateChangeset(token('changeset_id'), function() {
+            $('#changeset-modal').trigger('reveal:close');
+            $('#notify').fadeOut(250);
         });
     });
 };
@@ -277,13 +283,11 @@ function next() {
     });
 }
 
-function createChangeset(callback) {
-    var url = osmly.writeApi + '/api/0.6/changeset/create',
-        token_secret = token('secret'),
-        tags = '',
-        c = osmly.changesetTags.length;
+function newChangesetXml() {
+    var c = osmly.changesetTags.length,
+        tags = '';
 
-    notify('creating a new changeset');
+    console.log(osmly.changesetTags);
 
     while (c--) {
         tags +=
@@ -291,10 +295,15 @@ function createChangeset(callback) {
             '" v="' + osmly.changesetTags[c][1] + '"/>';
     }
 
-    var change = '<osm>' +
-            '<changeset>' + tags +
-            '<\/changeset>' +
-        '<\/osm>';
+    return '<osm><changeset>' + tags + '<\/changeset><\/osm>';
+}
+
+function createChangeset(callback) {
+    var url = osmly.writeApi + '/api/0.6/changeset/create',
+        token_secret = token('secret'),
+        change = newChangesetXml();
+
+    notify('creating a new changeset');
 
     o.oauth_timestamp = ohauth.timestamp();
     o.oauth_nonce = ohauth.nonce();
@@ -310,6 +319,30 @@ function createChangeset(callback) {
             token('changeset_id', id);
 
             callback();
+        });
+}
+
+function updateChangeset(id, callback) {
+    var url = osmly.writeApi + '/api/0.6/changeset/' + id,
+        token_secret = token('secret'),
+        change = newChangesetXml();
+
+    console.log(osmly.changesetTags);
+    console.log(change);
+
+    notify('updating changeset');
+
+    o.oauth_timestamp = ohauth.timestamp();
+    o.oauth_nonce = ohauth.nonce();
+    o.oauth_token = token('token');
+
+    o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
+        ohauth.baseString('PUT', url, o));
+
+    ohauth.xhr('PUT', url, o, change, {header: {'Content-Type': 'text/xml'}},
+        function(xhr) {
+            // don't care about the response
+            if (callback) callback();
         });
 }
 
@@ -571,8 +604,8 @@ function submitToOSM() {
         .fadeIn(500);
 
     $('#changeset-modal')
-        .append('<a href="' + osmly.writeApi + '/browse/changeset/' +
-            id + '" target="_blank">Changeset #' + id + ' details on osm.org »</a>');
+        .append('<a style="border-bottom: 1px solid #999;" href="' + osmly.writeApi + '/browse/changeset/' +
+            id + '" target="_blank">details on osm.org »</a>');
 
     var url = osmly.writeApi + '/api/0.6/changeset/' + id + '/upload',
         token_secret = token('secret'),
