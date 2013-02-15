@@ -46,7 +46,7 @@ a {
     margin-bottom: 1px;
     margin-left: 1px;
     background-color: white;
-    padding: 7px 10px;
+    padding: 6px;
 }
 
 #title {
@@ -78,6 +78,10 @@ a {
     color: white;
     float: right;
     cursor: pointer;
+}
+
+#changeset-link {
+    border-bottom: 1px solid #999;
 }
 
 #action-block {
@@ -162,13 +166,22 @@ a {
     display: inline-block;
     color: #222;
     padding: 4px 6px;
-    /*box-shadow: inset rgba(0,0,0,0.2) 0px 1px 3px;*/
 }
 
 .k {
     font-weight: bold;
+}
+
+.k, .v {
     border-right: 1px solid #ccc;
     min-width: 25px;
+}
+
+.minus {
+    padding: 0 10px !important;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 18px;
 }
 
 .display {

@@ -384,7 +384,22 @@ function setup() {
             equalize: 'width',
             reset: true
         });
-        $('.k').width($('.k').width()+15);
+        $('.k').width($('.k').width()+10);
+    });
+
+    $('.v').keypress(function() {
+        $('ul').equalize({
+            children: '.v',
+            equalize: 'width',
+            reset: true
+        });
+        $('.v').width($('.v').width()+10);
+    });
+
+    $('.minus').click(function() {
+        if ($('#tags li').length > 1) {
+            $(this).parent().remove();
+        }
     });
 
     display();
@@ -402,7 +417,11 @@ function display() {
             children: '.k',
             equalize: 'width',
             reset: true});
-    $('.k').width($('.k').width()+15);
+
+    $('ul').equalize({
+            children: '.v',
+            equalize: 'width',
+            reset: true});
 }
 
 function populateTags() {
@@ -419,6 +438,7 @@ function populateTags() {
             tag + '</span>' +
             '<span class="v" spellcheck="false" contenteditable="true">' +
             current.tags[tag] + '</span>' +
+            '<span class="minus">-</span>' +
             '</li>');
         }
     }
@@ -599,13 +619,11 @@ function submit(result) {
 function submitToOSM() {
     var id = token('changeset_id');
 
-    $('#changeset')
-        .text('Changeset #' + id)
-        .fadeIn(500);
+    $('#changeset').fadeIn(500);
 
-    $('#changeset-modal')
-        .append('<a style="border-bottom: 1px solid #999;" href="' + osmly.writeApi + '/browse/changeset/' +
-            id + '" target="_blank">details on osm.org »</a>');
+    $('#changeset-link')
+        .html('<a href="' + osmly.writeApi + '/browse/changeset/' +
+            id + '" target="_blank">Details on osm.org »</a>');
 
     var url = osmly.writeApi + '/api/0.6/changeset/' + id + '/upload',
         token_secret = token('secret'),
