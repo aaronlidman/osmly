@@ -148,6 +148,18 @@ a {
     box-shadow: 0 0 8px rgba(0,0,0,0.4);
 }
 
+#add-new-tag {
+    /* missing box-shadow */
+    cursor: pointer;
+    font-weight: bold;
+    background-color: white;
+    padding: 4px 20px;
+    left: 0px;
+    top: -20px;
+    position: absolute;
+    float: left;
+}
+
 #tags ul {
     list-style-type: none;
     border: 1px solid #ccc;

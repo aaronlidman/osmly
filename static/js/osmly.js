@@ -30,6 +30,8 @@ TODO
         - just because of gzip
         - might be faster for small things
     - eventually, decouple ui
+    - crossbrowser test ui
+        - especially modal and tag stuff
 */
 
 var osmly = {
@@ -378,28 +380,39 @@ function setup() {
         submit($('#problem').val());
     });
 
-    $('.k').keypress(function() {
-        $('ul').equalize({
-            children: '.k',
-            equalize: 'width',
-            reset: true
-        });
-        $('.k').width($('.k').width()+10);
-    });
-
-    $('.v').keypress(function() {
-        $('ul').equalize({
-            children: '.v',
-            equalize: 'width',
-            reset: true
-        });
-        $('.v').width($('.v').width()+10);
+    $('.k, .v').keypress(function() {
+        equalizeTags();
     });
 
     $('.minus').click(function() {
         if ($('#tags li').length > 1) {
             $(this).parent().remove();
+            equalizeTags();
         }
+    });
+
+    $('#add-new-tag').click(function() {
+        // bindings are a freakin mess, what have I done
+        $('#tags ul').append(
+            '<li>' +
+            '<span class="k" spellcheck="false" contenteditable="true"></span>' +
+            '<span class="v" spellcheck="false" contenteditable="true"></span>' +
+            '<span class="minus">-</span>' +
+            '</li>');
+
+        equalizeTags();
+
+        $('.k, .v').keypress(function() {
+            equalizeTags();
+        });
+
+        $('.minus').click(function() {
+            if ($('#tags li').length > 1) {
+                $(this).parent().remove();
+                equalizeTags();
+            }
+        });
+
     });
 
     display();
@@ -412,16 +425,7 @@ function display() {
     $('#notify, #login').fadeOut(250);
     $('#top_right, #action-block, #tags').fadeIn(500);
 
-    // equalize doesn't seem to work until the selector is visible
-    $('ul').equalize({
-            children: '.k',
-            equalize: 'width',
-            reset: true});
-
-    $('ul').equalize({
-            children: '.v',
-            equalize: 'width',
-            reset: true});
+    equalizeTags();
 }
 
 function populateTags() {
@@ -442,6 +446,22 @@ function populateTags() {
             '</li>');
         }
     }
+}
+
+// doesn't work until the selectors are visibile?
+function equalizeTags() {
+    // janky & inefficient, need to look into how the plugin works
+    $('ul').equalize({
+        children: '.k',
+        equalize: 'width',
+        reset: true});
+    $('.k').width($('.k').width()+10);
+
+    $('ul').equalize({
+        children: '.v',
+        equalize: 'width',
+        reset: true});
+    $('.v').width($('.v').width()+10);
 }
 
 // http://stackoverflow.com/a/1359808
@@ -646,7 +666,8 @@ function submitToOSM() {
 }
 
 function teardown() {
-    $('#problem, #skip, #submit').unbind();
+    $('#problem, #skip, #submit, .minus, #add-new-tag').unbind();
+    $('.k, .v').unbind();
     $('#action-block, #tags').hide();
     map.closePopup();
     $('#problem').val('problem'); // resets problem menu
