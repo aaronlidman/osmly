@@ -9,10 +9,6 @@ window.osmly = function () {
 
 TODO
     - use http://cdnjs.com/ for libraries?
-    - tags
-        - handle empty tag values
-            - clicking an empty value is a crapshoot
-        - add/remove tag buttons
     - success + failure callbacks on every request
     - common ohauth.xhr function
     - group oauth functions like iD
@@ -21,14 +17,10 @@ TODO
     - cache userDetails in localStorage on login, not every session
         - had some failures that propagated to uploads, changesets, etc...
     - make var o public for consumer key
-    - refactor, refactor, refactor
+    - refactor
     - keypress shortcuts
         - W + S, zoom in/out on pointer
         - A + D, open problem menu, skip
-    - benchmark osm api for dataLayer
-        - URL:http://www.openstreetmap.org/api/0.6/map?bbox
-        - just because of gzip
-        - might be faster for small things
     - eventually, decouple ui
     - crossbrowser test ui
         - especially modal and tag stuff
@@ -392,7 +384,7 @@ function setup() {
     });
 
     $('#add-new-tag').click(function() {
-        // bindings are a freakin mess, what have I done
+        // what a freakin mess, what have I done
         $('#tags ul').append(
             '<li>' +
             '<span class="k" spellcheck="false" contenteditable="true"></span>' +
@@ -547,7 +539,8 @@ function getTags() {
     $tags.each(function(i,ele) {
         var k = $(ele).children('.k').text(),
             v = $(ele).children('.v').text();
-        tags.push([k,v]);
+
+        if (k !== '' && v !== '') tags.push([k,v]);
     });
 
     return tags;
