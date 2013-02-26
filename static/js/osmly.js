@@ -14,8 +14,6 @@ TODO
     - group oauth functions like iD
         - https://github.com/systemed/iD/blob/master/js/id/oauth.js#L53
         - same idea can be applied to changesets, submitting?, setup, L.toGeoJson
-    - cache userDetails in localStorage on login, not every session
-        - had some failures that propagated to uploads, changesets, etc...
     - make var o public for consumer key
     - refactor
     - keypress shortcuts
@@ -24,6 +22,7 @@ TODO
     - eventually, decouple ui
     - crossbrowser test ui
         - especially modal and tag stuff
+    - reset button + functionality
 */
 
 var osmly = {
@@ -75,7 +74,7 @@ osmly.go = function() {
     osmly.map = map;
 
     if (!osmly.demo && token('token') && token('secret')) {
-        getUserDetails();
+        userDetailsUI();
         next();
     } else {
         if (osmly.demo) $('#login').text('Demonstration »');
@@ -206,11 +205,16 @@ function access_oauth(oauth_token) {
         token('secret', access_token.oauth_token_secret);
 
         getUserDetails();
+        userDetailsUI();
         next();
     });
 }
 
 function getUserDetails() {
+    // this is all pretty stupid, we just need the username
+    // we're only using the username to link the user to their own profile
+        // ~50 lines for one link, a tiny convenience
+    // probably removing soon
     var url = osmly.writeApi + '/api/0.6/user/details',
         token_secret = token('secret');
 
@@ -232,12 +236,19 @@ function getUserDetails() {
             if (img.length) {
                 user.avatar = img[0].getAttribute('href');
             }
-            
-            $('#user')
-                .html('<a href="' + osmly.writeApi + '/user/' +
-                    user.name + '" target="_blank">' + user.name + '</a>')
-                .fadeIn(500);
+
+            // not using the id or avatar for anything yet
+            token('userName', user.name);
+            token('userId', user.id);
+            token('userAvatar', user.avatar);
         });
+}
+
+function userDetailsUI() {
+    $('#user')
+        .html('<a href="' + osmly.writeApi + '/user/' +
+            token('userName') + '" target="_blank">' + token('userName') + '</a>')
+        .fadeIn(500);
 }
 
 function next() {
