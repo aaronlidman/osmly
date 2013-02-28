@@ -25,22 +25,22 @@ parser.add_option('-p', '--precision', dest='precision',
 
 if __name__ == '__main__':
     options, args = parser.parse_args()
-    
+
     #
     # Read!
     #
     input = len(args) and open(args[0]) or stdin
     data = load(input)
-    
+
     #
     # Write!
     #
     encoder = JSONEncoder(separators=(',', ':'))
     encoded = encoder.iterencode(data)
-    
+
     format = '%.' + str(options.precision) + 'f'
     output = len(args) == 2 and open(args[1], 'w') or stdout
-    
+
     for token in encoded:
         if charfloat_pat.match(token):
             # in python 2.7, we see a character followed by a float literal

@@ -4,8 +4,12 @@ import os
 import errno
 import json
 from shapely.geometry import asShape, mapping
+from optparse import OptionParser
 
-file = open('parks-small.geojson')
+parser = OptionParser()
+(options, args) = parser.parse_args()
+
+file = open(args[0])
 data = json.load(file)
 
 count = 0
@@ -19,7 +23,8 @@ except OSError as exception:
 
 for feature in data['features']:
     geo = asShape(feature['geometry'])
-    # we want to use simplify() with False param because it's much faster
+    bounds = json.dumps(geo.buffer(0.001).bounds)
+    # we want to use simplify() with False param because it's faster
     # but it occasionally deletes all nodes and that upsets mapping()
     try:
         simple = geo.simplify(0.0001, False)
@@ -28,6 +33,7 @@ for feature in data['features']:
         simple = geo.simplify(0.0001, True)
         geo = mapping(simple)
 
+    feature['properties']['buffer_bounds'] = bounds
     feature['geometry']['coordinates'] = geo['coordinates']
 
     fileName = 'features/' + str(count) + '.json'
