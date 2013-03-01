@@ -23,7 +23,8 @@ except OSError as exception:
 
 for feature in data['features']:
     geo = asShape(feature['geometry'])
-    bounds = json.dumps(geo.buffer(0.001).bounds)
+    bounds = geo.buffer(0.001).bounds
+
     # we want to use simplify() with False param because it's faster
     # but it occasionally deletes all nodes and that upsets mapping()
     try:

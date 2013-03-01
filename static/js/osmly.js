@@ -14,7 +14,6 @@ TODO
     - group oauth functions like iD
         - https://github.com/systemed/iD/blob/master/js/id/oauth.js#L53
         - same idea can be applied to changesets, submitting?, setup, L.toGeoJson
-    - make var o public for consumer key
     - refactor
     - keypress shortcuts
         - W + S, zoom in/out on pointer
@@ -26,6 +25,9 @@ TODO
 */
 
 var osmly = {
+        featuresDir: '',
+        featuresRange: [],
+        featuresExt: '.json',
         writeApi: 'http://api06.dev.openstreetmap.org',
         oauth_secret: 'Mon0UoBHaO3qvfgwWrMkf4QAPM0O4lITd3JRK4ff',
         readApi: 'http://www.overpass-api.de/api/xapi?map?',
@@ -36,12 +38,15 @@ var osmly = {
         center: [0,0],
         zoom: 2,
         demo: false,
-        appendTag: {}, // {'key': 'value', 'key2': 'value2'}, will overwrite existing tag with the same name
         changesetTags: [ // include specifics to the import
             ['created_by', 'osmly'],
             ['osmly:version', '0'],
             ['imagery_used', 'Bing']
-        ]
+        ],
+        renameProperty: {}, // {'MEssy55': 'clean'}, only converts key not value
+        usePropertyAsTag: [], // just keys
+        appendTag: {}, // {'key': 'value'}, will overwrite existing tags
+        consumerKey: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg'
     },
     user = {
         id: -1,
@@ -49,7 +54,7 @@ var osmly = {
     },
     current = {},
     o = {
-        oauth_consumer_key: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg',
+        oauth_consumer_key: osmly.consumerKey,
         oauth_signature_method: 'HMAC-SHA1'};
 
 osmly.set = function(object) {
@@ -255,31 +260,25 @@ function next() {
     notify('getting next');
     $('#tags li').remove();
 
-    var request = '/?next' + '&db=' + osmly.db + '&columns=' + osmly.columns;
-    request += '&time=' + new Date().getTime();
+    var request = osmly.featuresDir + randomFeature() + osmly.featuresExt;
 
     $.ajax({
         type: 'GET',
         url: request
     }).success(function(data) {
         current = {};
-        current = jQuery.parseJSON(data);
+        current.feature = jQuery.parseJSON(data);
         if (osmly.demo) console.log(current);
 
-        current.layer = L.geoJson(current.geo, {
+        current.layer = L.geoJson(current.feature, {
             style: {
                 'color': '#00FF00',
                 'weight': 3,
                 'opacity': 1
             },
             onEachFeature: function (feature, layer) {
-                if (current.geo.type === 'MultiPolygon') {
-                    for (var ayer in layer._layers) {
-                        layer._layers[ayer].editing.enable();
-                    }
-                } else {
-                    layer.editing.enable();
-                }
+                // need to handle multipolygons
+                layer.editing.enable();
             }
         });
 
@@ -431,20 +430,46 @@ function display() {
     equalizeTags();
 }
 
-function populateTags() {
-    for (var append in osmly.appendTag) {
-        current.tags[append] = osmly.appendTag[append];
+function renameProperties() {
+    // converts the feature tag key
+    // ex. NAME -> name
+    // ex. CAT2 -> leisure
+    for (var prop in osmly.renameProperty) {
+        var change = osmly.renameProperty[prop];
+        current.feature.properties[change] = current.feature.properties[prop];
     }
-    current.tags = sortObject(current.tags);
+}
 
-    for (var tag in current.tags) {
-        if (current.tags[tag] !== 'null' && current.tags[tag] !== null) {
+function usePropertiesAsTag() {
+    // only keeps specified properties to be used as tags
+    for (var prop in current.feature.properties) {
+        if (!(prop in osmly.usePropertyAsTag)) {
+            current.feature.properties[prop] = null;
+        }
+    }
+}
+
+function appendTags() {
+    for (var append in osmly.appendTag) {
+        current.feature.properties[append] = osmly.appendTag[append];
+    }
+}
+
+function populateTags() {
+    renameProperties();
+    usePropertiesAsTag();
+    appendTags();
+
+    current.feature.properties = sortObject(current.feature.properties);
+
+    for (var tag in current.feature.properties) {
+        if (current.feature.properties[tag] !== 'null' && current.feature.properties[tag] !== null) {
             $('#tags ul').append(
             '<li>' +
             '<span class="k" spellcheck="false" contenteditable="true">' +
             tag + '</span>' +
             '<span class="v" spellcheck="false" contenteditable="true">' +
-            current.tags[tag] + '</span>' +
+            current.feature.properties[tag] + '</span>' +
             '<span class="minus">-</span>' +
             '</li>');
         }
@@ -682,9 +707,12 @@ function teardown() {
 function getOSM() {
     notify('getting context');
 
+    var bbox = current.feature.properies.buffer_bounds;
+    bbox = 'bbox=' + bbox.join(',');
+
     $.ajax({
         type: 'GET',
-        url: osmly.readApi + current.bbox
+        url: osmly.readApi + bbox
     }).success(function(xml) {
         notify('building context');
 
