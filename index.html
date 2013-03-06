@@ -2,24 +2,25 @@
 <html>
     <head>
         <title>rawr</title>
+        <meta charset='utf-8'> 
 
-        <link rel="stylesheet" href="/static/css/leaflet0.5.css" />
-        <link rel="stylesheet" href="/static/css/leaflet.label.css" />
-        <link rel="stylesheet" href="/static/css/css.css" />
-        <link rel="stylesheet" href="/static/css/reveal.css" />
+        <link rel="stylesheet" href="static/css/leaflet0.5.css" />
+        <link rel="stylesheet" href="static/css/leaflet.label.css" />
+        <link rel="stylesheet" href="static/css/css.css" />
+        <link rel="stylesheet" href="static/css/reveal.css" />
         <!--[if lte IE 8]>
             <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.ie.css" />
         <![endif]-->
-        <script src="/static/js/leaflet0.5.js"></script>
-        <script src="/static/js/leaflet.label.js"></script>
-        <script src="/static/js/jquery1.8.2.min.js"></script>
-        <script src="/static/js/osmly.js"></script>
-        <script src="/static/js/sha.js"></script>
-        <script src="/static/js/ohauth.js"></script>
-        <script src="/static/js/Bing.js"></script>
-        <script src="/static/js/equalize.js"></script>
-        <script src="/static/js/jquery.reveal.js"></script>
-        <script src="/static/js/osm2geo.js"></script>
+        <script src="static/js/leaflet0.5.js"></script>
+        <script src="static/js/leaflet.label.js"></script>
+        <script src="static/js/jquery1.8.2.min.js"></script>
+        <script src="static/js/osmly.js"></script>
+        <script src="static/js/sha.js"></script>
+        <script src="static/js/ohauth.js"></script>
+        <script src="static/js/Bing.js"></script>
+        <script src="static/js/equalize.js"></script>
+        <script src="static/js/jquery.reveal.js"></script>
+        <script src="static/js/osm2geo.js"></script>
     </head>
     <body>
         <ul id="top_right">
@@ -61,9 +62,9 @@
             <a class="close-reveal-modal">&#215;</a>
         </div>
 
-        <img id="d-problem" class="display" src="/static/images/problem_white.svg" />
-        <img id="d-skip" class="display" src="/static/images/skip_white.svg" />
-        <img id="d-submit" class="display" src="/static/images/upload_white.svg" />
+        <img id="d-problem" class="display" src="static/images/problem_white.svg" />
+        <img id="d-skip" class="display" src="static/images/skip_white.svg" />
+        <img id="d-submit" class="display" src="static/images/upload_white.svg" />
 
         <div id="login">Login with your OSM account »</div>
 
@@ -90,16 +91,14 @@
         <div id="map"></div>
         <script type="text/javascript">
             var OSMly = osmly().set({
-                featuresDir: '',
+                featuresDir: 'http://aaronlidman-osmly.s3.amazonaws.com/los-angeles-parks/features/',
                 featuresRange: [0, 1778],
-                demo: false,
-                db: 'laparks',
-                columns: 'name, source',
+                demo: true,
                 center: [34.0577, -118.2409],
                 zoom: 10,
-                appendTag: {
-                    'leisure': 'park'
-                },
+                renameProperty: {'NAME': 'name'},
+                usePropertyAsTag: ['name'],
+                appendTag: {'leisure': 'park'},
                 context: {
                     leisure: ['park', 'nature_reserve', 'stadium', 'golf_course', 'dog_park'],
                     landuse: ['cemetery', 'farm', 'farmland', 'recreation_ground'],

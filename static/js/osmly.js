@@ -33,8 +33,6 @@ var osmly = {
         readApi: 'http://www.overpass-api.de/api/xapi?map?',
         context: {}, // {key: ['some', 'tags'], otherkey: ['more', 'tags']}
         div: 'map',
-        db: '', // corresponds to 'database'.sqlite
-        columns: '',
         center: [0,0],
         zoom: 2,
         demo: false,
@@ -256,18 +254,25 @@ function userDetailsUI() {
         .fadeIn(500);
 }
 
+function randomFeature() {
+    // not checking for done or busy features yet
+    return Math.floor(Math.random() * (osmly.featuresRange[1] - osmly.featuresRange[0] + 1) + osmly.featuresRange[0]);
+}
+
 function next() {
     notify('getting next');
     $('#tags li').remove();
 
-    var request = osmly.featuresDir + randomFeature() + osmly.featuresExt;
+    current = {};
+    current.id = randomFeature();
+    var request = osmly.featuresDir + current.id + osmly.featuresExt;
 
     $.ajax({
         type: 'GET',
         url: request
     }).success(function(data) {
-        current = {};
-        current.feature = jQuery.parseJSON(data);
+        // current.feature = jQuery.parseJSON(data);
+        current.feature = data;
         if (osmly.demo) console.log(current);
 
         current.layer = L.geoJson(current.feature, {
@@ -443,7 +448,8 @@ function renameProperties() {
 function usePropertiesAsTag() {
     // only keeps specified properties to be used as tags
     for (var prop in current.feature.properties) {
-        if (!(prop in osmly.usePropertyAsTag)) {
+        if (osmly.usePropertyAsTag.indexOf(prop) === -1) {
+            console.log(prop);
             current.feature.properties[prop] = null;
         }
     }
@@ -465,13 +471,13 @@ function populateTags() {
     for (var tag in current.feature.properties) {
         if (current.feature.properties[tag] !== 'null' && current.feature.properties[tag] !== null) {
             $('#tags ul').append(
-            '<li>' +
-            '<span class="k" spellcheck="false" contenteditable="true">' +
-            tag + '</span>' +
-            '<span class="v" spellcheck="false" contenteditable="true">' +
-            current.feature.properties[tag] + '</span>' +
-            '<span class="minus">-</span>' +
-            '</li>');
+                '<li>' +
+                '<span class="k" spellcheck="false" contenteditable="true">' +
+                tag + '</span>' +
+                '<span class="v" spellcheck="false" contenteditable="true">' +
+                current.feature.properties[tag] + '</span>' +
+                '<span class="minus">-</span>' +
+                '</li>');
         }
     }
 }
@@ -707,7 +713,7 @@ function teardown() {
 function getOSM() {
     notify('getting context');
 
-    var bbox = current.feature.properies.buffer_bounds;
+    var bbox = current.feature.properties.buffer_bounds;
     bbox = 'bbox=' + bbox.join(',');
 
     $.ajax({
@@ -792,7 +798,7 @@ function filterContext(osmGeoJson) {
 
 function notify(string) {
     if (string !== '') string = '<span>' + string + '</span>';
-    string = '<img src="/static/images/loader.gif" />' + string;
+    string = '<img src="static/images/loader.gif" />' + string;
 
     $('#notify')
         .html(string)
