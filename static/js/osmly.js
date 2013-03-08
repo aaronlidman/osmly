@@ -271,9 +271,15 @@ function next() {
         type: 'GET',
         url: request
     }).success(function(data) {
-        // current.feature = jQuery.parseJSON(data);
+        // data = JSON.parse(data);
         current.feature = data;
         if (osmly.demo) console.log(current);
+
+        // fixes same first/last node issue
+        // fix coming to leaflet any day now
+        if (Object.keys(current.feature.geometry.coordinates).length < 2) {
+            current.feature.geometry.coordinates[0].pop();
+        }
 
         current.layer = L.geoJson(current.feature, {
             style: {
@@ -283,7 +289,9 @@ function next() {
             },
             onEachFeature: function (feature, layer) {
                 // need to handle multipolygons
-                layer.editing.enable();
+                if (Object.keys(current.feature.geometry.coordinates).length < 2) {
+                    layer.editing.enable();
+                }
             }
         });
 
@@ -384,7 +392,8 @@ function setup() {
     });
 
     $('#problem').change(function() {
-        submit($('#problem').val());
+        // not bothering with problem reporting for now
+        // submit($('#problem').val());
     });
 
     $('.k, .v').keypress(function() {
@@ -449,7 +458,6 @@ function usePropertiesAsTag() {
     // only keeps specified properties to be used as tags
     for (var prop in current.feature.properties) {
         if (osmly.usePropertyAsTag.indexOf(prop) === -1) {
-            console.log(prop);
             current.feature.properties[prop] = null;
         }
     }
@@ -669,6 +677,23 @@ function submit(result) {
     $('#d-' + result)
         .show()
         .fadeOut(750);
+}
+
+function s3_post () {
+    $.ajax({
+        type: 'POST',
+        url: 'http://osmly.s3.amazonaws.com/',
+        data: {
+            key: 'testfile.txt',
+            acl: 'public-read',
+            AWSAccessKeyId: 'AKIAJKVMYJQWZA6DWR3A',
+            policy: 'ewogICJleHBpcmF0aW9uIjogIjIwMTQtMDEtMDFUMTI6MDA6MDAuMDAwWiIsCiAgImNvbmRpdGlvbnMiOiBbCiAgICB7ImJ1Y2tldCI6ICJvc21seSIgfSwKICAgIHsiYWNsIjogInB1YmxpYy1yZWFkIiB9LAogICAgWyJjb250ZW50LWxlbmd0aC1yYW5nZSIsIDAsIDEwMjQwXSwKICAgIFsic3RhcnRzLXdpdGgiLCAiJGtleSIsICJkb25lLyJdCiAgXQp9',
+            signature: 'mlmnOg0krm48B9gn9QCiSEZp+4w=',
+            text: 'THIS IS ONLY A TEST'
+        }
+    }).done(function(msg) {
+        console.log(msg);
+    });
 }
 
 function submitToOSM() {
