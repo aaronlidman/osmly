@@ -28,6 +28,7 @@ var osmly = {
         featuresDir: '',
         featuresRange: [],
         featuresExt: '.json',
+        slug: '',
         writeApi: 'http://api06.dev.openstreetmap.org',
         oauth_secret: 'Mon0UoBHaO3qvfgwWrMkf4QAPM0O4lITd3JRK4ff',
         readApi: 'http://www.overpass-api.de/api/xapi?map?',
@@ -654,16 +655,18 @@ function submit(result) {
             var geojson = toGeoJson(current.layer);
             console.log(toOsmChange(geojson, getTags()));
         }
-        next();
+
+        setTimeout(next(), 2500);
     } else {
-        // submission to osmly.com to mark it as done
-        $.ajax({
-            type: 'POST',
-            url: '/',
-            data: {id: current.id, action: result}
-        }).done(function(msg) {
-            // not worth slowing down/complicating over, it's reproducable
-        });
+        var filename = 'done/' + osmly.slug + '-' + current.id + '.json',
+            file = {
+                'user': token('userName'),
+                'time': Math.round((new Date()).getTime() / 1000)
+            };
+
+        $('#s3-filename').attr('value', filename);
+        $('#s3-file').attr('value', JSON.stringify(file));
+        s3_post();
 
         if (result === 'submit') {
             changesetIsOpen(token('changeset_id'), submitToOSM);
@@ -679,18 +682,15 @@ function submit(result) {
         .fadeOut(750);
 }
 
-function s3_post () {
+function s3_post() {
+    // right now we're only using one form, that might change
     $.ajax({
         type: 'POST',
         url: 'http://osmly.s3.amazonaws.com/',
-        data: {
-            key: 'testfile.txt',
-            acl: 'public-read',
-            AWSAccessKeyId: 'AKIAJKVMYJQWZA6DWR3A',
-            policy: 'ewogICJleHBpcmF0aW9uIjogIjIwMTQtMDEtMDFUMTI6MDA6MDAuMDAwWiIsCiAgImNvbmRpdGlvbnMiOiBbCiAgICB7ImJ1Y2tldCI6ICJvc21seSIgfSwKICAgIHsiYWNsIjogInB1YmxpYy1yZWFkIiB9LAogICAgWyJjb250ZW50LWxlbmd0aC1yYW5nZSIsIDAsIDEwMjQwXSwKICAgIFsic3RhcnRzLXdpdGgiLCAiJGtleSIsICJkb25lLyJdCiAgXQp9',
-            signature: 'mlmnOg0krm48B9gn9QCiSEZp+4w=',
-            text: 'THIS IS ONLY A TEST'
-        }
+        contentType: false,
+        cache: false,
+        processData: false,
+        data: new FormData($('#s3-form')[0])
     }).done(function(msg) {
         console.log(msg);
     });

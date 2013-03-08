@@ -124,12 +124,14 @@ a {
     border: 1px solid rgba(255,255,255,0.25);
     padding: 8px 15px;
     cursor: pointer;
+
+    display: none !important;
 }
 
-#submit {background-color: rgba(0, 179, 0, 0.7);}
+#submit {background-color: rgba(0, 144, 0, 1);}
 #submit:hover {background-color: rgba(0, 179, 0, 1);}
 #submit:active {background-color: rgba(0, 109, 0, 1);}
-#skip {background-color: rgba(0, 78, 179, 0.7);}
+#skip {background-color: rgba(0, 69, 144, 1);}
 #skip:hover {background-color: rgba(0, 78, 179, 1);}
 #skip:active {background-color: rgba(0, 49, 109, 1);}
 #problem:hover {background-color: rgba(0, 0, 0, 1);}
@@ -246,6 +248,10 @@ a {
 
 .b {
     font-weight: bold;
+}
+
+#s3-form {
+    display: none;
 }
 
 
