@@ -25,9 +25,8 @@ TODO
 */
 
 var osmly = {
-        featuresDir: '',
+        s3Bucket: '',
         featuresRange: [],
-        featuresExt: '.json',
         slug: '',
         writeApi: 'http://api06.dev.openstreetmap.org',
         oauth_secret: 'Mon0UoBHaO3qvfgwWrMkf4QAPM0O4lITd3JRK4ff',
@@ -266,7 +265,7 @@ function next() {
 
     current = {};
     current.id = randomFeature();
-    var request = osmly.featuresDir + current.id + osmly.featuresExt;
+    var request = 'http://' + osmly.s3Bucket + '.s3.amazonaws.com/' + osmly.slug + '/' +  current.id + '.json';
 
     $.ajax({
         type: 'GET',
@@ -662,10 +661,12 @@ function submit(result) {
             file = {
                 'user': token('userName'),
                 'time': Math.round((new Date()).getTime() / 1000)
-            };
+            },
+            dupe = S3Dupe(filename);
 
         $('#s3-filename').attr('value', filename);
         $('#s3-file').attr('value', JSON.stringify(file));
+
         s3_post();
 
         if (result === 'submit') {
@@ -680,6 +681,19 @@ function submit(result) {
     $('#d-' + result)
         .show()
         .fadeOut(750);
+}
+
+function S3Dupe(filename) {
+    var request = 'http://' + osmly.s3Bucket + '.s3.amazonaws.com/' +  filename;
+
+    $.ajax({
+        type: 'HEAD',
+        url: request
+    }).done(function(msg) {
+        console.log(msg);
+    }).fail(function(msg){
+        console.log(msg);
+    });
 }
 
 function s3_post() {
