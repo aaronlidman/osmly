@@ -1,25 +1,26 @@
 #!/usr/bin/env python
 
-import os
-import errno
 import json
+import sqlite3
 from shapely.geometry import asShape, mapping
 from optparse import OptionParser
 
 parser = OptionParser()
 (options, args) = parser.parse_args()
 
-file = open(args[0])
-data = json.load(file)
+data = open(args[0])
+data = json.load(data)
+
+sqlite = args[0].split('.')
+sqlite = sqlite[0] + '.sqlite'
+
+conn = sqlite3.connect(sqlite)
+c = conn.cursor()
+c.execute("DROP TABLE IF EXISTS osmly")
+c.execute('''CREATE TABLE osmly (count INT, geo TEXT, problem TEXT, done TEXT)''')
+conn.commit()
 
 count = 0
-
-# http://stackoverflow.com/a/5032238
-try:
-    os.makedirs('features')
-except OSError as exception:
-    if exception.errno != errno.EEXIST:
-        raise
 
 for feature in data['features']:
     geo = asShape(feature['geometry'])
@@ -37,9 +38,10 @@ for feature in data['features']:
     feature['properties']['buffer_bounds'] = bounds
     feature['geometry']['coordinates'] = geo['coordinates']
 
-    fileName = 'features/' + str(count) + '.json'
-    f = open(fileName, 'w+')
-    f.write(json.dumps(feature))
-    f.close()
+    statement = "INSERT INTO osmly VALUES(?, ?, ?, ?);"
+    c.execute(statement, (count, json.dumps(feature), '', ''))
+    conn.commit()
 
     count = count + 1
+
+conn.close()
