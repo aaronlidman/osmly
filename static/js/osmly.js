@@ -264,8 +264,8 @@ function next() {
         type: 'GET',
         url: request
     }).success(function(data) {
+        data = JSON.parse(data);
         console.log(data);
-        // data = JSON.parse(data);
         current.feature = data;
         if (osmly.demo) console.log(current);
 
