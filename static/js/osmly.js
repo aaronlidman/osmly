@@ -25,9 +25,8 @@ TODO
 */
 
 var osmly = {
-        s3Bucket: '',
-        featuresRange: [],
-        slug: '',
+        featuresApi: '',
+        db: '',
         writeApi: 'http://api06.dev.openstreetmap.org',
         oauth_secret: 'Mon0UoBHaO3qvfgwWrMkf4QAPM0O4lITd3JRK4ff',
         readApi: 'http://www.overpass-api.de/api/xapi?map?',
@@ -254,23 +253,18 @@ function userDetailsUI() {
         .fadeIn(500);
 }
 
-function randomFeature() {
-    // not checking for done or busy features yet
-    return Math.floor(Math.random() * (osmly.featuresRange[1] - osmly.featuresRange[0] + 1) + osmly.featuresRange[0]);
-}
-
 function next() {
     notify('getting next');
     $('#tags li').remove();
 
     current = {};
-    current.id = randomFeature();
-    var request = 'http://' + osmly.s3Bucket + '.s3.amazonaws.com/' + osmly.slug + '/' +  current.id + '.json';
+    var request = osmly.featuresApi + 'db=' + osmly.db;
 
     $.ajax({
         type: 'GET',
         url: request
     }).success(function(data) {
+        console.log(data);
         // data = JSON.parse(data);
         current.feature = data;
         if (osmly.demo) console.log(current);
@@ -655,20 +649,9 @@ function submit(result) {
             console.log(toOsmChange(geojson, getTags()));
         }
 
-        setTimeout(next(), 2500);
+        next();
     } else {
-        var filename = 'done/' + osmly.slug + '-' + current.id + '.json',
-            file = {
-                'user': token('userName'),
-                'time': Math.round((new Date()).getTime() / 1000)
-            },
-            dupe = S3Dupe(filename);
-
-        $('#s3-filename').attr('value', filename);
-        $('#s3-file').attr('value', JSON.stringify(file));
-
-        s3_post();
-
+        // do stuff
         if (result === 'submit') {
             changesetIsOpen(token('changeset_id'), submitToOSM);
         } else {
@@ -681,33 +664,6 @@ function submit(result) {
     $('#d-' + result)
         .show()
         .fadeOut(750);
-}
-
-function S3Dupe(filename) {
-    var request = 'http://' + osmly.s3Bucket + '.s3.amazonaws.com/' +  filename;
-
-    $.ajax({
-        type: 'HEAD',
-        url: request
-    }).done(function(msg) {
-        console.log(msg);
-    }).fail(function(msg){
-        console.log(msg);
-    });
-}
-
-function s3_post() {
-    // right now we're only using one form, that might change
-    $.ajax({
-        type: 'POST',
-        url: 'http://osmly.s3.amazonaws.com/',
-        contentType: false,
-        cache: false,
-        processData: false,
-        data: new FormData($('#s3-form')[0])
-    }).done(function(msg) {
-        console.log(msg);
-    });
 }
 
 function submitToOSM() {
