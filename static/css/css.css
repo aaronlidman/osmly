@@ -124,8 +124,6 @@ a {
     border: 1px solid rgba(255,255,255,0.25);
     padding: 8px 15px;
     cursor: pointer;
-
-    display: none !important;
 }
 
 #submit {background-color: rgba(0, 144, 0, 1);}
@@ -248,10 +246,6 @@ a {
 
 .b {
     font-weight: bold;
-}
-
-#s3-form {
-    display: none;
 }
 
 

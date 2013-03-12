@@ -267,6 +267,7 @@ function next() {
         data = JSON.parse(data);
         console.log(data);
         current.feature = data;
+        current.id = current.feature.properties.id;
         if (osmly.demo) console.log(current);
 
         // fixes same first/last node issue
@@ -386,8 +387,7 @@ function setup() {
     });
 
     $('#problem').change(function() {
-        // not bothering with problem reporting for now
-        // submit($('#problem').val());
+        submit($('#problem').val());
     });
 
     $('.k, .v').keypress(function() {
@@ -644,14 +644,28 @@ function submit(result) {
     teardown();
 
     if (osmly.demo) {
+        console.log(current);
         if (result === 'submit') {
             var geojson = toGeoJson(current.layer);
             console.log(toOsmChange(geojson, getTags()));
         }
-
+        $.ajax({
+            type: 'POST',
+            url: osmly.featuresApi + 'db=' + osmly.db,
+            data: {db: osmly.db, id: current.id, problem: result}
+        }).done(function(msg) {
+            // not worth slowing down/complicating over, it's reproducable
+        });
         next();
     } else {
-        // do stuff
+        $.ajax({
+            type: 'POST',
+            url: osmly.featuresApi + 'db=' + osmly.db,
+            data: {db: osmly.db, id: current.id, problem: result}
+        }).done(function(msg) {
+            // not worth slowing down/complicating over, it's reproducable
+        });
+
         if (result === 'submit') {
             changesetIsOpen(token('changeset_id'), submitToOSM);
         } else {
