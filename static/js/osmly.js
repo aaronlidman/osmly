@@ -652,6 +652,7 @@ function submit(result) {
         $.ajax({
             type: 'POST',
             url: osmly.featuresApi + 'db=' + osmly.db,
+            crossDomain: true,
             data: {db: osmly.db, id: current.id, problem: result}
         }).done(function(msg) {
             // not worth slowing down/complicating over, it's reproducable
@@ -661,6 +662,7 @@ function submit(result) {
         $.ajax({
             type: 'POST',
             url: osmly.featuresApi + 'db=' + osmly.db,
+            crossDomain: true,
             data: {db: osmly.db, id: current.id, problem: result}
         }).done(function(msg) {
             // not worth slowing down/complicating over, it's reproducable
