@@ -35,6 +35,7 @@ for feature in data['features']:
         simple = geo.simplify(0.0001, True)
         geo = mapping(simple)
 
+    feature['properties']['id'] = count
     feature['properties']['buffer_bounds'] = bounds
     feature['geometry']['coordinates'] = geo['coordinates']
 

@@ -1,4 +1,11 @@
 <!doctype html>
+<!--
+ ______     ______     __    __     __         __  __    
+/\  __ \   /\  ___\   /\ "-./  \   /\ \       /\ \_\ \   
+\ \ \/\ \  \ \___  \  \ \ \-./\ \  \ \ \____  \ \____ \  
+ \ \_____\  \/\_____\  \ \_\ \ \_\  \ \_____\  \/\_____\ 
+  \/_____/   \/_____/   \/_/  \/_/   \/_____/   \/_____/ 
+-->
 <html>
     <head>
         <title>rawr</title>
@@ -91,9 +98,9 @@
         <div id="map"></div>
         <script type="text/javascript">
             var OSMly = osmly().set({
-                featuresApi: 'http://127.0.0.1:4000/?',
+                featuresApi: 'http://127.0.0.1:5000/?',
                 db: 'parks-5',
-                demo: true,
+                demo: false,
                 center: [34.0577, -118.2409],
                 zoom: 10,
                 renameProperty: {'NAME': 'name'},
