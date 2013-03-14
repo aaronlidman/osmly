@@ -815,7 +815,7 @@ function notify(string) {
 
     $('#notify')
         .html(string)
-        .show();
+        .fadeIn(100);
 
     // don't forget to hide #notify later
     // $('#notify').fadeOut(250);
