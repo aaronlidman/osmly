@@ -258,7 +258,9 @@ function next() {
     $('#tags li').remove();
 
     current = {};
-    var request = osmly.featuresApi + 'db=' + osmly.db;
+    // var request = osmly.featuresApi + 'db=' + osmly.db;
+    var request = osmly.featuresApi + 'db=' + osmly.db + '&id=1047';
+    // var request = osmly.featuresApi + 'db=' + osmly.db + '&id=1108';
 
     $.ajax({
         type: 'GET',
@@ -272,7 +274,14 @@ function next() {
 
         // fixes same first/last node issue
         // fix coming to leaflet any day now
-        if (Object.keys(current.feature.geometry.coordinates).length < 2) {
+        if (current.feature.geometry.coordinates.length > 1) {
+            // multipolygon
+            var aa = current.feature.geometry.coordinates.length;
+            while (aa--) {
+                current.feature.geometry.coordinates[aa][0].pop();
+            }
+        } else {
+            // regular polygon
             current.feature.geometry.coordinates[0].pop();
         }
 
@@ -285,7 +294,12 @@ function next() {
             onEachFeature: function (feature, layer) {
                 // need to handle multipolygons
                 if (Object.keys(current.feature.geometry.coordinates).length < 2) {
+                    // single polygon, geometry.type is not reliable
                     layer.editing.enable();
+                } else {
+                    for (var ayer in layer._layers) {
+                        layer._layers[ayer].editing.enable();
+                    }
                 }
             }
         });
@@ -382,7 +396,14 @@ function changesetIsOpen(id, callback) {
 function setup() {
     populateTags();
 
+    if (osmly.demo) {
+        var geojson = toGeoJson(current.layer);
+        console.log(geojson);
+        console.log(toOsmChange(geojson, getTags()));
+    }
+
     $('#skip, #submit').click(function() {
+        console.log(toGeoJson(current.layer));
         submit(this.id);
     });
 
@@ -560,6 +581,7 @@ function toGeoJson(target) {
         }
     }
 }
+osmly.toGeoJson = toGeoJson(current.layer);
 
 function latLngToCoords(latlng) {
     var lng = Math.round(latlng.lng*1000000)/1000000;
@@ -590,24 +612,57 @@ function getTags() {
     return tags;
 }
 
-// geojson object, tags [[k,v],[k,v], [k,v]]
+// geojson object, tags [[k,v],[k,v],[k,v]]
 // returns xml string
 function toOsmChange(geojson, tags) {
-    // if geometries > 1 the same tags are added to each way
-    // relations? anything with more than one geometry to append w/ all ways in it
+    // this is all up in the air and very limited to this specific toGeoJSON output
+    // need to figure out holes in polygons/multipolygons
+    // actual leaflet toGeoJSON is coming?
+        // https://github.com/Leaflet/Leaflet/pull/1462
     var osmChange = '<osmChange version="0.6" generator="osmly"><create>',
         nodes = '',
         ways = '',
-        count = -1,
-        i = geojson.geometries.length;
+        relations = '',
+        count = -1;
 
-    while (i--) {
-        var nds = [],
-        j = geojson.geometries[i].coordinates[0].length;
+    if (geojson.geometries[0].geometries && geojson.geometries[0].geometries.length > 1) {
+        // relations aren't ment to be comprehensive, just passable to be editted in JOSM
+        var a = geojson.geometries[0].geometries.length,
+            wayz = [],
+            coords = [];
 
-        while (j--) {
-            var lon = geojson.geometries[i].coordinates[0][j][0],
-                lat = geojson.geometries[i].coordinates[0][j][1];
+        relations += '<relation id="' + count + '" changeset="' + token('changeset_id') + '">';
+        count--;
+
+        while (a--) {
+            relations += '<member type="way" ref="' + count + '" role="outer" />';
+            wayz.push(count);
+            coords.push(geojson.geometries[0].geometries[a].coordinates[0]);
+            count--;
+        }
+
+        for (var tag in tags) {
+            relations += '<tag k="' + tags[tag][0] + '" v="' + tags[tag][1] + '"/>';
+        }
+
+        relations += '<tag k="type" v="multipolygon" />';
+        relations += '</relation>';
+    }
+
+    if (relations === '') {
+        // var j = geojson.geometries[i].coordinates[0].length;
+        var coords = [geojson.geometries[0].coordinates[0]];
+    }
+
+    var b = coords.length;
+    while (b--) {
+        var c = coords[b].length,
+            nds = [];
+
+        while (c--) {
+            var lon = coords[b][c][0],
+                lat = coords[b][c][1];
+
             nodes += '<node id="' + count + '" lat="' + lat + '" lon="' + lon +
             '" changeset="' + token('changeset_id') + '"/>';
                 // might need version="0"
@@ -615,25 +670,34 @@ function toOsmChange(geojson, tags) {
             count--;
         }
 
+        if (relations === '') {
+            ways += '<way id="' + count + '" changeset="' + token('changeset_id') + '">';
+        } else {
+            ways += '<way id="' + wayz[b] + '" changeset="' + token('changeset_id') + '">';
+            // the order on this isn't significant because they all use the same tags in the end
+        }
+
         // wrap around node for polygons, check geojson feature type in the future
         nds.push(nds[0]);
 
-        ways += '<way id="' + count + '" changeset="' + token('changeset_id') + '">';
-
-        var k = nds.length;
-        while (k--) {
-            ways += '<nd ref="' + nds[k] + '"/>';
+        var d = nds.length;
+        console.log(nds);
+        console.log(d);
+        while (d--) {
+            ways += '<nd ref="' + nds[d] + '"/>';
         }
 
-        for (var tag in tags) {
-            ways += '<tag k="' + tags[tag][0] + '" v="' + tags[tag][1] + '"/>';
+        if (relations === '') {
+            for (var tag in tags) {
+                ways += '<tag k="' + tags[tag][0] + '" v="' + tags[tag][1] + '"/>';
+            }
         }
 
         ways += '</way>';
         count--;
     }
 
-    osmChange += nodes + ways;
+    osmChange += nodes + ways +  relations;
     osmChange += '</create></osmChange>';
 
     return osmChange;
@@ -659,7 +723,7 @@ function submit(result) {
         });
         next();
     } else {
-        if (result !== 'skip') {
+        if (result != 'skip') {
             $.ajax({
                 type: 'POST',
                 url: osmly.featuresApi + 'db=' + osmly.db,
@@ -739,7 +803,7 @@ function getOSM() {
         osmly.osmContext = osm2geo(xml);
         osmly.simpleContext = filterContext(osmly.osmContext);
 
-        // console.log(osmly.osmContext);
+        console.log(osmly.osmContext);
         // console.log(osmly.simpleContext);
 
         current.dataLayer = L.geoJson(osmly.simpleContext, {
