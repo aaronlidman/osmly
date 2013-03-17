@@ -396,12 +396,6 @@ function changesetIsOpen(id, callback) {
 function setup() {
     populateTags();
 
-    if (osmly.demo) {
-        var geojson = toGeoJson(current.layer);
-        console.log(geojson);
-        console.log(toOsmChange(geojson, getTags()));
-    }
-
     $('#skip, #submit').click(function() {
         console.log(toGeoJson(current.layer));
         submit(this.id);
@@ -681,8 +675,6 @@ function toOsmChange(geojson, tags) {
         nds.push(nds[0]);
 
         var d = nds.length;
-        console.log(nds);
-        console.log(d);
         while (d--) {
             ways += '<nd ref="' + nds[d] + '"/>';
         }
@@ -803,7 +795,7 @@ function getOSM() {
         osmly.osmContext = osm2geo(xml);
         osmly.simpleContext = filterContext(osmly.osmContext);
 
-        console.log(osmly.osmContext);
+        // console.log(osmly.osmContext);
         // console.log(osmly.simpleContext);
 
         current.dataLayer = L.geoJson(osmly.simpleContext, {
