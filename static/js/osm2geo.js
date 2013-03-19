@@ -78,8 +78,6 @@ var osm2geo = function(osm) {
     }
 
     function buildRelations() {
-        // features, multipolygons halfway done
-        // done, a list of feature refs that will finish the features and the multipolygons they belong to
         var relations = xml.getElementsByTagName('relation'),
             r = relations.length,
             features = [],
@@ -90,28 +88,12 @@ var osm2geo = function(osm) {
             var tags = [],
                 type = false;
 
-            // don't know it's a multipolygon for sure, check the type
-            // or enforce so it's just type=multipolygon we're parsing
-                // probably simpler
             feature = getFeature(relations[r], "MultiPolygon");
 
             if (feature.properties.type == 'multipolygon') {
                 // other types require more work that I don't have time for right now
 
                 feature.geometry.coordinates.push([]);
-
-                // // probably going away
-                // // if we can get actual multipolygons working this can go away
-                // // if not, then we're just going to copy tags to all child ways/nodes
-                // var relTags = relations[r].getElementsByTagName('tag'),
-                //     x = relTags.length;
-                // while (x--) {
-                //     if (relTags[x].getAttribute('k') == 'type') {
-                //         type = relTags[x].getAttribute('k');
-                //     } else {
-                //         tags.push([relTags[x].getAttribute('k'), relTags[x].getAttribute('v')]);
-                //     }
-                // }
 
                 var members = relations[r].getElementsByTagName('member'),
                     m = members.length;
@@ -121,8 +103,6 @@ var osm2geo = function(osm) {
 
                     // .getAttribute('role') stuff would go somewhere around here
                 }
-
-                console.log(feature);
 
                 delete feature.properties.type;
                 features[count] = feature;
@@ -136,11 +116,26 @@ var osm2geo = function(osm) {
         };
     }
 
-    var relational = buildRelations();
-    console.log(relational);
+    // Points
+    var points = nodesCache.withTags,
+        p = points.length;
 
-    var ways = xml.getElementsByTagName('way');
+    while (p--) {
+        var feature = getFeature(points[p], "Point");
 
+        feature.geometry.coordinates = [
+            +points[p].getAttribute('lon'),
+            +points[p].getAttribute('lat')
+        ];
+
+        geo.features.push(feature);
+    }
+
+    // MultiPolygons, mostly in buildRelations()
+    var relational = buildRelations(),
+        ways = xml.getElementsByTagName('way');
+
+    // Polygons/LineStrings
     var w = ways.length;
     while (w--) {
         var feature = {},
@@ -166,10 +161,16 @@ var osm2geo = function(osm) {
         }
 
         if (relational.done[ways[w].getAttribute('id')]) {
-            var relCount = relational.done[ways[w].getAttribute('id')];
-            console.log('relational.features[relCount].geometry');
-            console.log(relational.features[relCount].geometry);
-            relational.features[relCount].geometry.coordinates[0].push(feature.geometry.coordinates);
+            var relWay = relational.done[ways[w].getAttribute('id')];
+            relational.features[relWay].geometry.coordinates[0].push(feature.geometry.coordinates);
+
+            // transfer the way (polygon) properties over to the relation (multipolygon)
+            // no overwriting, relation tags take precedence
+            for (var wayProp in feature.properties) {
+                if (!relational.features[relWay].properties[wayProp]) {
+                    relational.features[relWay].properties[wayProp] = feature.properties[wayProp];
+                }
+            }
         } else {
             geo.features.push(feature);
         }
@@ -177,23 +178,8 @@ var osm2geo = function(osm) {
 
     var r = relational.features.length;
     while (r--) {
-        console.log(relational.features[r]);
         geo.features.push(relational.features[r]);
     }
     
-    var points = nodesCache.withTags,
-        p = points.length;
-
-    while (p--) {
-        var feature = getFeature(points[p], "Point");
-
-        feature.geometry.coordinates = [
-            points[p].getAttribute('lon'),
-            points[p].getAttribute('lat')
-        ];
-
-        geo.features.push(feature);
-    }
-
     return geo;
 };
