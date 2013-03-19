@@ -31,6 +31,11 @@ var osm2geo = function(osm) {
 
     geo.bbox = getBounds(xml.getElementsByTagName('bounds'));
 
+    // http://stackoverflow.com/a/1830844
+    function isNumber(n) {
+        return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+
     // set properties for a feature
     function setProps(element){
         var properties = {},
@@ -38,7 +43,11 @@ var osm2geo = function(osm) {
             t = tags.length;
 
         while (t--) {
-            properties[tags[t].getAttribute('k')] = tags[t].getAttribute('v');
+            if (isNumber(tags[t].getAttribute('v'))) {
+                properties[tags[t].getAttribute('k')] = +tags[t].getAttribute('v');
+            } else {
+                properties[tags[t].getAttribute('k')] = tags[t].getAttribute('v');
+            }
         }
 
         return properties;
@@ -65,8 +74,10 @@ var osm2geo = function(osm) {
         while (n--) {
             var tags = nodes[n].getElementsByTagName('tag');
 
-            coords[nodes[n].getAttribute('id')] =
-                [nodes[n].getAttribute('lon'), nodes[n].getAttribute('lat')];
+            coords[nodes[n].getAttribute('id')] = [
+                +nodes[n].getAttribute('lon'),
+                +nodes[n].getAttribute('lat')
+            ];
 
             if (tags.length) withTags.push(nodes[n]);
         }
