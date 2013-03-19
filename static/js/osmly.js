@@ -258,10 +258,10 @@ function next() {
     $('#tags li').remove();
 
     current = {};
-    var request = osmly.featuresApi + 'db=' + osmly.db;
+    // var request = osmly.featuresApi + 'db=' + osmly.db;
     // var request = osmly.featuresApi + 'db=' + osmly.db + '&id=1047';
     // var request = osmly.featuresApi + 'db=' + osmly.db + '&id=1108';
-    // var request = osmly.featuresApi + 'db=' + osmly.db + '&id=110';
+    var request = osmly.featuresApi + 'db=' + osmly.db + '&id=502';
 
     $.ajax({
         type: 'GET',
@@ -851,23 +851,24 @@ function filterContext(osmGeoJson) {
     var features = osmGeoJson.features,
         geo = {
             'type' : 'FeatureCollection',
-            'features' : []
-        },
+            'features' : []},
         i = features.length;
 
     while (i--) {
-        var feature = features[i];
+        var feature = features[i],
+            match = false;
         
-        // too terse
         for (var key in feature.properties) {
             if (key in osmly.context &&
-                osmly.context[key].indexOf(feature.properties[key]) > -1) {
-                    geo.features.push(feature);
-            }
+                osmly.context[key].indexOf(feature.properties[key]) > -1 &&
+                !match) {
 
-            if (!Object.keys(osmly.context).length) {
-                geo.features.push(feature);
+                match = true;
             }
+        }
+
+        if (match || !Object.keys(osmly.context).length) {
+            geo.features.push(feature);
         }
     }
 
