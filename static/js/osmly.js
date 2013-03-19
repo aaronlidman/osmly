@@ -258,9 +258,10 @@ function next() {
     $('#tags li').remove();
 
     current = {};
-    // var request = osmly.featuresApi + 'db=' + osmly.db;
-    var request = osmly.featuresApi + 'db=' + osmly.db + '&id=1047';
+    var request = osmly.featuresApi + 'db=' + osmly.db;
+    // var request = osmly.featuresApi + 'db=' + osmly.db + '&id=1047';
     // var request = osmly.featuresApi + 'db=' + osmly.db + '&id=1108';
+    // var request = osmly.featuresApi + 'db=' + osmly.db + '&id=110';
 
     $.ajax({
         type: 'GET',
@@ -282,6 +283,10 @@ function next() {
             }
         } else {
             // regular polygon
+            if (current.feature.geometry.type == "MultiPolygon") {
+                // fixes some invalid json from ogr
+                current.feature.geometry.type = 'Polygon';
+            }
             current.feature.geometry.coordinates[0].pop();
         }
 
@@ -796,7 +801,7 @@ function getOSM() {
         osmly.simpleContext = filterContext(osmly.osmContext);
 
         // console.log(osmly.osmContext);
-        // console.log(osmly.simpleContext);
+        console.log(osmly.simpleContext);
 
         current.dataLayer = L.geoJson(osmly.simpleContext, {
             style: {
@@ -858,6 +863,10 @@ function filterContext(osmGeoJson) {
             if (key in osmly.context &&
                 osmly.context[key].indexOf(feature.properties[key]) > -1) {
                     geo.features.push(feature);
+            }
+
+            if (!Object.keys(osmly.context).length) {
+                geo.features.push(feature);
             }
         }
     }
