@@ -258,37 +258,43 @@ function next() {
     $('#tags li').remove();
 
     current = {};
-    // var request = osmly.featuresApi + 'db=' + osmly.db;
+    var request = osmly.featuresApi + 'db=' + osmly.db;
     // var request = osmly.featuresApi + 'db=' + osmly.db + '&id=1047';
     // var request = osmly.featuresApi + 'db=' + osmly.db + '&id=1108';
-    var request = osmly.featuresApi + 'db=' + osmly.db + '&id=502';
+    // var request = osmly.featuresApi + 'db=' + osmly.db + '&id=810';
 
     $.ajax({
         type: 'GET',
         url: request
     }).success(function(data) {
         data = JSON.parse(data);
-        console.log(data);
         current.feature = data;
         current.id = current.feature.properties.id;
-        if (osmly.demo) console.log(current);
+
 
         // fixes same first/last node issue
         // fix coming to leaflet any day now
+        // --- delete w/ leaflet 0.5.1
+        // this is one hell of a mess but I really don't care
         if (current.feature.geometry.coordinates.length > 1) {
-            // multipolygon
-            var aa = current.feature.geometry.coordinates.length;
-            while (aa--) {
-                current.feature.geometry.coordinates[aa][0].pop();
+            if (current.feature.geometry.type == "MultiPolygon") {
+                var aa = current.feature.geometry.coordinates.length;
+                while (aa--) {
+                    current.feature.geometry.coordinates[aa][0].pop();
+                }
+            } else if (current.feature.geometry.type == "Polygon"){
+                var bb = current.feature.geometry.coordinates.length;
+                while (bb--) {
+                    current.feature.geometry.coordinates[bb].pop();
+                }
             }
         } else {
-            // regular polygon
-            if (current.feature.geometry.type == "MultiPolygon") {
-                // fixes some invalid json from ogr
-                current.feature.geometry.type = 'Polygon';
-            }
             current.feature.geometry.coordinates[0].pop();
         }
+        // ^^ --- to delete w/ leaflet 0.5.1
+
+
+        if (osmly.demo) console.log(current);
 
         current.layer = L.geoJson(current.feature, {
             style: {
@@ -297,14 +303,12 @@ function next() {
                 'opacity': 1
             },
             onEachFeature: function (feature, layer) {
-                // need to handle multipolygons
-                if (Object.keys(current.feature.geometry.coordinates).length < 2) {
-                    // single polygon, geometry.type is not reliable
-                    layer.editing.enable();
-                } else {
+                if (current.feature.geometry.type == 'MultiPolygon') {
                     for (var ayer in layer._layers) {
                         layer._layers[ayer].editing.enable();
                     }
+                } else {
+                    layer.editing.enable();
                 }
             }
         });
@@ -706,18 +710,23 @@ function submit(result) {
 
     if (osmly.demo) {
         console.log(current);
+
         if (result === 'submit') {
             var geojson = toGeoJson(current.layer);
             console.log(toOsmChange(geojson, getTags()));
         }
-        $.ajax({
-            type: 'POST',
-            url: osmly.featuresApi + 'db=' + osmly.db,
-            crossDomain: true,
-            data: {db: osmly.db, id: current.id, problem: result, user: user.name}
-        }).done(function(msg) {
-            // not worth slowing down/complicating over, it's reproducable
-        });
+
+        if (result != 'skip') {
+            $.ajax({
+                type: 'POST',
+                url: osmly.featuresApi + 'db=' + osmly.db,
+                crossDomain: true,
+                data: {db: osmly.db, id: current.id, problem: result, user: user.name}
+            }).done(function(msg) {
+                // not worth slowing down/complicating over, it's reproducable
+            });
+        }
+
         next();
     } else {
         if (result != 'skip') {
@@ -800,8 +809,8 @@ function getOSM() {
         osmly.osmContext = osm2geo(xml);
         osmly.simpleContext = filterContext(osmly.osmContext);
 
-        // console.log(osmly.osmContext);
-        console.log(osmly.simpleContext);
+        console.log(JSON.stringify(osmly.osmContext));
+        console.log(JSON.stringify(osmly.simpleContext));
 
         current.dataLayer = L.geoJson(osmly.simpleContext, {
             style: {
