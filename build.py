@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# converts a geojson file, from ogr2ogr, to a sqlite database with individuals features as rows
+# run: python build.py file.geojson
+# creates a sqlite db, named file.sqlite
+
 import json
 import sqlite3
 from shapely.geometry import asShape, mapping
@@ -17,7 +21,7 @@ sqlite = sqlite[0] + '.sqlite'
 conn = sqlite3.connect(sqlite)
 c = conn.cursor()
 c.execute("DROP TABLE IF EXISTS osmly")
-c.execute('''CREATE TABLE osmly (count INT, geo TEXT, problem TEXT, done TEXT)''')
+c.execute('''CREATE TABLE osmly (id INT, geo TEXT, osc TEXT, problem TEXT, done TEXT)''')
 conn.commit()
 
 count = 0
@@ -40,7 +44,7 @@ for feature in data['features']:
     feature['geometry']['coordinates'] = geo['coordinates']
 
     statement = "INSERT INTO osmly VALUES(?, ?, ?, ?);"
-    c.execute(statement, (count, json.dumps(feature), '', ''))
+    c.execute(statement, (id, json.dumps(feature), '', ''))
     conn.commit()
 
     count = count + 1
