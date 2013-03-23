@@ -21,7 +21,8 @@ TODO
     - eventually, decouple ui
     - crossbrowser test ui
         - especially modal and tag stuff
-    - reset button + functionality
+    - reset button functionality
+    - remote JOSM file functionality
 */
 
 var osmly = {
@@ -257,8 +258,8 @@ function next() {
     notify('getting next');
     $('#tags li').remove();
 
-    current = {};
-    var request = osmly.featuresApi + 'db=' + osmly.db;
+    var current = {},
+        request = osmly.featuresApi + 'db=' + osmly.db;
     // var request = osmly.featuresApi + 'db=' + osmly.db + '&id=1047';
     // var request = osmly.featuresApi + 'db=' + osmly.db + '&id=1108';
     // var request = osmly.featuresApi + 'db=' + osmly.db + '&id=810';
@@ -296,26 +297,33 @@ function next() {
 
         if (osmly.demo) console.log(current);
 
-        current.layer = L.geoJson(current.feature, {
-            style: {
-                'color': '#00FF00',
-                'weight': 3,
-                'opacity': 1
-            },
-            onEachFeature: function (feature, layer) {
-                if (current.feature.geometry.type == 'MultiPolygon') {
-                    for (var ayer in layer._layers) {
-                        layer._layers[ayer].editing.enable();
-                    }
-                } else {
-                    layer.editing.enable();
-                }
-            }
-        });
+        osmly.current = current;
 
-        map.fitBounds(current.layer.getBounds());
-        getOSM();
+        setFeatureLayer();
     });
+}
+
+function setFeatureLayer(featureJson) {
+    osmly.current.layer = L.geoJson(osmly.current.feature, {
+        style: {
+            'color': '#00FF00',
+            'weight': 3,
+            'opacity': 1
+        },
+        onEachFeature: function (feature, layer) {
+            if (osmly.current.feature.geometry.type == 'MultiPolygon') {
+                for (var ayer in layer._layers) {
+                    layer._layers[ayer].editing.enable();
+                }
+            } else {
+                layer.editing.enable();
+            }
+        }
+    });
+
+    map.fitBounds(osmly.current.layer.getBounds());
+
+    getOSM();
 }
 
 function newChangesetXml() {
@@ -406,7 +414,7 @@ function setup() {
     populateTags();
 
     $('#skip, #submit').click(function() {
-        console.log(toGeoJson(current.layer));
+        console.log(toGeoJson(osmly.current.layer));
         submit(this.id);
     });
 
@@ -449,12 +457,13 @@ function setup() {
 
     });
 
+    console.log(window);
     display();
 }
 
 function display() {
-    current.layer.addTo(map);
-    current.dataLayer.addTo(map);
+    osmly.current.layer.addTo(map);
+    osmly.current.dataLayer.addTo(map);
 
     $('#notify, #login').fadeOut(250);
     $('#top-right, #bottom-right, #action-block, #tags').fadeIn(500);
@@ -468,22 +477,22 @@ function renameProperties() {
     // ex. CAT2 -> leisure
     for (var prop in osmly.renameProperty) {
         var change = osmly.renameProperty[prop];
-        current.feature.properties[change] = current.feature.properties[prop];
+        osmly.current.feature.properties[change] = osmly.current.feature.properties[prop];
     }
 }
 
 function usePropertiesAsTag() {
     // only keeps specified properties to be used as tags
-    for (var prop in current.feature.properties) {
+    for (var prop in osmly.current.feature.properties) {
         if (osmly.usePropertyAsTag.indexOf(prop) === -1) {
-            current.feature.properties[prop] = null;
+            osmly.current.feature.properties[prop] = null;
         }
     }
 }
 
 function appendTags() {
     for (var append in osmly.appendTag) {
-        current.feature.properties[append] = osmly.appendTag[append];
+        osmly.current.feature.properties[append] = osmly.appendTag[append];
     }
 }
 
@@ -492,16 +501,16 @@ function populateTags() {
     usePropertiesAsTag();
     appendTags();
 
-    current.feature.properties = sortObject(current.feature.properties);
+    osmly.current.feature.properties = sortObject(osmly.current.feature.properties);
 
-    for (var tag in current.feature.properties) {
-        if (current.feature.properties[tag] !== 'null' && current.feature.properties[tag] !== null) {
+    for (var tag in osmly.current.feature.properties) {
+        if (osmly.current.feature.properties[tag] !== 'null' && osmly.current.feature.properties[tag] !== null) {
             $('#tags ul').append(
                 '<li>' +
                 '<span class="k" spellcheck="false" contenteditable="true">' +
                 tag + '</span>' +
                 '<span class="v" spellcheck="false" contenteditable="true">' +
-                current.feature.properties[tag] + '</span>' +
+                osmly.current.feature.properties[tag] + '</span>' +
                 '<span class="minus">-</span>' +
                 '</li>');
         }
@@ -584,7 +593,6 @@ function toGeoJson(target) {
         }
     }
 }
-osmly.toGeoJson = toGeoJson(current.layer);
 
 function latLngToCoords(latlng) {
     var lng = Math.round(latlng.lng*1000000)/1000000;
@@ -709,10 +717,10 @@ function submit(result) {
     teardown();
 
     if (osmly.demo) {
-        console.log(current);
+        console.log(osmly.current);
 
         if (result === 'submit') {
-            var geojson = toGeoJson(current.layer);
+            var geojson = toGeoJson(osmly.current.layer);
             console.log(toOsmChange(geojson, getTags()));
         }
 
@@ -721,7 +729,7 @@ function submit(result) {
                 type: 'POST',
                 url: osmly.featuresApi + 'db=' + osmly.db,
                 crossDomain: true,
-                data: {db: osmly.db, id: current.id, problem: result, user: user.name}
+                data: {db: osmly.db, id: osmly.current.id, problem: result, user: user.name}
             }).done(function(msg) {
                 // not worth slowing down/complicating over, it's reproducable
             });
@@ -734,7 +742,7 @@ function submit(result) {
                 type: 'POST',
                 url: osmly.featuresApi + 'db=' + osmly.db,
                 crossDomain: true,
-                data: {db: osmly.db, id: current.id, problem: result, user: user.name}
+                data: {db: osmly.db, id: osmly.current.id, problem: result, user: user.name}
             }).done(function(msg) {
                 // not worth slowing down/complicating over, it's reproducable
             });
@@ -765,7 +773,7 @@ function submitToOSM() {
 
     var url = osmly.writeApi + '/api/0.6/changeset/' + id + '/upload',
         token_secret = token('secret'),
-        geojson = toGeoJson(current.layer),
+        geojson = toGeoJson(osmly.current.layer),
         osmChange = toOsmChange(geojson, getTags());
 
     notify('uploading to OSM');
@@ -789,14 +797,14 @@ function teardown() {
     $('#action-block, #tags, #bottom-right').hide();
     map.closePopup();
     $('#problem').val('problem'); // resets problem menu
-    map.removeLayer(current.layer);
-    map.removeLayer(current.dataLayer);
+    map.removeLayer(osmly.current.layer);
+    map.removeLayer(osmly.current.dataLayer);
 }
 
 function getOSM() {
     notify('getting context');
 
-    var bbox = current.feature.properties.buffer_bounds;
+    var bbox = osmly.current.feature.properties.buffer_bounds;
     bbox = 'bbox=' + bbox.join(',');
 
     $.ajax({
@@ -812,7 +820,7 @@ function getOSM() {
         console.log(JSON.stringify(osmly.osmContext));
         console.log(JSON.stringify(osmly.simpleContext));
 
-        current.dataLayer = L.geoJson(osmly.simpleContext, {
+        osmly.current.dataLayer = L.geoJson(osmly.simpleContext, {
             style: {
                 'color': '#FFFF00',
                 'weight': 3,
