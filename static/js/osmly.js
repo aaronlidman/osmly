@@ -136,6 +136,10 @@ osmly.go = function() {
             $('#notify').fadeOut(250);
         });
     });
+
+    $('#reset').click(function() {
+        reset();
+    });
 };
 
 // next 2 functions from iD: https://github.com/systemed/iD/blob/master/js/id/oauth.js
@@ -300,10 +304,11 @@ function next() {
         osmly.current = current;
 
         setFeatureLayer();
+        getSetOSM();
     });
 }
 
-function setFeatureLayer(featureJson) {
+function setFeatureLayer() {
     osmly.current.layer = L.geoJson(osmly.current.feature, {
         style: {
             'color': '#00FF00',
@@ -322,8 +327,14 @@ function setFeatureLayer(featureJson) {
     });
 
     map.fitBounds(osmly.current.layer.getBounds());
+}
 
-    getOSM();
+function reset() {
+    map.closePopup();
+    map.removeLayer(osmly.current.layer);
+    setFeatureLayer();
+    osmly.current.layer.addTo(map);
+    osmly.current.dataLayer.bringToFront();
 }
 
 function newChangesetXml() {
@@ -801,7 +812,7 @@ function teardown() {
     map.removeLayer(osmly.current.dataLayer);
 }
 
-function getOSM() {
+function getSetOSM() {
     notify('getting context');
 
     var bbox = osmly.current.feature.properties.buffer_bounds;
