@@ -24,17 +24,28 @@ def slash():
         response = make_response(json.dumps({'id': request.form['id']}))
 
     elif request.method == 'GET':
-        response = make_response(next(request.args['db']))
+        if 'id' in request.args:
+            response = next(request.args['db'], request.args['id'])
+        else:
+            response = next(request.args['db'])
 
+    response = make_response(response)
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
     response.headers['Access-Control-Max-Age'] = 86400
+
     return response
 
 
-def next(db):
+def next(db, id=False):
+    # need to make a new column for osm format
+    # it will be pulled with 'if id'
+    # if no 'format' in request.args, remove it before sending request
     conn = sqlite3.connect(db + '.sqlite')
-    row = conn.execute('SELECT geo FROM osmly WHERE problem="" AND done="" ORDER BY RANDOM() LIMIT 1')
+    if id:
+        row = conn.execute('SELECT geo FROM osmly WHERE id = ? LIMIT 1', [id])
+    else:
+        row = conn.execute('SELECT geo FROM osmly WHERE problem="" AND done="" ORDER BY RANDOM() LIMIT 1')
     row = row.fetchone()
     conn.commit()
     conn.close()
@@ -44,7 +55,7 @@ def next(db):
 def done(db, id, log):
     conn = sqlite3.connect(db + '.sqlite')
     c = conn.cursor()
-    c.execute('UPDATE osmly SET done = ? WHERE count = ?', (log, id))
+    c.execute('UPDATE osmly SET done = ? WHERE id = ?', (log, id))
     conn.commit()
     conn.close()
 
@@ -52,7 +63,7 @@ def done(db, id, log):
 def problem(db, id, problem, log):
     conn = sqlite3.connect(db + '.sqlite')
     c = conn.cursor()
-    c.execute('UPDATE osmly SET problem = ?, done = ? WHERE count = ?', (problem, log, id))
+    c.execute('UPDATE osmly SET problem = ?, done = ? WHERE id = ?', (problem, log, id))
     conn.commit()
     conn.close()
 
