@@ -68,7 +68,7 @@ var osm2geo = function(osm) {
     function cacheNodes() {
         var nodes = xml.getElementsByTagName('node'),
             n = nodes.length,
-            coords = {};
+            coords = {},
             withTags = [];
 
         while (n--) {
@@ -96,9 +96,6 @@ var osm2geo = function(osm) {
             count = 0;
 
         while (r--) {
-            var tags = [],
-                type = false;
-
             feature = getFeature(relations[r], "MultiPolygon");
 
             if (feature.properties.type == 'multipolygon') {
