@@ -30,11 +30,15 @@
         <script src="static/js/osm2geo.js"></script>
     </head>
     <body>
-        <ul id="top_right">
+        <ul id="top-right">
             <li id="title">Outline the nearby park</li>
             <li id="instruction">Instructions</li>
             <li id="user"></li>
             <li id="changeset">Changeset</li>
+        </ul>
+        <ul id="bottom-right">
+            <li>Reset</li>
+            <li>Edit in JOSM</li>
         </ul>
 
         <div id="changeset-modal" class="reveal-modal medium">
@@ -89,8 +93,8 @@
         </div>
 
         <div id="tags">
-            <span id="add-new-tag" alt="Add a new tag">+</span>
             <ul></ul>
+            <span class="k" id="add-new-tag" alt="Add a new tag">+</span>
         </div>
 
         <div id="notify"></div>
@@ -100,8 +104,8 @@
             var OSMly = osmly().set({
                 featuresApi: 'http://127.0.0.1:5000/?',
                 db: 'parks-5',
-                demo: false,
-                center: [34.0577, -118.2409],
+                demo: true,
+                origin: [34.0577, -118.2409],
                 zoom: 10,
                 renameProperty: {'NAME': 'name'},
                 usePropertyAsTag: ['name'],
@@ -109,7 +113,8 @@
                 context: {
                     leisure: ['park', 'nature_reserve', 'stadium', 'golf_course', 'dog_park'],
                     landuse: ['cemetery', 'farm', 'farmland', 'recreation_ground'],
-                    amenity: ['college', 'kindergarten', 'school', 'university', 'grave_yard']}
+                    amenity: ['college', 'kindergarten', 'school', 'university', 'grave_yard']
+                }
             });
 
             OSMly.go();

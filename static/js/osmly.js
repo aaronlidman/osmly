@@ -32,7 +32,7 @@ var osmly = {
         readApi: 'http://www.overpass-api.de/api/xapi?map?',
         context: {}, // {key: ['some', 'tags'], otherkey: ['more', 'tags']}
         div: 'map',
-        center: [0,0],
+        origin: [0,0],
         zoom: 2,
         demo: false,
         changesetTags: [ // include specifics to the import
@@ -67,7 +67,7 @@ osmly.set = function(object) {
 
 osmly.go = function() {
     map = L.map(osmly.div, {
-        center: osmly.center,
+        center: osmly.origin,
         layers: [new L.BingLayer('Anqm0F_JjIZvT0P3abS6KONpaBaKuTnITRrnYuiJCE0WOhH6ZbE4DzeT6brvKVR5')],
         zoom: osmly.zoom,
         maxZoom: 20
@@ -274,7 +274,7 @@ function next() {
 
         // fixes same first/last node issue
         // fix coming to leaflet any day now
-        // --- delete w/ leaflet 0.5.1
+        // --- delete w/ leaflet update
         // this is one hell of a mess but I really don't care
         if (current.feature.geometry.coordinates.length > 1) {
             if (current.feature.geometry.type == "MultiPolygon") {
@@ -291,7 +291,7 @@ function next() {
         } else {
             current.feature.geometry.coordinates[0].pop();
         }
-        // ^^ --- to delete w/ leaflet 0.5.1
+        // ^^ --- to delete w/ leaflet update
 
 
         if (osmly.demo) console.log(current);
@@ -457,7 +457,7 @@ function display() {
     current.dataLayer.addTo(map);
 
     $('#notify, #login').fadeOut(250);
-    $('#top_right, #action-block, #tags').fadeIn(500);
+    $('#top-right, #bottom-right, #action-block, #tags').fadeIn(500);
 
     equalizeTags();
 }
@@ -786,7 +786,7 @@ function submitToOSM() {
 function teardown() {
     $('#problem, #skip, #submit, .minus, #add-new-tag').unbind();
     $('.k, .v').unbind();
-    $('#action-block, #tags').hide();
+    $('#action-block, #tags, #bottom-right').hide();
     map.closePopup();
     $('#problem').val('problem'); // resets problem menu
     map.removeLayer(current.layer);
