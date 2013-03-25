@@ -21,8 +21,7 @@ TODO
     - eventually, decouple ui
     - crossbrowser test ui
         - especially modal and tag stuff
-    - reset button functionality
-        - need to reset tags too
+    - fix reset tags bindings
     - remote JOSM file functionality
 */
 
@@ -45,7 +44,19 @@ var osmly = {
         renameProperty: {}, // {'MEssy55': 'clean'}, only converts key not value
         usePropertyAsTag: [], // just keys
         appendTag: {}, // {'key': 'value'}, will overwrite existing tags
-        consumerKey: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg'
+        consumerKey: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg',
+        // http://leafletjs.com/reference.html#path-options
+        featureStyle: {
+            color: '#00FF00',
+            weight: 3,
+            opacity: 1,
+            clickable: false
+        },
+        contextStyle: {
+            color: '#FFFF00',
+            weight: 3,
+            opacity: 0.75
+        }
     },
     user = {
         id: -1,
@@ -311,11 +322,7 @@ function next() {
 
 function setFeatureLayer() {
     osmly.current.layer = L.geoJson(osmly.current.feature, {
-        style: {
-            'color': '#00FF00',
-            'weight': 3,
-            'opacity': 1
-        },
+        style: osmly.featureStyle,
         onEachFeature: function (feature, layer) {
             if (osmly.current.feature.geometry.type == 'MultiPolygon') {
                 for (var ayer in layer._layers) {
@@ -539,13 +546,13 @@ function equalizeTags() {
         children: '.k',
         equalize: 'width',
         reset: true});
-    $('.k').width($('.k').width()+10);
+    $('.k').width( $('.k').width() + 12);
 
     $('ul').equalize({
         children: '.v',
         equalize: 'width',
         reset: true});
-    $('.v').width($('.v').width()+10);
+    $('.v').width( $('.v').width() + 12);
 }
 
 // http://stackoverflow.com/a/1359808
@@ -828,7 +835,7 @@ function getSetOSM() {
     }).success(function(xml) {
         notify('building context');
 
-        // seperate lists so the user can switch between them
+        // seperate lists so the user can switch between them?
         osmly.osmContext = osm2geo(xml);
         osmly.simpleContext = filterContext(osmly.osmContext);
 
@@ -836,11 +843,7 @@ function getSetOSM() {
         console.log(JSON.stringify(osmly.simpleContext));
 
         osmly.current.dataLayer = L.geoJson(osmly.simpleContext, {
-            style: {
-                'color': '#FFFF00',
-                'weight': 3,
-                'opacity': 0.75
-            },
+            style: osmly.contextStyle,
             onEachFeature: function(feature, layer) {
                 // hovering displays the name
                 // clicking displays all tags
@@ -868,8 +871,8 @@ function getSetOSM() {
             },
             pointToLayer: function(feature, latlng) {
                 return L.circleMarker(latlng, {
-                    radius: 6,
-                    opacity: 0.75,
+                    radius: 7,
+                    opacity: 1,
                     fillOpacity: 0.5
                 });
             }
