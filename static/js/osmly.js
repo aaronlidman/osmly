@@ -22,6 +22,7 @@ TODO
     - crossbrowser test ui
         - especially modal and tag stuff
     - reset button functionality
+        - need to reset tags too
     - remote JOSM file functionality
 */
 
@@ -330,6 +331,10 @@ function setFeatureLayer() {
 }
 
 function reset() {
+    $('#tags li').remove();
+    populateTags();
+    equalizeTags();
+
     map.closePopup();
     map.removeLayer(osmly.current.layer);
     setFeatureLayer();
@@ -422,6 +427,9 @@ function changesetIsOpen(id, callback) {
 }
 
 function setup() {
+    renameProperties();
+    usePropertiesAsTag();
+    appendTags();
     populateTags();
 
     $('#skip, #submit').click(function() {
@@ -484,8 +492,7 @@ function display() {
 
 function renameProperties() {
     // converts the feature tag key
-    // ex. NAME -> name
-    // ex. CAT2 -> leisure
+    // ex. NAME -> name, CAT2 -> leisure
     for (var prop in osmly.renameProperty) {
         var change = osmly.renameProperty[prop];
         osmly.current.feature.properties[change] = osmly.current.feature.properties[prop];
@@ -508,10 +515,6 @@ function appendTags() {
 }
 
 function populateTags() {
-    renameProperties();
-    usePropertiesAsTag();
-    appendTags();
-
     osmly.current.feature.properties = sortObject(osmly.current.feature.properties);
 
     for (var tag in osmly.current.feature.properties) {
@@ -527,6 +530,7 @@ function populateTags() {
         }
     }
 }
+
 
 // doesn't work until the selectors are visibile?
 function equalizeTags() {
