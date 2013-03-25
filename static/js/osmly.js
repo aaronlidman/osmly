@@ -21,8 +21,10 @@ TODO
     - eventually, decouple ui
     - crossbrowser test ui
         - especially modal and tag stuff
-    - fix reset tags bindings
     - remote JOSM file functionality
+    - confirm that reset tags get built/uploaded fine
+    - clickthrough problem w/ #top-right and #bottom-right
+        -  pointer-events:none; isn't cross browser, all or nothing w/ children
 */
 
 var osmly = {
@@ -147,10 +149,6 @@ osmly.go = function() {
             $('#changeset-modal').trigger('reveal:close');
             $('#notify').fadeOut(250);
         });
-    });
-
-    $('#reset').click(function() {
-        reset();
     });
 };
 
@@ -315,6 +313,9 @@ function next() {
 
         osmly.current = current;
 
+        // this is purposefully here and not in display() due to timing issues
+        // basically if we do it during display the map is still zooming and
+        // midpoint nodes get all screwed up
         setFeatureLayer();
         getSetOSM();
     });
@@ -335,18 +336,6 @@ function setFeatureLayer() {
     });
 
     map.fitBounds(osmly.current.layer.getBounds());
-}
-
-function reset() {
-    $('#tags li').remove();
-    populateTags();
-    equalizeTags();
-
-    map.closePopup();
-    map.removeLayer(osmly.current.layer);
-    setFeatureLayer();
-    osmly.current.layer.addTo(map);
-    osmly.current.dataLayer.bringToFront();
 }
 
 function newChangesetXml() {
@@ -433,10 +422,13 @@ function changesetIsOpen(id, callback) {
     });
 }
 
-function setup() {
-    renameProperties();
-    usePropertiesAsTag();
-    appendTags();
+function setup(reset) {
+    if (!reset) {
+        renameProperties();
+        usePropertiesAsTag();
+        appendTags();
+    }
+
     populateTags();
 
     $('#skip, #submit').click(function() {
@@ -480,7 +472,13 @@ function setup() {
                 equalizeTags();
             }
         });
+    });
 
+    $('#reset').click(function() {
+        teardown();
+        $('#tags li').remove();
+        setFeatureLayer();
+        setup('reset');
     });
 
     console.log(window);
@@ -490,6 +488,7 @@ function setup() {
 function display() {
     osmly.current.layer.addTo(map);
     osmly.current.dataLayer.addTo(map);
+    osmly.current.dataLayer.bringToFront();
 
     $('#notify, #login').fadeOut(250);
     $('#top-right, #bottom-right, #action-block, #tags').fadeIn(500);
@@ -814,9 +813,9 @@ function submitToOSM() {
 }
 
 function teardown() {
-    $('#problem, #skip, #submit, .minus, #add-new-tag').unbind();
-    $('.k, .v').unbind();
     $('#action-block, #tags, #bottom-right').hide();
+    $('#problem, #skip, #submit, .minus, #add-new-tag, #reset').unbind();
+    $('.k, .v').unbind();
     map.closePopup();
     $('#problem').val('problem'); // resets problem menu
     map.removeLayer(osmly.current.layer);
