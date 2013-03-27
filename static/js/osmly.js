@@ -145,6 +145,28 @@ osmly.go = function() {
             $('#notify').fadeOut(250);
         });
     });
+
+    $('#josm').click(function() {
+        teardown();
+        $('#tags li').remove();
+        setup('reset');
+
+        var id = osmly.current.id,
+            geojson = toGeoJson(osmly.current.layer),
+            osmChange = toOsmChange(geojson, getTags());
+
+        // this isn't working for some reason (clientside??)
+        $.ajax({
+            type: 'POST',
+            url: osmly.featuresApi + 'db=' + osmly.db + '&id=' + id + '&osc=1',
+            crossDomain: true,
+            data: {osc: osmChange}
+        }).success(function(data) {
+            console.log(data);
+            // josm code
+        });
+
+    });
 };
 
 // next 2 functions from iD: https://github.com/systemed/iD/blob/master/js/id/oauth.js
@@ -729,6 +751,9 @@ function toOsmChange(geojson, tags) {
 }
 
 // this really sucks
+// group common .ajax data
+// data vs uri vars, put the id in the uri, you idiot
+// think polymorphic
 function submit(result) {
     teardown();
 
