@@ -14,17 +14,12 @@ TODO
     - group oauth functions like iD
         - https://github.com/systemed/iD/blob/master/js/id/oauth.js#L53
         - same idea can be applied to changesets, submitting?, setup, L.toGeoJson
-    - refactor
     - keypress shortcuts
         - W + S, zoom in/out on pointer
         - A + D, open problem menu, skip
-    - eventually, decouple ui
     - crossbrowser test ui
         - especially modal and tag stuff
     - remote JOSM file functionality
-    - confirm that reset tags get built/uploaded fine
-    - clickthrough problem w/ #top-right and #bottom-right
-        -  pointer-events:none; isn't cross browser, all or nothing w/ children
 */
 
 var osmly = {
@@ -816,8 +811,9 @@ function teardown() {
     $('#action-block, #tags, #bottom-right').hide();
     $('#problem, #skip, #submit, .minus, #add-new-tag, #reset').unbind();
     $('.k, .v').unbind();
-    map.closePopup();
     $('#problem').val('problem'); // resets problem menu
+
+    map.closePopup();
     map.removeLayer(osmly.current.layer);
     map.removeLayer(osmly.current.dataLayer);
 }
@@ -872,7 +868,7 @@ function getSetOSM() {
                 return L.circleMarker(latlng, {
                     radius: 7,
                     opacity: 1,
-                    fillOpacity: 0.5
+                    fillOpacity: 0.33
                 });
             }
         });
