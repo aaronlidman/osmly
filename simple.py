@@ -28,7 +28,7 @@ def get():
     conn = sqlite3.connect(request.args['db'] + '.sqlite')
     if 'id' in request.args:
         row = conn.execute(
-            'SELECT geo FROM osmly WHERE id = ? LIMIT 1',
+            'SELECT geo, osc FROM osmly WHERE id = ? LIMIT 1',
             [request.args['id']]
         )
     else:
@@ -38,6 +38,9 @@ def get():
     row = row.fetchone()
     conn.commit()
     conn.close()
+    if 'action' in request.args and request.args['action'] == 'osc':
+        return row[1]
+
     return row
 
 

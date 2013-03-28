@@ -19,8 +19,8 @@ TODO
         - A + D, open problem menu, skip
     - crossbrowser test ui
         - especially modal and tag stuff
-    - remote JOSM file functionality
     - check if done, again, before submitting to osm
+    - confirm toOsm multipolygons are valid in josm
 */
 
 var osmly = {
@@ -154,16 +154,29 @@ osmly.go = function() {
 
         var id = osmly.current.id,
             geojson = toGeoJson(osmly.current.layer),
-            osmChange = toOsmChange(geojson, getTags());
+            osmChange = toOsm(innerOsm(geojson, getTags())),
+            request = osmly.featuresApi + 'db=' + osmly.db + '&id=' + id + '&action=osc',
+            bbox = osmly.current.bbox;
 
         $.ajax({
             type: 'POST',
-            url: osmly.featuresApi + 'db=' + osmly.db + '&id=' + id + '&action=osc',
+            url: request,
             crossDomain: true,
             data: {osc: osmChange}
         }).success(function(data) {
-            console.log(data);
-            // josm code
+            // there's no way to both load data from the api and import a file
+            // so we do them seperately with two requests
+            $.ajax({
+                type: 'GET',
+                url: 'http://127.0.0.1:8111/load_and_zoom?left=' + bbox[0] + '&right=' + bbox[2] + '&top=' + bbox[3] + '&bottom=' + bbox[1]
+            }).success(function(data) {
+                $.ajax({
+                    type: 'GET',
+                    url: 'http://127.0.0.1:8111/import?url=' + request
+                }).success(function(data) {
+                    // throw up some ui notice for logging done/skip
+                });
+            });
         });
 
     });
@@ -291,9 +304,9 @@ function next() {
 
     var current = {},
         request = osmly.featuresApi + 'db=' + osmly.db;
-    // var request = osmly.featuresApi + 'db=' + osmly.db + '&id=1047';
-    // var request = osmly.featuresApi + 'db=' + osmly.db + '&id=1108';
-    // var request = osmly.featuresApi + 'db=' + osmly.db + '&id=810';
+        // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1047';
+        // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1108';
+        // request = osmly.featuresApi + 'db=' + osmly.db + '&id=810';
 
     $.ajax({
         type: 'GET',
@@ -302,6 +315,7 @@ function next() {
         data = JSON.parse(data);
         current.feature = data;
         current.id = current.feature.properties.id;
+        current.bbox = current.feature.properties.buffer_bounds;
 
 
         // fixes same first/last node issue
@@ -326,11 +340,9 @@ function next() {
         // ^^ --- to delete w/ leaflet update
 
 
-        if (osmly.demo) console.log(current);
-
         osmly.current = current;
 
-        // this is purposefully here and not in display() due to timing issues
+        // setFeatureLayer() is purposefully here and not in display() due to timing issues
         // basically if we do it during display the map is still zooming and
         // midpoint nodes get all screwed up
         setFeatureLayer();
@@ -449,7 +461,6 @@ function setup(reset) {
     populateTags();
 
     $('#skip, #submit').click(function() {
-        console.log(toGeoJson(osmly.current.layer));
         submit(this.id);
     });
 
@@ -498,7 +509,6 @@ function setup(reset) {
         setup('reset');
     });
 
-    console.log(window);
     display();
 }
 
@@ -661,15 +671,25 @@ function getTags() {
     return tags;
 }
 
+function toOsm(innerOsm) {
+    return '<?xml version="1.0" encoding="UTF-8"?>' +
+    '<osm version="0.6" generator="osmly">' + innerOsm + '</osm>';
+}
+
+function toOsmChange(innerOsm) {
+    return '<osmChange version="0.6" generator="osmly"><create>' + innerOsm +
+    '</create></osmChange>';
+}
+
+// this is hideous
 // geojson object, tags [[k,v],[k,v],[k,v]]
 // returns xml string
-function toOsmChange(geojson, tags) {
+function innerOsm(geojson, tags) {
     // this is all up in the air and very limited to this specific toGeoJSON output
     // need to figure out holes in polygons/multipolygons
     // actual leaflet toGeoJSON is coming?
         // https://github.com/Leaflet/Leaflet/pull/1462
-    var osmChange = '<osmChange version="0.6" generator="osmly"><create>',
-        nodes = '',
+    var nodes = '',
         ways = '',
         relations = '',
         count = -1;
@@ -744,10 +764,7 @@ function toOsmChange(geojson, tags) {
         count--;
     }
 
-    osmChange += nodes + ways +  relations;
-    osmChange += '</create></osmChange>';
-
-    return osmChange;
+    return nodes + ways + relations;
 }
 
 // this really sucks
@@ -766,11 +783,8 @@ function submit(result) {
     }
 
     if (osmly.demo) {
-        console.log(osmly.current);
-
         if (result === 'submit') {
             var geojson = toGeoJson(osmly.current.layer);
-            console.log(toOsmChange(geojson, getTags()));
         }
 
         next();
@@ -801,7 +815,7 @@ function submitToOSM() {
     var url = osmly.writeApi + '/api/0.6/changeset/' + id + '/upload',
         token_secret = token('secret'),
         geojson = toGeoJson(osmly.current.layer),
-        osmChange = toOsmChange(geojson, getTags());
+        osmChange = toOsmChange(innerOsm(geojson, getTags()));
 
     notify('uploading to OSM');
 
@@ -845,8 +859,8 @@ function getSetOSM() {
         osmly.osmContext = osm2geo(xml);
         osmly.simpleContext = filterContext(osmly.osmContext);
 
-        console.log(JSON.stringify(osmly.osmContext));
-        console.log(JSON.stringify(osmly.simpleContext));
+        // console.log(JSON.stringify(osmly.osmContext));
+        // console.log(JSON.stringify(osmly.simpleContext));
 
         osmly.current.dataLayer = L.geoJson(osmly.simpleContext, {
             style: osmly.contextStyle,
