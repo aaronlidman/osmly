@@ -25,9 +25,7 @@ def slash():
 
 def get():
     # need osc path, use same 'osc' in request.args from post()
-    db = request.args['db']
-
-    conn = sqlite3.connect(db + '.sqlite')
+    conn = sqlite3.connect(request.args['db'] + '.sqlite')
     if 'id' in request.args:
         row = conn.execute(
             'SELECT geo FROM osmly WHERE id = ? LIMIT 1',
@@ -58,27 +56,23 @@ def post():
 
 
 def done():
-    db = request.args['db']
-    id = request.args['id']
-
-    conn = sqlite3.connect(db + '.sqlite')
+    conn = sqlite3.connect(request.args['db'] + '.sqlite')
     c = conn.cursor()
-    c.execute('UPDATE osmly SET done = ? WHERE id = ?', (log(), id))
+    c.execute(
+        'UPDATE osmly SET done = ? WHERE id = ?',
+        (log(), request.args['id'])
+    )
     conn.commit()
     conn.close()
     return json.dumps({'id': request.args['id']})
 
 
 def problem():
-    db = request.args['db']
-    id = request.args['id']
-    problem = request.form['problem']
-
-    conn = sqlite3.connect(db + '.sqlite')
+    conn = sqlite3.connect(request.args['db'] + '.sqlite')
     c = conn.cursor()
     c.execute(
         'UPDATE osmly SET problem = ?, done = ? WHERE id = ?',
-        (problem, log(), id)
+        (request.form['problem'], log(), request.args['id'])
     )
     conn.commit()
     conn.close()
@@ -87,14 +81,12 @@ def problem():
 
 def post_osc():
     # could do a uid check if needed
-    db = request.args['db']
-    id = request.args['id']
-    osc = request.form['osc']
-    print osc
-
-    conn = sqlite3.connect(db + '.sqlite')
+    conn = sqlite3.connect(request.args['db'] + '.sqlite')
     c = conn.cursor()
-    c.execute('UPDATE osmly SET osc = ? WHERE id = ?', (osc, id))
+    c.execute(
+        'UPDATE osmly SET osc = ? WHERE id = ?',
+        (request.form['osc'], request.args['id'])
+    )
     conn.commit()
     conn.close()
     return json.dumps({'id': 'ugg'})
