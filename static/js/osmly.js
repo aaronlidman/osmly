@@ -20,6 +20,7 @@ TODO
     - crossbrowser test ui
         - especially modal and tag stuff
     - remote JOSM file functionality
+    - check if done, again, before submitting to osm
 */
 
 var osmly = {
@@ -155,10 +156,9 @@ osmly.go = function() {
             geojson = toGeoJson(osmly.current.layer),
             osmChange = toOsmChange(geojson, getTags());
 
-        // this isn't working for some reason (clientside??)
         $.ajax({
             type: 'POST',
-            url: osmly.featuresApi + 'db=' + osmly.db + '&id=' + id + '&osc=1',
+            url: osmly.featuresApi + 'db=' + osmly.db + '&id=' + id + '&action=osc',
             crossDomain: true,
             data: {osc: osmChange}
         }).success(function(data) {
@@ -751,11 +751,19 @@ function toOsmChange(geojson, tags) {
 }
 
 // this really sucks
-// group common .ajax data
-// data vs uri vars, put the id in the uri, you idiot
-// think polymorphic
 function submit(result) {
     teardown();
+
+    if (result != 'skip') {
+        $.ajax({
+            type: 'POST',
+            url: osmly.featuresApi + 'db=' + osmly.db + '&id=' + osmly.current.id + '&action=problem',
+            crossDomain: true,
+            data: {problem: result, user: user.name}
+        }).success(function(msg) {
+            // not worth slowing down/complicating over, it's reproducable
+        });
+    }
 
     if (osmly.demo) {
         console.log(osmly.current);
@@ -765,30 +773,8 @@ function submit(result) {
             console.log(toOsmChange(geojson, getTags()));
         }
 
-        if (result != 'skip') {
-            $.ajax({
-                type: 'POST',
-                url: osmly.featuresApi + 'db=' + osmly.db,
-                crossDomain: true,
-                data: {db: osmly.db, id: osmly.current.id, problem: result, user: user.name}
-            }).done(function(msg) {
-                // not worth slowing down/complicating over, it's reproducable
-            });
-        }
-
         next();
     } else {
-        if (result != 'skip') {
-            $.ajax({
-                type: 'POST',
-                url: osmly.featuresApi + 'db=' + osmly.db,
-                crossDomain: true,
-                data: {db: osmly.db, id: osmly.current.id, problem: result, user: user.name}
-            }).done(function(msg) {
-                // not worth slowing down/complicating over, it's reproducable
-            });
-        }
-
         if (result === 'submit') {
             changesetIsOpen(token('changeset_id'), submitToOSM);
         } else {
@@ -884,6 +870,8 @@ function getSetOSM() {
                         '</span>: ' + feature.properties[tagKeys[t]] + '</li>';
                         t++;
                     }
+
+                    // add a link to osm.org for ways
 
                     layer.bindPopup(popup);
                     layer.bindLabel(label);

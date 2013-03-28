@@ -1,9 +1,5 @@
 #!/usr/bin/env python
 # more polymorphic, less neanderthal
-# under 100 lines
-# figure out your .args and .form shit
-    # args (uri) contains, db, id and action?
-    # everything else in form (data)
 
 import sqlite3
 from flask import Flask, request, make_response
@@ -16,11 +12,10 @@ app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST'])
 def slash():
     if request.method == 'POST':
-        response = to_db()
+        response = post()
     elif request.method == 'GET':
         response = get()
 
-    # we've got new CORS issues
     response = make_response(response)
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
@@ -29,7 +24,7 @@ def slash():
 
 
 def get():
-    # need osc path, use same 'osc' in request.args from to_db()
+    # need osc path, use same 'osc' in request.args from post()
     db = request.args['db']
 
     conn = sqlite3.connect(db + '.sqlite')
@@ -48,38 +43,35 @@ def get():
     return row
 
 
-def to_db():
-    # !!! --- notice .form and .arg mismatch --- !!!
+def post():
     # how do you execute a function named by a variable?
+    # map .args['action'] directly to functions here rather than a growing list
     # request.args['action'] = 'problem' etc...
-    # request.args['action']() -ish
-    print request.form
-    print request.args
-    if 'problem' in request.form:
-        print 'problem hit'
-        return problem()
-    elif 'osc' in request.args:
-        print 'osc hit'
-        return post_osc()
+    # request.args['action']() -> problem()
+    if 'action' in request.args:
+        if request.args['action'] == 'problem':
+            return problem()
+        elif request.args['action'] == 'osc':
+            return post_osc()
     else:
         return done()
 
 
 def done():
     db = request.args['db']
-    id = request.form['id']
+    id = request.args['id']
 
     conn = sqlite3.connect(db + '.sqlite')
     c = conn.cursor()
     c.execute('UPDATE osmly SET done = ? WHERE id = ?', (log(), id))
     conn.commit()
     conn.close()
-    return json.dumps({'id': request.form['id']})
+    return json.dumps({'id': request.args['id']})
 
 
 def problem():
     db = request.args['db']
-    id = request.form['id']
+    id = request.args['id']
     problem = request.form['problem']
 
     conn = sqlite3.connect(db + '.sqlite')
@@ -90,11 +82,11 @@ def problem():
     )
     conn.commit()
     conn.close()
-    return json.dumps({'id': request.form['id']})
+    return json.dumps({'id': request.args['id']})
 
 
 def post_osc():
-    # could do a uid check
+    # could do a uid check if needed
     db = request.args['db']
     id = request.args['id']
     osc = request.form['osc']
