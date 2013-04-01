@@ -1,26 +1,19 @@
 window.osmly = function () {
 /*
-- Leaflet: leafletjs.com
-- Bing plugin: github.com/shramov/leaflet-plugins/blob/master/layer/tile/Bing.js
-- jQuery: jquery.com
-- equalize.js plugin: github.com/tsvensen/equalize.js
-- ohauth: github.com/tmcw/ohauth
-- osm2geo: gist.github.com/1396990
-
 TODO
-    - use http://cdnjs.com/ for libraries?
     - success + failure callbacks on every request
+        - replace .success, .error, .complete w/ .done, .fail, .always
     - common ohauth.xhr function
     - group oauth functions like iD
         - https://github.com/systemed/iD/blob/master/js/id/oauth.js#L53
         - same idea can be applied to changesets, submitting?, setup, L.toGeoJson
-    - keypress shortcuts
-        - W + S, zoom in/out on pointer
-        - A + D, open problem menu, skip
     - crossbrowser test ui
         - especially modal and tag stuff
     - check if done, again, before submitting to osm
     - confirm toOsm multipolygons are valid in josm
+        - they're not
+    - consider forwarding all polygons with holes to josm
+        - multipolygons are cool, holes suck because I have no way of knowing what's an inner
 */
 
 var osmly = {
@@ -43,8 +36,8 @@ var osmly = {
         usePropertyAsTag: [], // just keys
         appendTag: {}, // {'key': 'value'}, will overwrite existing tags
         consumerKey: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg',
-        // http://leafletjs.com/reference.html#path-options
         featureStyle: {
+            // http://leafletjs.com/reference.html#path-options
             color: '#00FF00',
             weight: 3,
             opacity: 1,
@@ -163,19 +156,20 @@ osmly.go = function() {
             url: request,
             crossDomain: true,
             data: {osc: osmChange}
-        }).success(function(data) {
+        }).done(function(data) {
             // there's no way to both load data from the api and import a file
             // so we do them seperately with two requests
-            $.ajax({
-                type: 'GET',
-                url: 'http://127.0.0.1:8111/load_and_zoom?left=' + bbox[0] + '&right=' + bbox[2] + '&top=' + bbox[3] + '&bottom=' + bbox[1]
-            }).success(function(data) {
-                $.ajax({
-                    type: 'GET',
-                    url: 'http://127.0.0.1:8111/import?url=' + request
-                }).success(function(data) {
-                    // throw up some ui notice for logging done/skip
+            $.ajax('http://127.0.0.1:8111/load_and_zoom?left=' + bbox[0] +
+                '&right=' + bbox[2] + '&top=' + bbox[3] + '&bottom=' + bbox[1]
+            ).done(function(data) {
+                $.ajax('http://127.0.0.1:8111/import?url=' + request)
+                .done(function(data) {
+                    // throw up some ui, "go to josm"
+                    // also for logging as done/skip
                 });
+            }).fail(function(data) {
+                notify('JOSM doesn\'t seem to be running. Make sure you start it first');
+                setTimeout(function(){$('#notify').fadeOut(1000);}, 3000);
             });
         });
 
@@ -308,10 +302,7 @@ function next() {
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1108';
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=810';
 
-    $.ajax({
-        type: 'GET',
-        url: request
-    }).success(function(data) {
+    $.ajax(request).done(function(data) {
         data = JSON.parse(data);
         current.feature = data;
         current.id = current.feature.properties.id;
@@ -436,10 +427,9 @@ function changesetIsOpen(id, callback) {
     notify('checking changeset status');
 
     $.ajax({
-        type: 'GET',
         url: osmly.writeApi + '/api/0.6/changeset/' + id,
         cache: false
-    }).success(function(xml) {
+    }).done(function(xml) {
         // need a failure case, dev server fails pretty often
         var cs = xml.getElementsByTagName('changeset');
 
@@ -777,9 +767,8 @@ function submit(result) {
             url: osmly.featuresApi + 'db=' + osmly.db + '&id=' + osmly.current.id + '&action=problem',
             crossDomain: true,
             data: {problem: result, user: user.name}
-        }).success(function(msg) {
-            // not worth slowing down/complicating over, it's reproducable
         });
+        // no callback, not worth slowing down/complicating over, it's reproducable
     }
 
     if (osmly.demo) {
@@ -849,10 +838,7 @@ function getSetOSM() {
     var bbox = osmly.current.feature.properties.buffer_bounds;
     bbox = 'bbox=' + bbox.join(',');
 
-    $.ajax({
-        type: 'GET',
-        url: osmly.readApi + bbox
-    }).success(function(xml) {
+    $.ajax(osmly.readApi + bbox).done(function(xml) {
         notify('building context');
 
         // seperate lists so the user can switch between them?
@@ -873,10 +859,10 @@ function getSetOSM() {
                     tagKeys = Object.keys(feature.properties);
 
                 if (feature.properties) {
-                    if (!feature.properties.name) {
-                        label = '[NO NAME] click for tags';
-                    } else {
+                    if (feature.properties.name) {
                         label = feature.properties.name;
+                    } else {
+                        label = '[NO NAME] click for tags';
                     }
 
                     while (t < tagKeys.length) {
@@ -884,8 +870,6 @@ function getSetOSM() {
                         '</span>: ' + feature.properties[tagKeys[t]] + '</li>';
                         t++;
                     }
-
-                    // add a link to osm.org for ways
 
                     layer.bindPopup(popup);
                     layer.bindLabel(label);
