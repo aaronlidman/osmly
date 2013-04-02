@@ -17,6 +17,11 @@ TODO
     - bind link in validFeature(), unbind on click
     - getSetOsm(), setup(), and display() interaction is a mess
     - instructions modal limits min-height
+    - rethink loading
+        - zoom to, load feature while osm is downloading
+        - when osm is done bring in UI and editing points
+        - allows for a few seconds of planning
+    - bigger action buttons
 */
 
 var osmly = {
@@ -314,6 +319,7 @@ function next() {
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1047';
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1108';
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=810';
+        // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1129';
 
     $.ajax(request).done(function(data) {
         data = JSON.parse(data);
@@ -371,8 +377,9 @@ function editable(geo) {
     }
 
     if (geo.type == 'MultiPolygon') {
-        for (var poly in geo.coordinates[0]) {
-            if (poly.length > 1) return false;
+        for (var poly in geo.coordinates) {
+            console.log(geo.coordinates[poly]);
+            if (geo.coordinates[poly].length > 1) return false;
         }
     }
 
@@ -554,10 +561,10 @@ function display() {
     }
 
     $('#notify, #login').fadeOut(250);
-    $('#top-right, #bottom-right, #action-block').fadeIn(500);
+    $('#top-right, #bottom-right, #action-block').fadeIn(250);
 
     if (osmly.current.isEditable) {
-        $('#tags').fadeIn(500);
+        $('#tags').fadeIn(250);
         equalizeTags();
 
     } else {
