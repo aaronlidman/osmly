@@ -56,7 +56,7 @@ a {
     margin-bottom: 2px;
     margin-left: 2px;
     background-color: white;
-    padding: 6px 8px;
+    padding: 10px 15px;
 }
 
 #bottom-right {
@@ -277,6 +277,10 @@ a {
 .reveal-modal a {
     cursor: pointer;
     border-bottom: 1px solid #666;
+}
+
+.close-reveal-modal {
+    border-bottom: none !important;
 }
 
 

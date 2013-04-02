@@ -44,8 +44,8 @@
             <li id="josm">Edit in JOSM</li>
         </ul>
 
+    <!-- modals -->
         <div id="changeset-modal" class="reveal-modal medium">
-            <!-- still needs logic behind button -->
             <!-- eventually, prefill comment with existing comment -->
             <span>Changeset comment:</span>
             <div id="changeset-form" contenteditable="true"></div>
@@ -75,6 +75,12 @@
 
             <a class="close-reveal-modal">&#215;</a>
         </div>
+
+        <div id="reusable-modal" class="reveal-modal large">
+            <span></span>
+            <a class="close-reveal-modal">&#215;</a>
+        </div>
+    <!-- end modals -->
 
         <img id="d-problem" class="display" src="static/images/problem_white.svg" />
         <img id="d-skip" class="display" src="static/images/skip_white.svg" />
@@ -116,7 +122,7 @@
                 context: {
                     leisure: ['park', 'nature_reserve', 'stadium', 'golf_course', 'dog_park'],
                     landuse: ['cemetery', 'farm', 'farmland', 'recreation_ground'],
-                    amenity: ['college', 'kindergarten', 'school', 'university', 'grave_yard']
+                    amenity: ['college', 'kindergarten', 'school', 'university', 'grave_yard', 'library', 'town_hall']
                 }
             });
 

@@ -15,8 +15,8 @@ TODO
     - consider forwarding all polygons with holes to josm
         - multipolygons are cool, holes suck because I have no way of knowing what's an inner
     - bind link in validFeature(), unbind on click
-    - setup() in getSetOsm() sucks
-    - if setFeatureLayer return true/false and then setup() sucks
+    - getSetOsm(), setup(), and display() interaction is a mess
+    - instructions modal limits min-height
 */
 
 var osmly = {
@@ -165,14 +165,14 @@ osmly.go = function() {
             ).done(function(data) {
                 $.ajax('http://127.0.0.1:8111/import?url=' + request)
                 .done(function(data) {
-                    $('#reusable-modal span').text('JOSM is good to go');
+                    $('#reusable-modal span').text('Opened in JOSM');
                     $('#reusable-modal').reveal({
                          animation: 'fade',
                          animationspeed: 100,
                          closeonbackgroundclick: true,
                          dismissmodalclass: 'close-reveal-modal'
                     });
-                    // fade this out after some seconds (idk 15?)
+                    // fade this out after some seconds (idk 10-15?)
                     // then show an action dialog, to determine what was done with that feature
                 });
             }).fail(function(data) {
@@ -310,10 +310,10 @@ function next() {
     $('#tags li').remove();
 
     var current = {},
-        // request = osmly.featuresApi + 'db=' + osmly.db;
+        request = osmly.featuresApi + 'db=' + osmly.db;
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1047';
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1108';
-        request = osmly.featuresApi + 'db=' + osmly.db + '&id=810';
+        // request = osmly.featuresApi + 'db=' + osmly.db + '&id=810';
 
     $.ajax(request).done(function(data) {
         data = JSON.parse(data);
@@ -350,12 +350,20 @@ function next() {
         // basically if we do it during display the map is still zooming and
         // midpoint nodes get all screwed up
         setFeatureLayer();
-        getSetOSM();
-        setup();
+
+        if (osmly.current.isEditable) {
+            getSetOSM(function() {
+                setup();
+                display();
+            });
+        } else {
+            setup();
+            display();
+        }
     });
 }
 
-// checks that the feature doesn't have holes (inners), leaflet can't edit them
+// checks if the feature has holes, leaflet can't edit them
 function editable(geo) {
     console.log(geo);
     if (geo.type == 'Polygon' && geo.coordinates.length > 1) {
@@ -375,7 +383,9 @@ function setFeatureLayer() {
     osmly.current.layer = L.geoJson(osmly.current.feature, {
         style: osmly.featureStyle,
         onEachFeature: function (feature, layer) {
-            if (current.isEditable) {
+
+            if (osmly.current.isEditable) {
+
                 if (osmly.current.feature.geometry.type == 'MultiPolygon') {
                     for (var ayer in layer._layers) {
                         layer._layers[ayer].editing.enable();
@@ -383,7 +393,9 @@ function setFeatureLayer() {
                 } else {
                     layer.editing.enable();
                 }
+
             }
+
         }
     });
 
@@ -529,26 +541,29 @@ function setup(reset) {
         $('#tags li').remove();
         setFeatureLayer();
         setup('reset');
+        display();
     });
-
-    display();
 }
 
 function display() {
     osmly.current.layer.addTo(map);
-    osmly.current.dataLayer.addTo(map);
-    osmly.current.dataLayer.bringToFront();
+
+    if (osmly.current.dataLayer) {
+        osmly.current.dataLayer.addTo(map);
+        osmly.current.dataLayer.bringToFront();
+    }
 
     $('#notify, #login').fadeOut(250);
-    $('#top-right, #bottom-right, #action-block, #tags').fadeIn(500);
+    $('#top-right, #bottom-right, #action-block').fadeIn(500);
 
-    equalizeTags();
+    if (osmly.current.isEditable) {
+        $('#tags').fadeIn(500);
+        equalizeTags();
 
-    if (!current.isEditable) {
-        $('#action-block, #tags').fadeOut(500);
-
+    } else {
+        $('#problem, #submit').hide();
         $('#reusable-modal span').html(
-            'This polygon is too complex and must be <a>editted in JOSM.</a>');
+            'This feature is too complex. <a>Edit it in JOSM?</a>');
         // put an 'Edit in JOSM' button right there, when clicked close the modal and let the other modal open
         // litterally bind, $('#josm').click()
             $('#reusable-modal').reveal({
@@ -873,13 +888,14 @@ function teardown() {
     $('#problem, #skip, #submit, .minus, #add-new-tag, #reset').unbind();
     $('.k, .v').unbind();
     $('#problem').val('problem'); // resets problem menu
+    $("#problem, #submit").removeAttr('style');
 
     map.closePopup();
     map.removeLayer(osmly.current.layer);
     map.removeLayer(osmly.current.dataLayer);
 }
 
-function getSetOSM() {
+function getSetOSM(callback) {
     notify('getting context');
 
     var bbox = osmly.current.feature.properties.buffer_bounds;
@@ -931,7 +947,7 @@ function getSetOSM() {
             }
         });
 
-        setup();
+        callback();
     });
 }
 
