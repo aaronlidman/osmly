@@ -14,6 +14,9 @@ TODO
         - they're not
     - consider forwarding all polygons with holes to josm
         - multipolygons are cool, holes suck because I have no way of knowing what's an inner
+    - bind link in validFeature(), unbind on click
+    - setup() in getSetOsm() sucks
+    - if setFeatureLayer return true/false and then setup() sucks
 */
 
 var osmly = {
@@ -116,7 +119,7 @@ osmly.go = function() {
     $('#instruction').click(function() {
         $('#instruction-modal').reveal({
              animation: 'fade',
-             animationspeed: 200,
+             animationspeed: 100,
              closeonbackgroundclick: true,
              dismissmodalclass: 'close-reveal-modal'
         });
@@ -126,7 +129,7 @@ osmly.go = function() {
         e.preventDefault();
         $('#changeset-modal').reveal({
              animation: 'fade',
-             animationspeed: 200,
+             animationspeed: 100,
              closeonbackgroundclick: true,
              dismissmodalclass: 'close-reveal-modal'
         });
@@ -141,9 +144,7 @@ osmly.go = function() {
     });
 
     $('#josm').click(function() {
-        teardown();
-        $('#tags li').remove();
-        setup('reset');
+        $('#reset').click();
 
         var id = osmly.current.id,
             geojson = toGeoJson(osmly.current.layer),
@@ -164,12 +165,24 @@ osmly.go = function() {
             ).done(function(data) {
                 $.ajax('http://127.0.0.1:8111/import?url=' + request)
                 .done(function(data) {
-                    // throw up some ui, "go to josm"
-                    // also for logging as done/skip
+                    $('#reusable-modal span').text('JOSM is good to go');
+                    $('#reusable-modal').reveal({
+                         animation: 'fade',
+                         animationspeed: 100,
+                         closeonbackgroundclick: true,
+                         dismissmodalclass: 'close-reveal-modal'
+                    });
+                    // fade this out after some seconds (idk 15?)
+                    // then show an action dialog, to determine what was done with that feature
                 });
             }).fail(function(data) {
-                notify('JOSM doesn\'t seem to be running. Make sure you start it first');
-                setTimeout(function(){$('#notify').fadeOut(1000);}, 3000);
+                $('#reusable-modal span').text('JOSM doesn\'t seem to be running. Make sure you start it first.');
+                $('#reusable-modal').reveal({
+                     animation: 'fade',
+                     animationspeed: 100,
+                     closeonbackgroundclick: true,
+                     dismissmodalclass: 'close-reveal-modal'
+                });
             });
         });
 
@@ -297,22 +310,22 @@ function next() {
     $('#tags li').remove();
 
     var current = {},
-        request = osmly.featuresApi + 'db=' + osmly.db;
+        // request = osmly.featuresApi + 'db=' + osmly.db;
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1047';
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1108';
-        // request = osmly.featuresApi + 'db=' + osmly.db + '&id=810';
+        request = osmly.featuresApi + 'db=' + osmly.db + '&id=810';
 
     $.ajax(request).done(function(data) {
         data = JSON.parse(data);
         current.feature = data;
         current.id = current.feature.properties.id;
         current.bbox = current.feature.properties.buffer_bounds;
+        current.isEditable = editable(current.feature.geometry);
 
 
         // fixes same first/last node issue
         // fix coming to leaflet any day now
         // --- delete w/ leaflet update
-        // this is one hell of a mess but I really don't care
         if (current.feature.geometry.coordinates.length > 1) {
             if (current.feature.geometry.type == "MultiPolygon") {
                 var aa = current.feature.geometry.coordinates.length;
@@ -338,19 +351,38 @@ function next() {
         // midpoint nodes get all screwed up
         setFeatureLayer();
         getSetOSM();
+        setup();
     });
+}
+
+// checks that the feature doesn't have holes (inners), leaflet can't edit them
+function editable(geo) {
+    console.log(geo);
+    if (geo.type == 'Polygon' && geo.coordinates.length > 1) {
+        return false;
+    }
+
+    if (geo.type == 'MultiPolygon') {
+        for (var poly in geo.coordinates[0]) {
+            if (poly.length > 1) return false;
+        }
+    }
+
+    return true;
 }
 
 function setFeatureLayer() {
     osmly.current.layer = L.geoJson(osmly.current.feature, {
         style: osmly.featureStyle,
         onEachFeature: function (feature, layer) {
-            if (osmly.current.feature.geometry.type == 'MultiPolygon') {
-                for (var ayer in layer._layers) {
-                    layer._layers[ayer].editing.enable();
+            if (current.isEditable) {
+                if (osmly.current.feature.geometry.type == 'MultiPolygon') {
+                    for (var ayer in layer._layers) {
+                        layer._layers[ayer].editing.enable();
+                    }
+                } else {
+                    layer.editing.enable();
                 }
-            } else {
-                layer.editing.enable();
             }
         }
     });
@@ -511,6 +543,21 @@ function display() {
     $('#top-right, #bottom-right, #action-block, #tags').fadeIn(500);
 
     equalizeTags();
+
+    if (!current.isEditable) {
+        $('#action-block, #tags').fadeOut(500);
+
+        $('#reusable-modal span').html(
+            'This polygon is too complex and must be <a>editted in JOSM.</a>');
+        // put an 'Edit in JOSM' button right there, when clicked close the modal and let the other modal open
+        // litterally bind, $('#josm').click()
+            $('#reusable-modal').reveal({
+                 animation: 'fade',
+                 animationspeed: 200,
+                 closeonbackgroundclick: true,
+                 dismissmodalclass: 'close-reveal-modal'
+            });
+    }
 }
 
 function renameProperties() {

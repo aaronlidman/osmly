@@ -270,6 +270,15 @@ a {
     font-weight: bold;
 }
 
+#reusable-modal {
+    text-align: center;
+}
+
+.reveal-modal a {
+    cursor: pointer;
+    border-bottom: 1px solid #666;
+}
+
 
 /* just spammed !important, which isn't nice */
 .leaflet-control-attribution {
