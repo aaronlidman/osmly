@@ -53,8 +53,9 @@ var osmly = {
         },
         contextStyle: {
             color: '#FFFF00',
+            fillOpacity: 0.33,
             weight: 3,
-            opacity: 0.75
+            opacity: 1
         }
     },
     user = {
@@ -64,7 +65,8 @@ var osmly = {
     current = {},
     o = {
         oauth_consumer_key: osmly.consumerKey,
-        oauth_signature_method: 'HMAC-SHA1'};
+        oauth_signature_method: 'HMAC-SHA1'
+    };
 
 osmly.set = function(object) {
     if (typeof object === 'object') {
@@ -153,7 +155,7 @@ osmly.go = function() {
 
         var id = osmly.current.id,
             geojson = toGeoJson(osmly.current.layer),
-            osmChange = toOsm(innerOsm(geojson, getTags())),
+            osmChange = toOsm(geojson),
             request = osmly.featuresApi + 'db=' + osmly.db + '&id=' + id + '&action=osc',
             bbox = osmly.current.bbox;
 
@@ -162,14 +164,14 @@ osmly.go = function() {
             url: request,
             crossDomain: true,
             data: {osc: osmChange}
-        }).done(function(data) {
+        }).done(function() {
             // there's no way to both load data from the api and import a file
             // so we do them seperately with two requests
             $.ajax('http://127.0.0.1:8111/load_and_zoom?left=' + bbox[0] +
                 '&right=' + bbox[2] + '&top=' + bbox[3] + '&bottom=' + bbox[1]
-            ).done(function(data) {
+            ).done(function() {
                 $.ajax('http://127.0.0.1:8111/import?url=' + request)
-                .done(function(data) {
+                .done(function() {
                     $('#reusable-modal span').text('Opened in JOSM');
                     $('#reusable-modal').reveal({
                          animation: 'fade',
@@ -180,7 +182,7 @@ osmly.go = function() {
                     // fade this out after some seconds (idk 10-15?)
                     // then show an action dialog, to determine what was done with that feature
                 });
-            }).fail(function(data) {
+            }).fail(function() {
                 $('#reusable-modal span').text('JOSM doesn\'t seem to be running. Make sure you start it first.');
                 $('#reusable-modal').reveal({
                      animation: 'fade',
@@ -466,7 +468,7 @@ function updateChangeset(id, callback) {
         ohauth.baseString('PUT', url, o));
 
     ohauth.xhr('PUT', url, o, change, {header: {'Content-Type': 'text/xml'}},
-        function(xhr) {
+        function() {
             // don't care about the response
             if (callback) callback();
         });
@@ -502,7 +504,7 @@ function setup(reset) {
     populateTags();
 
     $('#skip, #submit').click(function() {
-        submit(this.id);
+        submit(event.target.id);
     });
 
     $('#problem').change(function() {
@@ -730,28 +732,27 @@ function getTags() {
     return tags;
 }
 
-function toOsm(innerOsm) {
+function toOsm(geojson) {
     return '<?xml version="1.0" encoding="UTF-8"?>' +
-    '<osm version="0.6" generator="osmly">' + innerOsm + '</osm>';
+    '<osm version="0.6" generator="osmly">' + innerOsm(geojson) + '</osm>';
 }
 
-function toOsmChange(innerOsm) {
-    return '<osmChange version="0.6" generator="osmly"><create>' + innerOsm +
+function toOsmChange(geojson) {
+    return '<osmChange version="0.6" generator="osmly"><create>' + innerOsm(geojson) +
     '</create></osmChange>';
 }
 
 // this is hideous
 // geojson object, tags [[k,v],[k,v],[k,v]]
-// returns xml string
-function innerOsm(geojson, tags) {
+function innerOsm(geojson) {
     // this is all up in the air and very limited to this specific toGeoJSON output
-    // need to figure out holes in polygons/multipolygons
     // actual leaflet toGeoJSON is coming?
         // https://github.com/Leaflet/Leaflet/pull/1462
     var nodes = '',
         ways = '',
         relations = '',
         count = -1;
+        tags = getTags();
 
     if (geojson.geometries[0].geometries && geojson.geometries[0].geometries.length > 1) {
         // relations aren't ment to be comprehensive, just passable to be editted in JOSM
@@ -843,6 +844,8 @@ function submit(result) {
     if (osmly.demo) {
         if (result === 'submit') {
             var geojson = toGeoJson(osmly.current.layer);
+            console.log(toOsm(geojson));
+            console.log(toOsmChange(geojson));
         }
 
         next();
@@ -873,7 +876,7 @@ function submitToOSM() {
     var url = osmly.writeApi + '/api/0.6/changeset/' + id + '/upload',
         token_secret = token('secret'),
         geojson = toGeoJson(osmly.current.layer),
-        osmChange = toOsmChange(innerOsm(geojson, getTags()));
+        osmChange = toOsmChange(geojson);
 
     notify('uploading to OSM');
 
@@ -885,7 +888,7 @@ function submitToOSM() {
         ohauth.baseString('POST', url, o));
 
     ohauth.xhr('POST', url, o, osmChange, {header: {'Content-Type': 'text/xml'}},
-        function(xhr) {
+        function() {
             next();
         });
 }
@@ -899,7 +902,8 @@ function teardown() {
 
     map.closePopup();
     map.removeLayer(osmly.current.layer);
-    map.removeLayer(osmly.current.dataLayer);
+
+    if (osmly.current.dataLayer) map.removeLayer(osmly.current.dataLayer);
 }
 
 function getSetOSM(callback) {
@@ -947,7 +951,7 @@ function getSetOSM(callback) {
             },
             pointToLayer: function(feature, latlng) {
                 return L.circleMarker(latlng, {
-                    radius: 7,
+                    radius: 6,
                     opacity: 1,
                     fillOpacity: 0.33
                 });
@@ -968,7 +972,7 @@ function filterContext(osmGeoJson) {
     while (i--) {
         var feature = features[i],
             match = false;
-        
+
         for (var key in feature.properties) {
             if (key in osmly.context &&
                 osmly.context[key].indexOf(feature.properties[key]) > -1 &&
