@@ -1,11 +1,5 @@
 // https://gist.github.com/aaronlidman/4712709
 var osm2geo = function(osm) {
-    var xml = parse(osm),
-        geo = {
-            "type" : "FeatureCollection",
-            "features" : []
-        },
-        nodesCache = cacheNodes();
 
     function parse(xml) {
         var string = new XMLSerializer().serializeToString(xml),
@@ -14,6 +8,7 @@ var osm2geo = function(osm) {
     }
 
     // set the bounding box [minX,minY,maxX,maxY]; x -> long, y -> lat
+    // from what I've seen no one really uses this
     function getBounds(bounds) {
         var bbox = [];
 
@@ -29,28 +24,33 @@ var osm2geo = function(osm) {
         return bbox;
     }
 
-    geo.bbox = getBounds(xml.getElementsByTagName('bounds'));
-
     // http://stackoverflow.com/a/1830844
     function isNumber(n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     }
 
-    // set properties for a feature
+    // set tags as properties
     function setProps(element){
-        var properties = {},
+        var props = {},
             tags = element.getElementsByTagName('tag'),
             t = tags.length;
 
         while (t--) {
             if (isNumber(tags[t].getAttribute('v'))) {
-                properties[tags[t].getAttribute('k')] = +tags[t].getAttribute('v');
+                props[tags[t].getAttribute('k')] = +tags[t].getAttribute('v');
             } else {
-                properties[tags[t].getAttribute('k')] = tags[t].getAttribute('v');
+                props[tags[t].getAttribute('k')] = tags[t].getAttribute('v');
             }
         }
 
-        return properties;
+        // a few extra, possibly useful, properties
+        if (element.getAttribute('id')) props.osm_id = element.getAttribute('id');
+        if (element.getAttribute('user')) props.osm_lastEditor = element.getAttribute('user');
+        if (element.getAttribute('version')) props.osm_version = element.getAttribute('version');
+        if (element.getAttribute('changeset')) props.osm_lastChangeset = element.getAttribute('changeset');
+        if (element.getAttribute('timestamp')) props.osm_lastEdited = element.getAttribute('timestamp');
+
+        return sortObject(props);
     }
 
     // create a feature of given type
@@ -124,6 +124,34 @@ var osm2geo = function(osm) {
         };
     }
 
+    // http://stackoverflow.com/a/1359808
+    function sortObject(o) {
+        var sorted = {},
+        key, a = [];
+
+        for (key in o) {
+            if (o.hasOwnProperty(key)) {
+                a.push(key);
+            }
+        }
+
+        a.sort();
+
+        for (key = 0; key < a.length; key++) {
+            sorted[a[key]] = o[a[key]];
+        }
+        return sorted;
+    }
+
+    var xml = parse(osm),
+        geo = {
+            "type" : "FeatureCollection",
+            "features" : []
+        },
+        nodesCache = cacheNodes();
+
+    geo.bbox = getBounds(xml.getElementsByTagName('bounds'));
+
     // Points
     var points = nodesCache.withTags,
         p = points.length;
@@ -188,6 +216,6 @@ var osm2geo = function(osm) {
     while (r--) {
         geo.features.push(relational.features[r]);
     }
-    
+
     return geo;
 };
