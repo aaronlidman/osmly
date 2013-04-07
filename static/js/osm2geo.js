@@ -30,7 +30,7 @@ var osm2geo = function(osm) {
     }
 
     // set tags as properties
-    function setProps(element){
+    function setProps(element) {
         var props = {},
             tags = element.getElementsByTagName('tag'),
             t = tags.length;
@@ -44,17 +44,17 @@ var osm2geo = function(osm) {
         }
 
         // a few extra, possibly useful, properties
-        if (element.getAttribute('id')) props.osm_id = element.getAttribute('id');
+        if (element.getAttribute('id')) props.osm_id = +element.getAttribute('id');
         if (element.getAttribute('user')) props.osm_lastEditor = element.getAttribute('user');
-        if (element.getAttribute('version')) props.osm_version = element.getAttribute('version');
-        if (element.getAttribute('changeset')) props.osm_lastChangeset = element.getAttribute('changeset');
+        if (element.getAttribute('version')) props.osm_version = +element.getAttribute('version');
+        if (element.getAttribute('changeset')) props.osm_lastChangeset = +element.getAttribute('changeset');
         if (element.getAttribute('timestamp')) props.osm_lastEdited = element.getAttribute('timestamp');
 
         return sortObject(props);
     }
 
     // create a feature of given type
-    function getFeature(element, type){
+    function getFeature(element, type) {
         return {
             "geometry" : {
                 "type" : type,
