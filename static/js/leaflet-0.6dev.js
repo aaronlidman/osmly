@@ -7596,7 +7596,7 @@ L.Control.Attribution = L.Control.extend({
 			prefixAndAttribs.push(attribs.join(', '));
 		}
 
-		this._container.innerHTML = prefixAndAttribs.join(' | ');
+		this._container.innerHTML = prefixAndAttribs.join(' - ');
 	},
 
 	_onLayerAdd: function (e) {
