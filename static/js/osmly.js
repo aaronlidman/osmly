@@ -6,14 +6,12 @@ TODO
     - common ohauth.xhr function
     - group oauth functions like iD
         - https://github.com/systemed/iD/blob/master/js/id/oauth.js#L53
-        - same idea can be applied to changesets, submitting?, setup, L.toGeoJson
+        - same idea can be applied to changesets, submitting?
     - crossbrowser test ui
         - especially modal and tag stuff
     - check if done, again, before submitting to osm
     - confirm toOsm multipolygons are valid in josm
         - they're not
-    - consider forwarding all polygons with holes to josm
-        - multipolygons are cool, holes suck because I have no way of knowing what's an inner
     - bind link in validFeature(), unbind on click
     - getSetOsm(), setup(), and display() interaction is a mess
     - instructions modal limits min-height
@@ -22,6 +20,11 @@ TODO
         - when osm is done bring in UI and editing points
         - allows for a few seconds of planning
     - bigger action buttons
+    - get for loops figured out, consistency, noob
+        - for vs for-in
+    - handle tags better
+        - make then self contained with geojson properties
+        - available to edit tags for multiple items
 */
 
 var osmly = {
@@ -53,7 +56,7 @@ var osmly = {
         },
         contextStyle: {
             color: '#FFFF00',
-            fillOpacity: 0.33,
+            fillOpacity: 0.3,
             weight: 3,
             opacity: 1
         }
@@ -82,10 +85,12 @@ osmly.set = function(object) {
 osmly.go = function() {
     map = L.map(osmly.div, {
         center: osmly.origin,
-        layers: [new L.BingLayer('Anqm0F_JjIZvT0P3abS6KONpaBaKuTnITRrnYuiJCE0WOhH6ZbE4DzeT6brvKVR5')],
+        layers: [new L.BingLayer('Arzdiw4nlOJzRwOz__qailc8NiR31Tt51dN2D7cm57NrnceZnCpgOkmJhNpGoppU')],
         zoom: osmly.zoom,
         maxZoom: 20
     });
+
+    map.attributionControl.setPrefix(false);
 
     osmly.map = map;
 
@@ -154,7 +159,7 @@ osmly.go = function() {
         $('#reset').click();
 
         var id = osmly.current.id,
-            geojson = toGeoJson(osmly.current.layer),
+            geojson = osmly.current.layer.toGeoJSON(),
             osmChange = toOsm(geojson),
             request = osmly.featuresApi + 'db=' + osmly.db + '&id=' + id + '&action=osc',
             bbox = osmly.current.bbox;
@@ -317,11 +322,18 @@ function next() {
     $('#tags li').remove();
 
     var current = {},
-        request = osmly.featuresApi + 'db=' + osmly.db;
-        // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1047';
+        // request = osmly.featuresApi + 'db=' + osmly.db;
+        request = osmly.featuresApi + 'db=' + osmly.db + '&id=1047';
+            // simple multipolygon
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1108';
+            // poly
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=810';
+            // poly with a hole
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1129';
+        // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1146';
+            // context multipolygon isn't showing up, very important it does
+        // there was a multipolygon w/ only one coords array in it that screwed things up, didn't get id
+            // structured like a polygon, just had type of multipolygon
 
     $.ajax(request).done(function(data) {
         data = JSON.parse(data);
@@ -329,28 +341,6 @@ function next() {
         current.id = current.feature.properties.id;
         current.bbox = current.feature.properties.buffer_bounds;
         current.isEditable = editable(current.feature.geometry);
-
-
-        // fixes same first/last node issue
-        // fix coming to leaflet any day now
-        // --- delete w/ leaflet update
-        if (current.feature.geometry.coordinates.length > 1) {
-            if (current.feature.geometry.type == "MultiPolygon") {
-                var aa = current.feature.geometry.coordinates.length;
-                while (aa--) {
-                    current.feature.geometry.coordinates[aa][0].pop();
-                }
-            } else if (current.feature.geometry.type == "Polygon"){
-                var bb = current.feature.geometry.coordinates.length;
-                while (bb--) {
-                    current.feature.geometry.coordinates[bb].pop();
-                }
-            }
-        } else {
-            current.feature.geometry.coordinates[0].pop();
-        }
-        // ^^ --- to delete w/ leaflet update
-
 
         osmly.current = current;
 
@@ -379,9 +369,9 @@ function editable(geo) {
     }
 
     if (geo.type == 'MultiPolygon') {
-        for (var poly in geo.coordinates) {
-            console.log(geo.coordinates[poly]);
-            if (geo.coordinates[poly].length > 1) return false;
+        for (var a = 0, b = geo.coordinates.length; a < b; a += 1) {
+            console.log(geo.coordinates[a]);
+            if (geo.coordinates[a].length > 1) return false;
         }
     }
 
@@ -609,10 +599,9 @@ function appendTags() {
 }
 
 function populateTags() {
-    osmly.current.feature.properties = sortObject(osmly.current.feature.properties);
-
     for (var tag in osmly.current.feature.properties) {
-        if (osmly.current.feature.properties[tag] !== 'null' && osmly.current.feature.properties[tag] !== null) {
+        if (osmly.current.feature.properties[tag] !== 'null' &&
+            osmly.current.feature.properties[tag] !== null) {
             $('#tags ul').append(
                 '<li>' +
                 '<span class="k" spellcheck="false" contenteditable="true">' +
@@ -624,7 +613,6 @@ function populateTags() {
         }
     }
 }
-
 
 // doesn't work until the selectors are visibile?
 function equalizeTags() {
@@ -640,82 +628,6 @@ function equalizeTags() {
         equalize: 'width',
         reset: true});
     $('.v').width( $('.v').width() + 12);
-}
-
-// http://stackoverflow.com/a/1359808
-function sortObject(o) {
-    var sorted = {},
-    key, a = [];
-
-    for (key in o) {
-        if (o.hasOwnProperty(key)) {
-            a.push(key);
-        }
-    }
-
-    a.sort();
-
-    for (key = 0; key < a.length; key++) {
-        sorted[a[key]] = o[a[key]];
-    }
-    return sorted;
-}
-
-// next 3 functions from a Leaflet issue: https://github.com/Leaflet/Leaflet/issues/712
-function toGeoJson(target) {
-    // will want to convert layer groups in the future
-    if (target instanceof L.Polygon) {
-        //Polygon
-        var coords = latLngsToCoords(target.getLatLngs());
-        return {
-            coordinates: [coords],
-            type: 'Polygon'
-        };
-    } else if (target instanceof L.FeatureGroup) {
-        //Multi point and GeometryCollection
-        var multi = [];
-        var layers = target._layers;
-        var points = true;
-
-        for (var stamp in layers) {
-            var json = toGeoJson(layers[stamp]);
-            multi.push(json);
-            if (json.type !== 'Point') {
-                points = false;
-            }
-        }
-
-        if (points) {
-            var coords = multi.map(function(geo) {
-                return geo.coordinates;
-            });
-
-            return {
-                coordinates: coords,
-                type: 'MultiPoint'
-            };
-        } else {
-            return {
-                geometries: multi,
-                type: 'GeometryCollection'
-            };
-        }
-    }
-}
-
-function latLngToCoords(latlng) {
-    var lng = Math.round(latlng.lng*1000000)/1000000;
-    var lat = Math.round(latlng.lat*1000000)/1000000;
-    return [lng, lat];
-}
-
-function latLngsToCoords(arrLatlng) {
-    var coords = [];
-    arrLatlng.forEach(function(latlng) {
-        coords.push(latLngToCoords(latlng));
-    },
-    this);
-    return coords;
 }
 
 function getTags() {
@@ -738,90 +650,122 @@ function toOsm(geojson) {
 }
 
 function toOsmChange(geojson) {
-    return '<osmChange version="0.6" generator="osmly"><create>' + innerOsm(geojson) +
-    '</create></osmChange>';
+    return '<osmChange version="0.6" generator="osmly"><create>' +
+        innerOsm(geojson) + '</create></osmChange>';
 }
 
-// this is hideous
 // geojson object, tags [[k,v],[k,v],[k,v]]
 function innerOsm(geojson) {
-    // this is all up in the air and very limited to this specific toGeoJSON output
-    // actual leaflet toGeoJSON is coming?
-        // https://github.com/Leaflet/Leaflet/pull/1462
+    // currently not equipped for tags on individual features, just tags everything with var tags
     var nodes = '',
         ways = '',
         relations = '',
         count = -1;
-        tags = getTags();
+        tags = getTags(),
+        changeset = 0;
 
-    if (geojson.geometries[0].geometries && geojson.geometries[0].geometries.length > 1) {
-        // relations aren't ment to be comprehensive, just passable to be editted in JOSM
-        var a = geojson.geometries[0].geometries.length,
-            wayz = [],
-            coords = [];
+    if (token('changeset_id')) changeset = token('changeset_id');
 
-        relations += '<relation id="' + count + '" changeset="' + token('changeset_id') + '">';
-        count--;
+    for (var a = 0, b = geojson.geometries.length; a < b; a += 1) {
+        var geo = geojson.geometries[a];
 
-        while (a--) {
-            relations += '<member type="way" ref="' + count + '" role="outer" />';
-            wayz.push(count);
-            coords.push(geojson.geometries[0].geometries[a].coordinates[0]);
-            count--;
+        if (geo.type == 'MultiPolygon') {
+            var r = relation(geo);
+            ways += r; //kkkkk
+        } else if (geo.type == 'Polygon') {
+            addPolygon(geo);
         }
-
-        for (var tag in tags) {
-            relations += '<tag k="' + tags[tag][0] + '" v="' + tags[tag][1] + '"/>';
-        }
-
-        relations += '<tag k="type" v="multipolygon" />';
-        relations += '</relation>';
     }
 
-    if (relations === '') {
-        // var j = geojson.geometries[i].coordinates[0].length;
-        var coords = [geojson.geometries[0].coordinates[0]];
+    function relation(rel) {
+        var relStr = '',
+            members = '';
+
+        for (var a = 0, b = rel.coordinates.length; a < b; a += 1) {
+            var poly = addPolygon({coordinates: rel.coordinates[a]});
+            members += '<member type="way" ref="' + poly + '" role="outer"/>';
+        }
+
+        relStr += '<relation id="' + count + '" changeset="' + changeset + '">';
+        relStr += members;
+        relStr += '</relation>';
+
+        // need to figure out tagging, not on ways but on relation itself
+
+        return relStr;
     }
 
-    var b = coords.length;
-    while (b--) {
-        var c = coords[b].length,
-            nds = [];
+    function polygon(poly) {
+        var nds = [],
+            nodes = '';
 
-        while (c--) {
-            var lon = coords[b][c][0],
-                lat = coords[b][c][1];
+        if (poly.coordinates.length === 1){
+            var polyC = poly.coordinates[0];
 
-            nodes += '<node id="' + count + '" lat="' + lat + '" lon="' + lon +
-            '" changeset="' + token('changeset_id') + '"/>';
-                // might need version="0"
-            nds.push(count);
-            count--;
-        }
-
-        if (relations === '') {
-            ways += '<way id="' + count + '" changeset="' + token('changeset_id') + '">';
-        } else {
-            ways += '<way id="' + wayz[b] + '" changeset="' + token('changeset_id') + '">';
-            // the order on this isn't significant because they all use the same tags in the end
-        }
-
-        // wrap around node for polygons, check geojson feature type in the future
-        nds.push(nds[0]);
-
-        var d = nds.length;
-        while (d--) {
-            ways += '<nd ref="' + nds[d] + '"/>';
-        }
-
-        if (relations === '') {
-            for (var tag in tags) {
-                ways += '<tag k="' + tags[tag][0] + '" v="' + tags[tag][1] + '"/>';
+            // length-1 because osm xml doesn't need repeating nodes
+            // we instead use a reference to the first node
+            for (var a = 0, b = polyC.length-1; a < b; a += 1) {
+                nds.push(count);
+                nodes += addNode(polyC[a][1], polyC[a][0]);
             }
+
+            nds.push(nds[0]); // first node = last
+        } else {
+            // polygon with a hole, make into a relation w/ inner
+            // do bbox calculation, make the smaller bbox(es) inner
         }
 
-        ways += '</way>';
+        // right now we grab tag from parent function to use external tags
+        // eventually each feature will contain its own properties to use as tags
+        // then we'll use poly.properties
+        // then tags will be done here
+        // also, replace null below
+
+        return way(nds, tags);
+    }
+
+    function addPolygon(poly) {
+        var p = polygon(poly);
+        ways += p.way;
+
+        return p.id;
+    }
+
+    function buildNds(array) {
+        var xml = '';
+
+        for (var a = 0, b = array.length; a < b; a += 1) {
+            xml += '<nd ref="' + array[a] + '"/>';
+        }
+
+        return xml;
+    }
+
+    // geojson = lon,lat / osm = lat,lon
+    function addNode(lat, lon) {
+        var n = '<node id="' + count + '" lat="' + lat + '" lon="' + lon +
+        '" changeset="' + changeset + '"/>';
         count--;
+        nodes += n;
+    }
+
+    function way(nds, tags) {
+        // nds and tags as unprocessed arrays
+
+        // for temporary external tags, will go away soon, then use tagz or rename to tags
+        var tagStr = '';
+        for (var a = 0, b = tags.length; a < b; a += 1) {
+            tagStr += '<tag k="' + tags[a][0] + '" v="' + tags[a][1] + '"/>';
+        }
+
+        var w = '<way id="' + count + '" changeset="' + changeset + '">' +
+        buildNds(nds) + tagStr + '</way>';
+        count--;
+
+        return {
+            id: count + 1,
+            way: w
+        };
     }
 
     return nodes + ways + relations;
@@ -842,8 +786,9 @@ function submit(result) {
     }
 
     if (osmly.demo) {
+        console.log(osmly.current.layer.toGeoJSON());
         if (result === 'submit') {
-            var geojson = toGeoJson(osmly.current.layer);
+            var geojson = osmly.current.layer.toGeoJSON();
             console.log(toOsm(geojson));
             console.log(toOsmChange(geojson));
         }
@@ -875,7 +820,7 @@ function submitToOSM() {
 
     var url = osmly.writeApi + '/api/0.6/changeset/' + id + '/upload',
         token_secret = token('secret'),
-        geojson = toGeoJson(osmly.current.layer),
+        geojson = osmly.current.layer.toGeoJSON(),
         osmChange = toOsmChange(geojson);
 
     notify('uploading to OSM');
