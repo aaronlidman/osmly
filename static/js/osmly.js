@@ -323,13 +323,14 @@ function next() {
 
     var current = {},
         // request = osmly.featuresApi + 'db=' + osmly.db;
-        request = osmly.featuresApi + 'db=' + osmly.db + '&id=1047';
+        // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1047';
             // simple multipolygon
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1108';
             // poly
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=810';
             // poly with a hole
-        // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1129';
+        request = osmly.featuresApi + 'db=' + osmly.db + '&id=1129';
+            // multipolygon with a hole
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1146';
             // context multipolygon isn't showing up, very important it does
         // there was a multipolygon w/ only one coords array in it that screwed things up, didn't get id
@@ -370,7 +371,6 @@ function editable(geo) {
 
     if (geo.type == 'MultiPolygon') {
         for (var a = 0, b = geo.coordinates.length; a < b; a += 1) {
-            console.log(geo.coordinates[a]);
             if (geo.coordinates[a].length > 1) return false;
         }
     }
@@ -670,34 +670,52 @@ function innerOsm(geojson) {
         var geo = geojson.geometries[a];
 
         if (geo.type == 'MultiPolygon') {
-            var r = relation(geo);
-            ways += r; //kkkkk
+            addRelation(geo);
         } else if (geo.type == 'Polygon') {
             addPolygon(geo);
         }
     }
 
+    function addRelation(rel) {
+        var r = relation(rel);
+        relations += r;
+    }
+
     function relation(rel) {
         var relStr = '',
-            members = '';
+            members = '',
+            rCoords = rel.coordinates;
 
-        for (var a = 0, b = rel.coordinates.length; a < b; a += 1) {
-            var poly = addPolygon({coordinates: rel.coordinates[a]});
-            members += '<member type="way" ref="' + poly + '" role="outer"/>';
+        for (var a = 0, b = rCoords.length; a < b; a += 1) {
+            for (var c = 0, d = rCoords[a].length; c < d; c += 1) {
+
+                var poly = addPolygon({coordinates: [rCoords[a][c]]}),
+                    role = ((rel.type == 'Polygon' && c > 0) ? 'inner': 'outer');
+
+                members += '<member type="way" ref="' + poly + '" role="' + role + '"/>';
+            }
         }
+
+        // need to figure out how to remove tags from the inner way
+        // just do the property tags?
 
         relStr += '<relation id="' + count + '" changeset="' + changeset + '">';
         relStr += members;
-        relStr += '</relation>';
+        relStr += '<tag k="type" v="multipolygon"/></relation>';
 
-        // need to figure out tagging, not on ways but on relation itself
+        count--;
 
         return relStr;
     }
 
+    function addPolygon(poly) {
+        var p = polygon(poly);
+        ways += p.way;
+        return p.id;
+    }
+
     function polygon(poly) {
-        var nds = [],
-            nodes = '';
+        var nds = [];
 
         if (poly.coordinates.length === 1){
             var polyC = poly.coordinates[0];
@@ -706,29 +724,27 @@ function innerOsm(geojson) {
             // we instead use a reference to the first node
             for (var a = 0, b = polyC.length-1; a < b; a += 1) {
                 nds.push(count);
-                nodes += addNode(polyC[a][1], polyC[a][0]);
+                addNode(polyC[a][1], polyC[a][0]);
             }
-
             nds.push(nds[0]); // first node = last
+
+            return way(nds, tags);
         } else {
             // polygon with a hole, make into a relation w/ inner
-            // do bbox calculation, make the smaller bbox(es) inner
+            // console.log('before: ' + String(poly.coordinates));
+            poly.coordinates = [poly.coordinates];
+            // console.log('after: ' + String(poly.coordinates));
+            addRelation(poly);
+            return {id: null, way: ''};
         }
-
-        // right now we grab tag from parent function to use external tags
-        // eventually each feature will contain its own properties to use as tags
-        // then we'll use poly.properties
-        // then tags will be done here
-        // also, replace null below
-
-        return way(nds, tags);
     }
 
-    function addPolygon(poly) {
-        var p = polygon(poly);
-        ways += p.way;
-
-        return p.id;
+    // geojson = lon,lat / osm = lat,lon
+    function addNode(lat, lon) {
+        var n = '<node id="' + count + '" lat="' + lat + '" lon="' + lon +
+        '" changeset="' + changeset + '"/>';
+        count--;
+        nodes += n;
     }
 
     function buildNds(array) {
@@ -741,14 +757,6 @@ function innerOsm(geojson) {
         return xml;
     }
 
-    // geojson = lon,lat / osm = lat,lon
-    function addNode(lat, lon) {
-        var n = '<node id="' + count + '" lat="' + lat + '" lon="' + lon +
-        '" changeset="' + changeset + '"/>';
-        count--;
-        nodes += n;
-    }
-
     function way(nds, tags) {
         // nds and tags as unprocessed arrays
 
@@ -757,6 +765,7 @@ function innerOsm(geojson) {
         for (var a = 0, b = tags.length; a < b; a += 1) {
             tagStr += '<tag k="' + tags[a][0] + '" v="' + tags[a][1] + '"/>';
         }
+
 
         var w = '<way id="' + count + '" changeset="' + changeset + '">' +
         buildNds(nds) + tagStr + '</way>';
