@@ -8,7 +8,6 @@ var osm2geo = function(osm) {
     }
 
     // set the bounding box [minX,minY,maxX,maxY]; x -> long, y -> lat
-    // from what I've seen no one really uses this
     function getBounds(bounds) {
         var bbox = [];
 
@@ -99,12 +98,11 @@ var osm2geo = function(osm) {
             feature = getFeature(relations[r], "MultiPolygon");
 
             if (feature.properties.type == 'multipolygon') {
-                // other types require more work that I don't have time for right now
-
                 feature.geometry.coordinates.push([]);
 
                 var members = relations[r].getElementsByTagName('member'),
                     m = members.length;
+
                 while (m--) {
                     done[members[m].getAttribute('ref')] = count;
                     // feature.geometry.coordinates[0].push([]);
@@ -115,7 +113,7 @@ var osm2geo = function(osm) {
                 delete feature.properties.type;
                 features[count] = feature;
                 count++;
-            }
+            } // might get to other types in the future
         }
 
         return {
@@ -143,6 +141,22 @@ var osm2geo = function(osm) {
         return sorted;
     }
 
+    function Points() {
+        var points = nodesCache.withTags;
+
+        for (var p = 0, r = points.length; p < r; p += 1) {
+            var feature = getFeature(points[p], "Point");
+
+            feature.geometry.coordinates = [
+                +points[p].getAttribute('lon'),
+                +points[p].getAttribute('lat')
+            ];
+
+            geo.features.push(feature);
+        }
+    }
+
+
     var xml = parse(osm),
         geo = {
             "type" : "FeatureCollection",
@@ -152,28 +166,15 @@ var osm2geo = function(osm) {
 
     geo.bbox = getBounds(xml.getElementsByTagName('bounds'));
 
-    // Points
-    var points = nodesCache.withTags,
-        p = points.length;
+    Points();
 
-    while (p--) {
-        var feature = getFeature(points[p], "Point");
-
-        feature.geometry.coordinates = [
-            +points[p].getAttribute('lon'),
-            +points[p].getAttribute('lat')
-        ];
-
-        geo.features.push(feature);
-    }
-
-    // MultiPolygons, mostly in buildRelations()
+    // MultiPolygons
     var relational = buildRelations(),
         ways = xml.getElementsByTagName('way');
 
     // Polygons/LineStrings
-    var w = ways.length;
-    while (w--) {
+
+    for (var w = 0, x = ways.length; w < x; w += 1) {
         var feature = {},
             nds = ways[w].getElementsByTagName('nd');
 
@@ -212,10 +213,12 @@ var osm2geo = function(osm) {
         }
     }
 
+    console.log(relational);
     var r = relational.features.length;
     while (r--) {
         geo.features.push(relational.features[r]);
     }
 
+    console.log(geo);
     return geo;
 };

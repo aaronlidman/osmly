@@ -4,18 +4,26 @@
 # run: python build.py file.geojson
 # creates a sqlite db, named file.sqlite
 
+# TODO:
+#   size limitation, figure out the units, use bounds instead
+
 import json
 import sqlite3
 from shapely.geometry import asShape, mapping
-from optparse import OptionParser
+from argparse import ArgumentParser
 
-parser = OptionParser()
-(options, args) = parser.parse_args()
+parser = ArgumentParser()
 
-data = open(args[0])
+parser.add_argument(
+    'source',
+    help='Source file to parse')
+
+args = vars(parser.parse_args())
+
+data = open(args['source'])
 data = json.load(data)
 
-sqlite = args[0].split('.')
+sqlite = args['source'].split('.')
 sqlite = sqlite[0] + '.sqlite'
 
 conn = sqlite3.connect(sqlite)
@@ -42,6 +50,10 @@ for feature in data['features']:
     feature['properties']['id'] = count
     feature['properties']['buffer_bounds'] = bounds
     feature['geometry']['coordinates'] = geo['coordinates']
+
+    if len(feature['geometry']['coordinates']) > 1:
+        # multipolygon
+        print str(count) + ': ' + str(len(feature['geometry']['coordinates']))
 
     statement = "INSERT INTO osmly VALUES(?, ?, ?, ?);"
     c.execute(statement, (id, json.dumps(feature), '', ''))

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# more polymorphic, less neanderthal
 
 import sqlite3
 from flask import Flask, request, make_response
@@ -41,7 +40,7 @@ def get():
     if 'action' in request.args and request.args['action'] == 'osc':
         return row[1]
 
-    return row
+    return row[0]
 
 
 def post():

@@ -322,19 +322,20 @@ function next() {
     $('#tags li').remove();
 
     var current = {},
-        // request = osmly.featuresApi + 'db=' + osmly.db;
+        request = osmly.featuresApi + 'db=' + osmly.db;
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1047';
             // simple multipolygon
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1108';
             // poly
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=810';
             // poly with a hole
-        request = osmly.featuresApi + 'db=' + osmly.db + '&id=1129';
+        // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1129';
             // multipolygon with a hole
         // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1146';
             // context multipolygon isn't showing up, very important it does
         // there was a multipolygon w/ only one coords array in it that screwed things up, didn't get id
             // structured like a polygon, just had type of multipolygon
+            // try/catch?
 
     $.ajax(request).done(function(data) {
         data = JSON.parse(data);
@@ -876,7 +877,7 @@ function getSetOSM(callback) {
         // console.log(JSON.stringify(osmly.osmContext));
         // console.log(JSON.stringify(osmly.simpleContext));
 
-        osmly.current.dataLayer = L.geoJson(osmly.simpleContext, {
+        osmly.current.dataLayer = L.geoJson(osmly.osmContext, {
             style: osmly.contextStyle,
             onEachFeature: function(feature, layer) {
                 // hovering displays the name
