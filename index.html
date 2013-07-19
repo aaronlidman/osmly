@@ -11,14 +11,14 @@
         <title>rawr</title>
         <meta charset='utf-8'> 
 
-        <link rel="stylesheet" href="static/css/leaflet0.5.css" />
+        <link rel="stylesheet" href="static/css/leaflet.css" />
         <link rel="stylesheet" href="static/css/leaflet.label.css" />
         <link rel="stylesheet" href="static/css/css.css" />
         <link rel="stylesheet" href="static/css/reveal.css" />
         <!--[if lte IE 8]>
             <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.ie.css" />
         <![endif]-->
-        <script src="static/js/leaflet-0.6dev.js"></script>
+        <script src="static/js/leaflet-0.6.3.js"></script>
         <script src="static/js/leaflet.label.js"></script>
         <script src="static/js/leaflet.draw.js"></script>
         <script src="static/js/jquery1.8.2.min.js"></script>
@@ -111,7 +111,7 @@
 
         <div id="map"></div>
         <script type="text/javascript">
-            var OSMly = osmly().set({
+            osmly().go({
                 featuresApi: 'http://127.0.0.1:5000/?',
                 db: 'parks-5',
                 demo: true,
@@ -126,8 +126,6 @@
                     amenity: ['college', 'kindergarten', 'school', 'university', 'grave_yard', 'library', 'town_hall']
                 }
             });
-
-            OSMly.go();
         </script>        
     </body>
 </html>
