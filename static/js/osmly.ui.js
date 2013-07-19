@@ -1,5 +1,4 @@
 osmly.ui = function() {
-
     var ui = {},
         settings = osmly.settings;
 
@@ -103,7 +102,7 @@ osmly.ui = function() {
         });
 
         $('#osmlink').click(function() {
-            window.open(osmly.current.osmlink);
+            window.open(osmly.osmlink);
         });
 
     }
@@ -120,18 +119,121 @@ osmly.ui = function() {
         // $('#notify').fadeOut(250);
     };
 
-    ui.remove = function(selector) {
-        // to make it easier to remove jquery later
-        $(selector).remove();
+    ui.setupItem = function(properties) {
+        // bindings and populating fields for a new item
+        populateTags(properties);
+
+        $('#skip, #submit').click(function() {
+            submit(event.target.id);
+        });
+
+        $('#problem').change(function() {
+            submit($('#problem').val());
+        });
+
+        $('.k, .v').keypress(function() {
+            equalizeTags();
+        });
+
+        $('.minus').click(function() {
+            if ($('#tags li').length > 1) {
+                $(this).parent().remove();
+                equalizeTags();
+            }
+        });
+
+        $('#add-new-tag').click(function() {
+            // what a freakin mess, what have I done
+            $('#tags ul').append(
+                '<li>' +
+                '<span class="k" spellcheck="false" contenteditable="true"></span>' +
+                '<span class="v" spellcheck="false" contenteditable="true"></span>' +
+                '<span class="minus">-</span>' +
+                '</li>');
+
+            equalizeTags();
+
+            $('.k, .v').keypress(function() {
+                equalizeTags();
+            });
+
+            $('.minus').click(function() {
+                if ($('#tags li').length > 1) {
+                    $(this).parent().remove();
+                    equalizeTags();
+                }
+            });
+        });
+
+        $('#reset').click(function() {
+            teardown();
+            $('#tags li').remove();
+            osmly.item.setItemLayer();
+            ui.setup();
+            display();
+        });
     };
 
-    function clearItem() {
-        // destroy osmly.item also?
+    ui.displayItem = function(isEditable) {
+        osmly.item.layer.addTo(osmly.map);
+
+        if (osmly.item.contextLayer) {
+            osmly.item.contextLayer.addTo(osmly.map);
+            osmly.item.contextLayer.bringToFront();
+        }
+
+        $('#notify, #login').fadeOut(250);
+        $('#top-right, #bottom-right, #action-block').fadeIn(250);
+
+        if (isEditable) {
+            $('#tags').fadeIn(250);
+            equalizeTags();
+
+        } else {
+            $('#problem, #submit').hide();
+            $('#reusable-modal span').html(
+                'This feature is too complex. <a>Edit it in JOSM?</a>');
+            // put an 'Edit in JOSM' button right there, when clicked close the modal and let the other modal open
+            // literally bind, $('#josm').click()
+                $('#reusable-modal').reveal({
+                     animation: 'fade',
+                     animationspeed: 200,
+                     closeonbackgroundclick: true,
+                     dismissmodalclass: 'close-reveal-modal'
+                });
+        }
+    };
+
+    function populateTags(properties) {
+        for (var tag in properties) {
+            if (properties[tag] !== null &&
+                properties[tag] !== 'null') {
+                $('#tags ul').append(
+                    '<li>' +
+                    '<span class="k" spellcheck="false" contenteditable="true">' +
+                    tag + '</span>' +
+                    '<span class="v" spellcheck="false" contenteditable="true">' +
+                    properties[tag] + '</span>' +
+                    '<span class="minus">-</span>' +
+                    '</li>');
+            }
+        }
     }
 
-    function nextItem() {
-        ui.notify('getting next item');
-        ui.remove('#tags li');
+    function equalizeTags() {
+        // doesn't work until the selectors are visibile?
+        // janky & inefficient, need to look into how the plugin works
+        $('ul').equalize({
+            children: '.k',
+            equalize: 'width',
+            reset: true});
+        $('.k').width( $('.k').width() + 12);
+
+        $('ul').equalize({
+            children: '.v',
+            equalize: 'width',
+            reset: true});
+        $('.v').width( $('.v').width() + 12);
     }
 
     initialize();

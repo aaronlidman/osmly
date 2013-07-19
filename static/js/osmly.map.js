@@ -1,26 +1,22 @@
 osmly.map = function() {
-    var map = {},
-        settings = osmly.settings;
+    var map = {};
 
-    function initialize() {
-        map.map = L.map(settings.div, {
-            center: settings.origin,
+    map = L.map(osmly.settings.div, {
+            center: osmly.settings.origin,
             layers: [new L.BingLayer('Arzdiw4nlOJzRwOz__qailc8NiR31Tt51dN2D7cm57NrnceZnCpgOkmJhNpGoppU')],
-            zoom: settings.zoom,
+            zoom: osmly.settings.zoom,
             maxZoom: 20
         });
 
-        map.map.on('move', function() {
-            var coords = map.map.getCenter(),
+    map.on('move', function() {
+            var coords = map.getCenter(),
                 lat = coords.lat.toFixed(4).toString(),
                 lng = coords.lng.toFixed(4).toString(),
-                zoom = map.map.getZoom().toString();
+                zoom = map.getZoom().toString();
             osmly.osmlink = 'http://www.openstreetmap.org/?lat=' + lat + '&lon=' + lng + '&zoom=' + zoom;
         });
 
-        map.map.attributionControl.setPrefix(false);
-    }
+    map.attributionControl.setPrefix(false);
 
-    initialize();
     return map;
 };
