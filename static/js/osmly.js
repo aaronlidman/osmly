@@ -27,40 +27,42 @@ TODO
         - available to edit tags for multiple items
 */
 
-var settings = {
-        featuresApi: '',
-        db: '',
-        writeApi: 'http://api06.dev.openstreetmap.org',
-        oauth_secret: 'Mon0UoBHaO3qvfgwWrMkf4QAPM0O4lITd3JRK4ff',
-        readApi: 'http://www.overpass-api.de/api/xapi?map?',
-        context: {}, // {key: ['some', 'tags'], otherkey: ['more', 'tags']}
-        div: 'map',
-        origin: [0,0],
-        zoom: 2,
-        demo: false,
-        changesetTags: [ // include specifics to the import
-            ['created_by', 'osmly'],
-            ['osmly:version', '0'],
-            ['imagery_used', 'Bing']
-        ],
-        renameProperty: {}, // {'MEssy55': 'clean'}, only converts key not value
-        usePropertyAsTag: [], // just keys
-        appendTag: {}, // {'key': 'value'}, will overwrite existing tags
-        consumerKey: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg',
-        featureStyle: {
-            // http://leafletjs.com/reference.html#path-options
-            color: '#00FF00',
-            weight: 3,
-            opacity: 1,
-            clickable: false
-        },
-        contextStyle: {
-            color: '#FFFF00',
-            fillOpacity: 0.3,
-            weight: 3,
-            opacity: 1
-        }
+osmly.settings = {
+    featuresApi: '',
+    db: '',
+    writeApi: 'http://api06.dev.openstreetmap.org',
+    oauth_secret: 'Mon0UoBHaO3qvfgwWrMkf4QAPM0O4lITd3JRK4ff',
+    readApi: 'http://www.overpass-api.de/api/xapi?map?',
+    context: {}, // {key: ['some', 'tags'], otherkey: ['more', 'tags']}
+    div: 'map',
+    origin: [0,0],
+    zoom: 2,
+    demo: false,
+    changesetTags: [ // include specifics to the import
+        ['created_by', 'osmly'],
+        ['osmly:version', '0'],
+        ['imagery_used', 'Bing']
+    ],
+    renameProperty: {}, // {'MEssy55': 'clean'}, only converts key not value
+    usePropertyAsTag: [], // just keys
+    appendTag: {}, // {'key': 'value'}, will overwrite existing tags
+    consumerKey: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg',
+    featureStyle: {
+        // http://leafletjs.com/reference.html#path-options
+        color: '#00FF00',
+        weight: 3,
+        opacity: 1,
+        clickable: false
     },
+    contextStyle: {
+        color: '#FFFF00',
+        fillOpacity: 0.3,
+        weight: 3,
+        opacity: 1
+    }
+};
+
+var settings = osmly.settings,
     user = {
         id: -1,
         name: 'demo'
@@ -74,126 +76,14 @@ var settings = {
 osmly.go = function(object) {
     if (typeof object === 'object') {
         for (var obj in object) {
-            settings[obj] = object[obj];
+            osmly.settings[obj] = object[obj];
         }
     }
 
-    map = L.map(settings.div, {
-        center: settings.origin,
-        layers: [new L.BingLayer('Arzdiw4nlOJzRwOz__qailc8NiR31Tt51dN2D7cm57NrnceZnCpgOkmJhNpGoppU')],
-        zoom: settings.zoom,
-        maxZoom: 20
-    });
-
-    map.attributionControl.setPrefix(false);
-
-    osmly.map = map;
-
-    if (!settings.demo && token('token') && token('secret')) {
-        userDetailsUI();
-        next();
-    } else {
-        if (settings.demo) $('#login').text('Demonstration »');
-
-        $('#login').fadeIn(500);
-    }
-
-    map.on('move', function() {
-        var coords = map.getCenter(),
-            lat = coords.lat.toFixed(4).toString(),
-            lng = coords.lng.toFixed(4).toString(),
-            zoom = map.getZoom().toString();
-            string = '<span id="prefix_text">' +
-                '<a href="http://www.openstreetmap.org/?lat=' + lat +
-                '&lon=' + lng + '&zoom=' + zoom + '" target="_blank">' +
-                lat + ', ' + lng + '</a>' +
-                '</span>';
-        map.attributionControl.setPrefix(string);
-    });
-
-    $('#login').click(function() {
-        notify('');
-
-        if (settings.demo) {
-            $('#login').fadeOut(500);
-            next();
-        } else {
-            $('#login').fadeOut(500);
-            request_oauth();
-        }
-    });
-
-    $('#instruction').click(function() {
-        $('#instruction-modal').reveal({
-             animation: 'fade',
-             animationspeed: 100,
-             closeonbackgroundclick: true,
-             dismissmodalclass: 'close-reveal-modal'
-        });
-    });
-
-    $('#changeset').click(function(e) {
-        e.preventDefault();
-        $('#changeset-modal').reveal({
-             animation: 'fade',
-             animationspeed: 100,
-             closeonbackgroundclick: true,
-             dismissmodalclass: 'close-reveal-modal'
-        });
-    });
-
-    $('#update-change').click(function() {
-        settings.changesetTags.push(['comment', $('#changeset-form').text()]);
-        updateChangeset(token('changeset_id'), function() {
-            $('#changeset-modal').trigger('reveal:close');
-            $('#notify').fadeOut(250);
-        });
-    });
-
-    $('#josm').click(function() {
-        $('#reset').click();
-
-        var id = osmly.current.id,
-            geojson = osmly.current.layer.toGeoJSON(),
-            osmChange = toOsm(geojson),
-            request = settings.featuresApi + 'db=' + settings.db + '&id=' + id + '&action=osc',
-            bbox = osmly.current.bbox;
-
-        $.ajax({
-            type: 'POST',
-            url: request,
-            crossDomain: true,
-            data: {osc: osmChange}
-        }).done(function() {
-            // there's no way to both load data from the api and import a file
-            // so we do them seperately with two requests
-            $.ajax('http://127.0.0.1:8111/load_and_zoom?left=' + bbox[0] +
-                '&right=' + bbox[2] + '&top=' + bbox[3] + '&bottom=' + bbox[1]
-            ).done(function() {
-                $.ajax('http://127.0.0.1:8111/import?url=' + request)
-                .done(function() {
-                    $('#reusable-modal span').text('Opened in JOSM');
-                    $('#reusable-modal').reveal({
-                         animation: 'fade',
-                         animationspeed: 100,
-                         closeonbackgroundclick: true,
-                         dismissmodalclass: 'close-reveal-modal'
-                    });
-                    // fade this out after some seconds (idk 10-15?)
-                    // then show an action dialog, to determine what was done with that feature
-                });
-            }).fail(function() {
-                $('#reusable-modal span').text('JOSM doesn\'t seem to be running. Make sure you start it first.');
-                $('#reusable-modal').reveal({
-                     animation: 'fade',
-                     animationspeed: 100,
-                     closeonbackgroundclick: true,
-                     dismissmodalclass: 'close-reveal-modal'
-                });
-            });
-        });
-
-    });
+    osmly.map = osmly.map();
+    osmly.ui = osmly.ui();
+    osmly.user = osmly.user();
+    osmly.item = osmly.item();
 };
 
 // next 2 functions from iD: https://github.com/systemed/iD/blob/master/js/id/oauth.js
@@ -312,75 +202,11 @@ function userDetailsUI() {
         .fadeIn(500);
 }
 
-function next() {
-    notify('getting next');
-    $('#tags li').remove();
-
-    var current = {},
-        request = settings.featuresApi + 'db=' + settings.db;
-        // request = settings.featuresApi + 'db=' + settings.db + '&id=1047';
-            // simple multipolygon
-        // request = settings.featuresApi + 'db=' + settings.db + '&id=1108';
-            // poly
-        // request = settings.featuresApi + 'db=' + settings.db + '&id=810';
-            // poly with a hole
-        // request = settings.featuresApi + 'db=' + settings.db + '&id=1129';
-            // multipolygon with a hole
-        // request = settings.featuresApi + 'db=' + settings.db + '&id=1146';
-            // context multipolygon isn't showing up, very important it does
-        // there was a multipolygon w/ only one coords array in it that screwed things up, didn't get id
-            // structured like a polygon, just had type of multipolygon
-            // try/catch?
-
-    $.ajax(request).done(function(data) {
-        data = JSON.parse(data);
-        current.feature = data;
-        current.id = current.feature.properties.id;
-        current.bbox = current.feature.properties.buffer_bounds;
-        current.isEditable = editable(current.feature.geometry);
-
-        osmly.current = current;
-
-        // setFeatureLayer() is purposefully here and not in display() due to timing issues
-        // basically if we do it during display the map is still zooming and
-        // midpoint nodes get all screwed up
-        setFeatureLayer();
-
-        if (osmly.current.isEditable) {
-            getSetOSM(function() {
-                setup();
-                display();
-            });
-        } else {
-            setup();
-            display();
-        }
-    });
-}
-
-// checks if the feature has holes, leaflet can't edit them
-function editable(geo) {
-    console.log(geo);
-    if (geo.type == 'Polygon' && geo.coordinates.length > 1) {
-        return false;
-    }
-
-    if (geo.type == 'MultiPolygon') {
-        for (var a = 0, b = geo.coordinates.length; a < b; a += 1) {
-            if (geo.coordinates[a].length > 1) return false;
-        }
-    }
-
-    return true;
-}
-
 function setFeatureLayer() {
     osmly.current.layer = L.geoJson(osmly.current.feature, {
         style: settings.featureStyle,
         onEachFeature: function (feature, layer) {
-
             if (osmly.current.isEditable) {
-
                 if (osmly.current.feature.geometry.type == 'MultiPolygon') {
                     for (var ayer in layer._layers) {
                         layer._layers[ayer].editing.enable();
@@ -560,7 +386,7 @@ function display() {
         $('#reusable-modal span').html(
             'This feature is too complex. <a>Edit it in JOSM?</a>');
         // put an 'Edit in JOSM' button right there, when clicked close the modal and let the other modal open
-        // litterally bind, $('#josm').click()
+        // literally bind, $('#josm').click()
             $('#reusable-modal').reveal({
                  animation: 'fade',
                  animationspeed: 200,
@@ -854,103 +680,6 @@ function teardown() {
     map.removeLayer(osmly.current.layer);
 
     if (osmly.current.dataLayer) map.removeLayer(osmly.current.dataLayer);
-}
-
-function getSetOSM(callback) {
-    notify('getting nearby OSM data');
-        // context
-
-    var bbox = osmly.current.feature.properties.buffer_bounds;
-    bbox = 'bbox=' + bbox.join(',');
-
-    $.ajax(settings.readApi + bbox).done(function(xml) {
-        notify('building OSM data');
-
-        // seperate lists so the user can switch between them?
-        osmly.osmContext = osm2geo(xml);
-        osmly.simpleContext = filterContext(osmly.osmContext);
-
-        // console.log(JSON.stringify(osmly.osmContext));
-        // console.log(JSON.stringify(osmly.simpleContext));
-
-        osmly.current.dataLayer = L.geoJson(osmly.osmContext, {
-            style: settings.contextStyle,
-            onEachFeature: function(feature, layer) {
-                // hovering displays the name
-                // clicking displays all tags
-                var popup = '',
-                    label = null,
-                    t = 0,
-                    tagKeys = Object.keys(feature.properties);
-
-                if (feature.properties) {
-                    if (feature.properties.name) {
-                        label = feature.properties.name;
-                    } else {
-                        label = '[NO NAME] click for tags';
-                    }
-
-                    while (t < tagKeys.length) {
-                        popup += '<li><span class="b">' + tagKeys[t] +
-                        '</span>: ' + feature.properties[tagKeys[t]] + '</li>';
-                        t++;
-                    }
-
-                    layer.bindPopup(popup);
-                    layer.bindLabel(label);
-                }
-            },
-            pointToLayer: function(feature, latlng) {
-                return L.circleMarker(latlng, {
-                    radius: 6,
-                    opacity: 1,
-                    fillOpacity: 0.33
-                });
-            }
-        });
-
-        callback();
-    });
-}
-
-function filterContext(osmGeoJson) {
-    var features = osmGeoJson.features,
-        geo = {
-            'type' : 'FeatureCollection',
-            'features' : []},
-        i = features.length;
-
-    while (i--) {
-        var feature = features[i],
-            match = false;
-
-        for (var key in feature.properties) {
-            if (key in settings.context &&
-                settings.context[key].indexOf(feature.properties[key]) > -1 &&
-                !match) {
-
-                match = true;
-            }
-        }
-
-        if (match || !Object.keys(settings.context).length) {
-            geo.features.push(feature);
-        }
-    }
-
-    return geo;
-}
-
-function notify(string) {
-    if (string !== '') string = '<span>' + string + '</span>';
-    string = '<img src="static/images/loader.gif" />' + string;
-
-    $('#notify')
-        .html(string)
-        .show();
-
-    // don't forget to hide #notify later
-    // $('#notify').fadeOut(250);
 }
 
 return osmly;

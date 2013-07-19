@@ -307,6 +307,7 @@ a {
 }
 
 .leaflet-popup-content {
+    overflow: auto;
     margin: 12px !important;
     list-style-type: none;
 }
