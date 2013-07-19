@@ -27,7 +27,7 @@ TODO
         - available to edit tags for multiple items
 */
 
-var osmly = {
+var settings = {
         featuresApi: '',
         db: '',
         writeApi: 'http://api06.dev.openstreetmap.org',
@@ -67,26 +67,21 @@ var osmly = {
     },
     current = {},
     o = {
-        oauth_consumer_key: osmly.consumerKey,
+        oauth_consumer_key: settings.consumerKey,
         oauth_signature_method: 'HMAC-SHA1'
     };
 
-osmly.set = function(object) {
+osmly.go = function(object) {
     if (typeof object === 'object') {
         for (var obj in object) {
-            osmly[obj] = object[obj];
+            settings[obj] = object[obj];
         }
-        return osmly;
-    } else {
-        return false;
     }
-};
 
-osmly.go = function() {
-    map = L.map(osmly.div, {
-        center: osmly.origin,
+    map = L.map(settings.div, {
+        center: settings.origin,
         layers: [new L.BingLayer('Arzdiw4nlOJzRwOz__qailc8NiR31Tt51dN2D7cm57NrnceZnCpgOkmJhNpGoppU')],
-        zoom: osmly.zoom,
+        zoom: settings.zoom,
         maxZoom: 20
     });
 
@@ -94,11 +89,11 @@ osmly.go = function() {
 
     osmly.map = map;
 
-    if (!osmly.demo && token('token') && token('secret')) {
+    if (!settings.demo && token('token') && token('secret')) {
         userDetailsUI();
         next();
     } else {
-        if (osmly.demo) $('#login').text('Demonstration »');
+        if (settings.demo) $('#login').text('Demonstration »');
 
         $('#login').fadeIn(500);
     }
@@ -119,7 +114,7 @@ osmly.go = function() {
     $('#login').click(function() {
         notify('');
 
-        if (osmly.demo) {
+        if (settings.demo) {
             $('#login').fadeOut(500);
             next();
         } else {
@@ -148,7 +143,7 @@ osmly.go = function() {
     });
 
     $('#update-change').click(function() {
-        osmly.changesetTags.push(['comment', $('#changeset-form').text()]);
+        settings.changesetTags.push(['comment', $('#changeset-form').text()]);
         updateChangeset(token('changeset_id'), function() {
             $('#changeset-modal').trigger('reveal:close');
             $('#notify').fadeOut(250);
@@ -161,7 +156,7 @@ osmly.go = function() {
         var id = osmly.current.id,
             geojson = osmly.current.layer.toGeoJSON(),
             osmChange = toOsm(geojson),
-            request = osmly.featuresApi + 'db=' + osmly.db + '&id=' + id + '&action=osc',
+            request = settings.featuresApi + 'db=' + settings.db + '&id=' + id + '&action=osc',
             bbox = osmly.current.bbox;
 
         $.ajax({
@@ -206,13 +201,13 @@ function keyclean(x) { return x.replace(/\W/g, ''); }
 
 function token(k, x) {
     if (arguments.length === 2) {
-        localStorage[keyclean(osmly.writeApi) + k] = x;
+        localStorage[keyclean(settings.writeApi) + k] = x;
     }
-    return localStorage[keyclean(osmly.writeApi) + k];
+    return localStorage[keyclean(settings.writeApi) + k];
 }
 
 function request_oauth() {
-    var url = osmly.writeApi + '/oauth/request_token';
+    var url = osmly.settings.writeApi + '/oauth/request_token';
 
     // https://github.com/systemed/iD/blob/master/js/id/oauth.js#L72
     var w = 650, h = 500,
@@ -236,14 +231,14 @@ function request_oauth() {
 
     o.oauth_timestamp = ohauth.timestamp();
     o.oauth_nonce = ohauth.nonce();
-    o.oauth_signature = ohauth.signature(osmly.oauth_secret, '',
+    o.oauth_signature = ohauth.signature(osmly.settings.oauth_secret, '',
         ohauth.baseString('POST', url, o));
 
     ohauth.xhr('POST', url, o, null, {}, function(xhr) {
         var string = ohauth.stringQs(xhr.response);
         token('ohauth_token_secret', string.oauth_token_secret);
 
-        popup.location = osmly.writeApi + '/oauth/authorize?' + ohauth.qsString({
+        popup.location = osmly.settings.writeApi + '/oauth/authorize?' + ohauth.qsString({
             oauth_token: string.oauth_token,
             oauth_callback: location.href
         });
@@ -253,7 +248,7 @@ function request_oauth() {
 
 // https://github.com/systemed/iD/blob/master/js/id/oauth.js#L107
 function access_oauth(oauth_token) {
-    var url = osmly.writeApi + '/oauth/access_token',
+    var url = settings.writeApi + '/oauth/access_token',
         token_secret = token('ohauth_token_secret');
 
     o.oauth_timestamp = ohauth.timestamp();
@@ -262,7 +257,7 @@ function access_oauth(oauth_token) {
 
     if (!token_secret) return console.error('Required token not found');
 
-    o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
+    o.oauth_signature = ohauth.signature(settings.oauth_secret, token_secret,
         ohauth.baseString('POST', url, o));
 
     ohauth.xhr('POST', url, o, null, {}, function(xhr) {
@@ -281,14 +276,14 @@ function getUserDetails() {
     // we're only using the username to link the user to their own profile
         // ~50 lines for one link, a tiny convenience
     // probably removing soon
-    var url = osmly.writeApi + '/api/0.6/user/details',
+    var url = settings.writeApi + '/api/0.6/user/details',
         token_secret = token('secret');
 
     o.oauth_timestamp = ohauth.timestamp();
     o.oauth_nonce = ohauth.nonce();
     o.oauth_token = token('token');
 
-    o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
+    o.oauth_signature = ohauth.signature(settings.oauth_secret, token_secret,
         ohauth.baseString('GET', url, o));
 
     ohauth.xhr('GET', url, o, '', {},
@@ -312,7 +307,7 @@ function getUserDetails() {
 
 function userDetailsUI() {
     $('#user')
-        .html('<a href="' + osmly.writeApi + '/user/' +
+        .html('<a href="' + settings.writeApi + '/user/' +
             token('userName') + '" target="_blank">' + token('userName') + '</a>')
         .fadeIn(500);
 }
@@ -322,16 +317,16 @@ function next() {
     $('#tags li').remove();
 
     var current = {},
-        request = osmly.featuresApi + 'db=' + osmly.db;
-        // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1047';
+        request = settings.featuresApi + 'db=' + settings.db;
+        // request = settings.featuresApi + 'db=' + settings.db + '&id=1047';
             // simple multipolygon
-        // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1108';
+        // request = settings.featuresApi + 'db=' + settings.db + '&id=1108';
             // poly
-        // request = osmly.featuresApi + 'db=' + osmly.db + '&id=810';
+        // request = settings.featuresApi + 'db=' + settings.db + '&id=810';
             // poly with a hole
-        // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1129';
+        // request = settings.featuresApi + 'db=' + settings.db + '&id=1129';
             // multipolygon with a hole
-        // request = osmly.featuresApi + 'db=' + osmly.db + '&id=1146';
+        // request = settings.featuresApi + 'db=' + settings.db + '&id=1146';
             // context multipolygon isn't showing up, very important it does
         // there was a multipolygon w/ only one coords array in it that screwed things up, didn't get id
             // structured like a polygon, just had type of multipolygon
@@ -381,7 +376,7 @@ function editable(geo) {
 
 function setFeatureLayer() {
     osmly.current.layer = L.geoJson(osmly.current.feature, {
-        style: osmly.featureStyle,
+        style: settings.featureStyle,
         onEachFeature: function (feature, layer) {
 
             if (osmly.current.isEditable) {
@@ -403,22 +398,22 @@ function setFeatureLayer() {
 }
 
 function newChangesetXml() {
-    var c = osmly.changesetTags.length,
+    var c = settings.changesetTags.length,
         tags = '';
 
-    console.log(osmly.changesetTags);
+    console.log(settings.changesetTags);
 
     while (c--) {
         tags +=
-            '<tag k="' + osmly.changesetTags[c][0] +
-            '" v="' + osmly.changesetTags[c][1] + '"/>';
+            '<tag k="' + settings.changesetTags[c][0] +
+            '" v="' + settings.changesetTags[c][1] + '"/>';
     }
 
     return '<osm><changeset>' + tags + '<\/changeset><\/osm>';
 }
 
 function createChangeset(callback) {
-    var url = osmly.writeApi + '/api/0.6/changeset/create',
+    var url = settings.writeApi + '/api/0.6/changeset/create',
         token_secret = token('secret'),
         change = newChangesetXml();
 
@@ -428,7 +423,7 @@ function createChangeset(callback) {
     o.oauth_nonce = ohauth.nonce();
     o.oauth_token = token('token');
 
-    o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
+    o.oauth_signature = ohauth.signature(settings.oauth_secret, token_secret,
         ohauth.baseString('PUT', url, o));
 
     ohauth.xhr('PUT', url, o, change, {header: {'Content-Type': 'text/xml'}},
@@ -442,11 +437,11 @@ function createChangeset(callback) {
 }
 
 function updateChangeset(id, callback) {
-    var url = osmly.writeApi + '/api/0.6/changeset/' + id,
+    var url = settings.writeApi + '/api/0.6/changeset/' + id,
         token_secret = token('secret'),
         change = newChangesetXml();
 
-    console.log(osmly.changesetTags);
+    console.log(settings.changesetTags);
     console.log(change);
 
     notify('updating changeset');
@@ -455,7 +450,7 @@ function updateChangeset(id, callback) {
     o.oauth_nonce = ohauth.nonce();
     o.oauth_token = token('token');
 
-    o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
+    o.oauth_signature = ohauth.signature(settings.oauth_secret, token_secret,
         ohauth.baseString('PUT', url, o));
 
     ohauth.xhr('PUT', url, o, change, {header: {'Content-Type': 'text/xml'}},
@@ -471,7 +466,7 @@ function changesetIsOpen(id, callback) {
     notify('checking changeset status');
 
     $.ajax({
-        url: osmly.writeApi + '/api/0.6/changeset/' + id,
+        url: settings.writeApi + '/api/0.6/changeset/' + id,
         cache: false
     }).done(function(xml) {
         // need a failure case, dev server fails pretty often
@@ -576,26 +571,26 @@ function display() {
 }
 
 function renameProperties() {
-    // converts the feature tag key
+    // converts the feature key, for osm tags
     // ex. NAME -> name, CAT2 -> leisure
-    for (var prop in osmly.renameProperty) {
-        var change = osmly.renameProperty[prop];
+    for (var prop in settings.renameProperty) {
+        var change = settings.renameProperty[prop];
         osmly.current.feature.properties[change] = osmly.current.feature.properties[prop];
     }
 }
 
 function usePropertiesAsTag() {
-    // only keeps specified properties to be used as tags
+    // filters properties to be used as tags
     for (var prop in osmly.current.feature.properties) {
-        if (osmly.usePropertyAsTag.indexOf(prop) === -1) {
+        if (settings.usePropertyAsTag.indexOf(prop) === -1) {
             osmly.current.feature.properties[prop] = null;
         }
     }
 }
 
 function appendTags() {
-    for (var append in osmly.appendTag) {
-        osmly.current.feature.properties[append] = osmly.appendTag[append];
+    for (var append in settings.appendTag) {
+        osmly.current.feature.properties[append] = settings.appendTag[append];
     }
 }
 
@@ -788,14 +783,14 @@ function submit(result) {
     if (result != 'skip') {
         $.ajax({
             type: 'POST',
-            url: osmly.featuresApi + 'db=' + osmly.db + '&id=' + osmly.current.id + '&action=problem',
+            url: settings.featuresApi + 'db=' + settings.db + '&id=' + osmly.current.id + '&action=problem',
             crossDomain: true,
             data: {problem: result, user: user.name}
         });
         // no callback, not worth slowing down/complicating over, it's reproducable
     }
 
-    if (osmly.demo) {
+    if (settings.demo) {
         console.log(osmly.current.layer.toGeoJSON());
         if (result === 'submit') {
             var geojson = osmly.current.layer.toGeoJSON();
@@ -825,10 +820,10 @@ function submitToOSM() {
     $('#changeset').fadeIn(500);
 
     $('#changeset-link')
-        .html('<a href="' + osmly.writeApi + '/browse/changeset/' +
+        .html('<a href="' + settings.writeApi + '/browse/changeset/' +
             id + '" target="_blank">Details on osm.org »</a>');
 
-    var url = osmly.writeApi + '/api/0.6/changeset/' + id + '/upload',
+    var url = settings.writeApi + '/api/0.6/changeset/' + id + '/upload',
         token_secret = token('secret'),
         geojson = osmly.current.layer.toGeoJSON(),
         osmChange = toOsmChange(geojson);
@@ -839,7 +834,7 @@ function submitToOSM() {
     o.oauth_nonce = ohauth.nonce();
     o.oauth_token = token('token');
 
-    o.oauth_signature = ohauth.signature(osmly.oauth_secret, token_secret,
+    o.oauth_signature = ohauth.signature(settings.oauth_secret, token_secret,
         ohauth.baseString('POST', url, o));
 
     ohauth.xhr('POST', url, o, osmChange, {header: {'Content-Type': 'text/xml'}},
@@ -862,13 +857,14 @@ function teardown() {
 }
 
 function getSetOSM(callback) {
-    notify('getting context');
+    notify('getting nearby OSM data');
+        // context
 
     var bbox = osmly.current.feature.properties.buffer_bounds;
     bbox = 'bbox=' + bbox.join(',');
 
-    $.ajax(osmly.readApi + bbox).done(function(xml) {
-        notify('building context');
+    $.ajax(settings.readApi + bbox).done(function(xml) {
+        notify('building OSM data');
 
         // seperate lists so the user can switch between them?
         osmly.osmContext = osm2geo(xml);
@@ -878,7 +874,7 @@ function getSetOSM(callback) {
         // console.log(JSON.stringify(osmly.simpleContext));
 
         osmly.current.dataLayer = L.geoJson(osmly.osmContext, {
-            style: osmly.contextStyle,
+            style: settings.contextStyle,
             onEachFeature: function(feature, layer) {
                 // hovering displays the name
                 // clicking displays all tags
@@ -929,15 +925,15 @@ function filterContext(osmGeoJson) {
             match = false;
 
         for (var key in feature.properties) {
-            if (key in osmly.context &&
-                osmly.context[key].indexOf(feature.properties[key]) > -1 &&
+            if (key in settings.context &&
+                settings.context[key].indexOf(feature.properties[key]) > -1 &&
                 !match) {
 
                 match = true;
             }
         }
 
-        if (match || !Object.keys(osmly.context).length) {
+        if (match || !Object.keys(settings.context).length) {
             geo.features.push(feature);
         }
     }
