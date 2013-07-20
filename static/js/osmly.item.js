@@ -29,7 +29,7 @@ osmly.item = function () {
             // setFeatureLayer() is purposefully here and not in display() due to timing issues
             // basically if we do it during display the map is still zooming and
             // midpoint nodes get all screwed up
-            setItemLayer(item.data);
+            item.setItemLayer(item.data);
 
             renameProperties();
             usePropertiesAsTag();
@@ -47,7 +47,7 @@ osmly.item = function () {
         });
     };
 
-    function setItemLayer(json) {
+    item.setItemLayer = function(json) {
         osmly.item.layer = L.geoJson(json, {
             style: osmly.settings.featureStyle,
             onEachFeature: function (feature, layer) {
@@ -64,7 +64,7 @@ osmly.item = function () {
         });
 
         osmly.map.fitBounds(osmly.item.layer.getBounds());
-    }
+    };
 
     // checks if the feature has holes, leaflet can't edit them
     function isEditable(geo) {

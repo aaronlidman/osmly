@@ -123,8 +123,12 @@ osmly.ui = function() {
         // bindings and populating fields for a new item
         populateTags(properties);
 
-        $('#skip, #submit').click(function() {
+        $('#submit').click(function() {
             submit(event.target.id);
+        });
+
+        $('#skip').click(function(){
+            skip();
         });
 
         $('#problem').change(function() {
@@ -167,10 +171,10 @@ osmly.ui = function() {
 
         $('#reset').click(function() {
             teardown();
-            $('#tags li').remove();
-            osmly.item.setItemLayer();
-            ui.setup();
-            display();
+            osmly.item.setItemLayer(osmly.item.data);
+            ui.setupItem(osmly.item.data.properties);
+            ui.displayItem(true);
+            // true, just implying if they can click it, it was editable to begin with
         });
     };
 
@@ -234,6 +238,25 @@ osmly.ui = function() {
             equalize: 'width',
             reset: true});
         $('.v').width( $('.v').width() + 12);
+    }
+
+    function teardown() {
+        $('#action-block, #tags, #bottom-right').hide();
+        $('#problem, #skip, #submit, .minus, #add-new-tag, #reset').unbind();
+        $('.k, .v').unbind();
+        $('#problem').val('problem'); // resets problem menu
+        $("#problem, #submit").removeAttr('style');
+        $('#tags li').remove();
+
+        osmly.map.closePopup();
+        osmly.map.removeLayer(osmly.item.layer);
+
+        if (osmly.item.contextLayer) osmly.map.removeLayer(osmly.item.contextLayer);
+    }
+
+    function skip() {
+        teardown();
+        osmly.item.next();
     }
 
     initialize();

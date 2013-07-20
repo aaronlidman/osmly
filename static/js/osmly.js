@@ -502,18 +502,5 @@ function submitToOSM() {
         });
 }
 
-function teardown() {
-    $('#action-block, #tags, #bottom-right').hide();
-    $('#problem, #skip, #submit, .minus, #add-new-tag, #reset').unbind();
-    $('.k, .v').unbind();
-    $('#problem').val('problem'); // resets problem menu
-    $("#problem, #submit").removeAttr('style');
-
-    map.closePopup();
-    map.removeLayer(osmly.current.layer);
-
-    if (osmly.current.dataLayer) map.removeLayer(osmly.current.dataLayer);
-}
-
 return osmly;
 };
