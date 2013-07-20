@@ -3,7 +3,7 @@ osmly.ui = function() {
         settings = osmly.settings;
 
     function initialize() {
-        if (!settings.demo && osmly.user.token('token') && osmly.user.token('secret')) {
+        if (!settings.demo && osmly.token('token') && osmly.token('secret')) {
             userDetailsUI();
             next();
         } else {
@@ -256,7 +256,37 @@ osmly.ui = function() {
 
     function skip() {
         teardown();
+        $('#d-skip')
+            .show()
+            .fadeOut(750);
         osmly.item.next();
+    }
+
+    function submit(result) {
+        teardown();
+
+        if (settings.demo) {
+            console.log(osmly.item.layer.toGeoJSON());
+            if (result === 'submit') {
+                var geojson = osmly.item.layer.toGeoJSON();
+                // console.log(toOsm(geojson));
+                // console.log(toOsmChange(geojson));
+            }
+            osmly.item.next();
+        } else {
+            osmly.connect.submitToServer(result);
+            if (result === 'submit') {
+                osmly.connect.openChangeset(osmly.token('changeset_id'), submitToOSM);
+            } else {
+                osmly.item.next();
+            }
+        }
+
+        if (result !== 'submit') result = 'problem';
+
+        $('#d-' + result)
+            .show()
+            .fadeOut(750);
     }
 
     initialize();

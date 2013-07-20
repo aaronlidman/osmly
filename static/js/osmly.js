@@ -89,12 +89,12 @@ osmly.go = function(object) {
 // next 2 functions from iD: https://github.com/systemed/iD/blob/master/js/id/oauth.js
 function keyclean(x) { return x.replace(/\W/g, ''); }
 
-function token(k, x) {
+osmly.token = function(k, x) {
     if (arguments.length === 2) {
         localStorage[keyclean(settings.writeApi) + k] = x;
     }
     return localStorage[keyclean(settings.writeApi) + k];
-}
+};
 
 function request_oauth() {
     var url = osmly.settings.writeApi + '/oauth/request_token';
@@ -202,45 +202,6 @@ function userDetailsUI() {
         .fadeIn(500);
 }
 
-function newChangesetXml() {
-    var c = settings.changesetTags.length,
-        tags = '';
-
-    console.log(settings.changesetTags);
-
-    while (c--) {
-        tags +=
-            '<tag k="' + settings.changesetTags[c][0] +
-            '" v="' + settings.changesetTags[c][1] + '"/>';
-    }
-
-    return '<osm><changeset>' + tags + '<\/changeset><\/osm>';
-}
-
-function createChangeset(callback) {
-    var url = settings.writeApi + '/api/0.6/changeset/create',
-        token_secret = token('secret'),
-        change = newChangesetXml();
-
-    notify('creating a new changeset');
-
-    o.oauth_timestamp = ohauth.timestamp();
-    o.oauth_nonce = ohauth.nonce();
-    o.oauth_token = token('token');
-
-    o.oauth_signature = ohauth.signature(settings.oauth_secret, token_secret,
-        ohauth.baseString('PUT', url, o));
-
-    ohauth.xhr('PUT', url, o, change, {header: {'Content-Type': 'text/xml'}},
-        function(xhr) {
-            var id = xhr.response + '';
-
-            token('changeset_id', id);
-
-            callback();
-        });
-}
-
 function updateChangeset(id, callback) {
     var url = settings.writeApi + '/api/0.6/changeset/' + id,
         token_secret = token('secret'),
@@ -265,26 +226,6 @@ function updateChangeset(id, callback) {
         });
 }
 
-function changesetIsOpen(id, callback) {
-    if (!id) createChangeset(callback);
-
-    notify('checking changeset status');
-
-    $.ajax({
-        url: settings.writeApi + '/api/0.6/changeset/' + id,
-        cache: false
-    }).done(function(xml) {
-        // need a failure case, dev server fails pretty often
-        var cs = xml.getElementsByTagName('changeset');
-
-        if (cs[0].getAttribute('open') === 'true') {
-            callback();
-        } else {
-            createChangeset(callback);
-        }
-    });
-}
-
 function getTags() {
     var $tags = $('#tags li'),
         tags = [];
@@ -302,11 +243,6 @@ function getTags() {
 function toOsm(geojson) {
     return '<?xml version="1.0" encoding="UTF-8"?>' +
     '<osm version="0.6" generator="osmly">' + innerOsm(geojson) + '</osm>';
-}
-
-function toOsmChange(geojson) {
-    return '<osmChange version="0.6" generator="osmly"><create>' +
-        innerOsm(geojson) + '</create></osmChange>';
 }
 
 // geojson object, tags [[k,v],[k,v],[k,v]]
@@ -433,73 +369,6 @@ function innerOsm(geojson) {
     }
 
     return nodes + ways + relations;
-}
-
-// this really sucks
-function submit(result) {
-    teardown();
-
-    if (result != 'skip') {
-        $.ajax({
-            type: 'POST',
-            url: settings.featuresApi + 'db=' + settings.db + '&id=' + osmly.current.id + '&action=problem',
-            crossDomain: true,
-            data: {problem: result, user: user.name}
-        });
-        // no callback, not worth slowing down/complicating over, it's reproducable
-    }
-
-    if (settings.demo) {
-        console.log(osmly.current.layer.toGeoJSON());
-        if (result === 'submit') {
-            var geojson = osmly.current.layer.toGeoJSON();
-            console.log(toOsm(geojson));
-            console.log(toOsmChange(geojson));
-        }
-
-        next();
-    } else {
-        if (result === 'submit') {
-            changesetIsOpen(token('changeset_id'), submitToOSM);
-        } else {
-            next();
-        }
-    }
-
-    if (result !== 'skip' && result !== 'submit') result = 'problem';
-
-    $('#d-' + result)
-        .show()
-        .fadeOut(750);
-}
-
-function submitToOSM() {
-    var id = token('changeset_id');
-
-    $('#changeset').fadeIn(500);
-
-    $('#changeset-link')
-        .html('<a href="' + settings.writeApi + '/browse/changeset/' +
-            id + '" target="_blank">Details on osm.org »</a>');
-
-    var url = settings.writeApi + '/api/0.6/changeset/' + id + '/upload',
-        token_secret = token('secret'),
-        geojson = osmly.current.layer.toGeoJSON(),
-        osmChange = toOsmChange(geojson);
-
-    notify('uploading to OSM');
-
-    o.oauth_timestamp = ohauth.timestamp();
-    o.oauth_nonce = ohauth.nonce();
-    o.oauth_token = token('token');
-
-    o.oauth_signature = ohauth.signature(settings.oauth_secret, token_secret,
-        ohauth.baseString('POST', url, o));
-
-    ohauth.xhr('POST', url, o, osmChange, {header: {'Content-Type': 'text/xml'}},
-        function() {
-            next();
-        });
 }
 
 return osmly;
