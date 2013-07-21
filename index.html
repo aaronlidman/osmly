@@ -23,7 +23,7 @@
         <script src="static/js/leaflet.draw.js"></script>
         <script src="static/js/jquery1.8.2.min.js"></script>
         <script src="static/js/sha.js"></script>
-        <script src="static/js/ohauth.js"></script>
+        <script src="static/js/osmauth.min.js"></script>
         <script src="static/js/Bing.js"></script>
         <script src="static/js/equalize.js"></script>
         <script src="static/js/jquery.reveal.js"></script>
@@ -35,6 +35,7 @@
         <script src="static/js/osmly.connect.js"></script>
         <script src="static/js/osmly.user.js"></script>
         <script src="static/js/osmly.item.js"></script>
+        <script src="static/js/osmly.auth.js"></script>
     </head>
     <body>
         <div id="top-right">
@@ -118,7 +119,7 @@
 
         <div id="map"></div>
         <script type="text/javascript">
-            var OSMLY = {
+            var CONFIG = {
                 featuresApi: 'http://127.0.0.1:5000/?',
                 db: 'parks-5',
                 demo: false,
@@ -134,7 +135,7 @@
                 }
             };
 
-            osmly.initialize(OSMLY);
+            osmly.initialize(CONFIG);
         </script>        
     </body>
 </html>

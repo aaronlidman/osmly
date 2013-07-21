@@ -34,6 +34,7 @@ osmly.settings = {
     db: '',
     writeApi: 'http://api06.dev.openstreetmap.org',
     oauth_secret: 'Mon0UoBHaO3qvfgwWrMkf4QAPM0O4lITd3JRK4ff',
+    consumerKey: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg',
     readApi: 'http://www.overpass-api.de/api/xapi?map?',
     context: {}, // {key: ['some', 'tags'], otherkey: ['more', 'tags']}
     div: 'map',
@@ -48,7 +49,6 @@ osmly.settings = {
     renameProperty: {}, // {'MEssy55': 'clean'}, only converts key not value
     usePropertyAsTag: [], // just keys
     appendTag: {}, // {'key': 'value'}, will overwrite existing tags
-    consumerKey: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg',
     featureStyle: {
         // http://leafletjs.com/reference.html#path-options
         color: '#00FF00',
@@ -64,17 +64,6 @@ osmly.settings = {
     }
 };
 
-var user = {
-        id: -1,
-        name: 'demo'
-    },
-    current = {};
-
-osmly.o = {};
-
-osmly.o.oauth_consumer_key = osmly.settings.consumerKey;
-osmly.o.oauth_signature_method = 'HMAC-SHA1';
-
 osmly.initialize = function(settings) {
     if (typeof settings === 'object') {
         for (var obj in settings) {
@@ -86,12 +75,8 @@ osmly.initialize = function(settings) {
     }
 
     osmly.map = osmly.map();
+    osmly.auth = osmly.auth();
     osmly.ui.initialize();
-    // osmly.map = osmly.map();
-    // osmly.item = osmly.item();
-    // osmly.ui = osmly.ui();
-    // osmly.user = osmly.user();
-    // osmly.connect = osmly.connect();
 };
 
 // next 2 functions from iD: https://github.com/systemed/iD/blob/master/js/id/oauth.js
@@ -114,18 +99,7 @@ function updateChangeset(id, callback) {
 
     notify('updating changeset');
 
-    o.oauth_timestamp = ohauth.timestamp();
-    o.oauth_nonce = ohauth.nonce();
-    o.oauth_token = token('token');
-
-    o.oauth_signature = ohauth.signature(osmly.settings.oauth_secret, token_secret,
-        ohauth.baseString('PUT', url, o));
-
-    ohauth.xhr('PUT', url, o, change, {header: {'Content-Type': 'text/xml'}},
-        function() {
-            // don't care about the response
-            if (callback) callback();
-        });
+    // removed ohauth
 }
 
 function getTags() {

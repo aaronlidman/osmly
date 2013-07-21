@@ -24,7 +24,7 @@ osmly.ui = (function() {
                 osmly.item.next();
             } else {
                 $('#login').fadeOut(500);
-                osmly.connect.request_oauth();
+                osmly.auth.getDetails();
             }
         });
 
