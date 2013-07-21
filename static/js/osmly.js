@@ -75,12 +75,11 @@ osmly.initialize = function(settings) {
     }
 
     osmly.map = osmly.map();
-    osmly.auth = osmly.auth();
     osmly.ui.initialize();
 };
 
-// next 2 functions from iD: https://github.com/systemed/iD/blob/master/js/id/oauth.js
 function keyclean(x) { return x.replace(/\W/g, ''); }
+// from iD
 
 osmly.token = function(k, x) {
     if (arguments.length === 2) {
@@ -88,6 +87,7 @@ osmly.token = function(k, x) {
     }
     return localStorage[keyclean(osmly.settings.writeApi) + k];
 };
+// from iD
 
 function updateChangeset(id, callback) {
     var url = osmly.settings.writeApi + '/api/0.6/changeset/' + id,

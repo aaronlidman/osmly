@@ -2,6 +2,7 @@ osmly.connect = (function(){
     var connect = {};
 
     connect.submitToServer = function(result) {
+        // not the OSM server, feature server
         var url = osmly.settings.featuresApi + 'db=' + osmly.settings.db +
             '&id=' + osmly.item.id + '&action=problem';
         $.ajax({
@@ -70,28 +71,6 @@ osmly.connect = (function(){
     function toOsmChange(geojson) {
         return '<osmChange version="0.6" generator="osmly"><create>' +
             innerOsm(geojson) + '</create></osmChange>';
-    }
-
-    connect.request_oauth = function() {
-        var url = osmly.settings.writeApi + '/oauth/request_token';
-
-        // removed ohauth
-    };
-
-    // https://github.com/systemed/iD/blob/master/js/id/oauth.js#L107
-    function access_oauth(oauth_token) {
-        // removed ohauth
-    }
-
-    function getUserDetails() {
-        // this is all pretty stupid, we just need the username
-        // we're only using the username to link the user to their own profile
-            // ~50 lines for one link, a tiny convenience
-        // probably removing soon
-        var url = osmly.settings.writeApi + '/api/0.6/user/details',
-            token_secret = osmly.token('secret');
-
-        // removed ohauth
     }
 
     return connect;

@@ -24,7 +24,7 @@ osmly.ui = (function() {
                 osmly.item.next();
             } else {
                 $('#login').fadeOut(500);
-                osmly.auth.getDetails();
+                getDetails();
             }
         });
 
@@ -292,8 +292,8 @@ osmly.ui = (function() {
     function userDetailsUI() {
         $('#user')
             .html('<a href="' + osmly.settings.writeApi + '/user/' +
-                osmly.token('userName') + '" target="_blank">' +
-                osmly.token('userName') + '</a>')
+                osmly.token('user') + '" target="_blank">' +
+                osmly.token('display_name') + '</a>')
             .fadeIn(500);
     }
 
