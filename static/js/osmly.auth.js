@@ -19,8 +19,8 @@ function setDetails(err, res) {
         console.log('error! try clearing your browser cache');
         return;
     }
-    osmly.token('user', res.getElementsByTagName('user')[0]);
-    osmly.token('display_name', u.getAttribute('display_name'));
-    // there's plenty more to get
+    var u = res.getElementsByTagName('user')[0];
+    osmly.token('name', u.getAttribute('display_name'));
+    // there's more if needed
     // http://wiki.openstreetmap.org/wiki/API_v0.6#Details_of_the_logged-in_user
 }

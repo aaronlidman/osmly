@@ -293,7 +293,7 @@ osmly.ui = (function() {
         $('#user')
             .html('<a href="' + osmly.settings.writeApi + '/user/' +
                 osmly.token('user') + '" target="_blank">' +
-                osmly.token('display_name') + '</a>')
+                osmly.token('user') + '</a>')
             .fadeIn(500);
     }
 
