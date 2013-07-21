@@ -118,10 +118,10 @@
 
         <div id="map"></div>
         <script type="text/javascript">
-            osmly().go({
+            var OSMLY = {
                 featuresApi: 'http://127.0.0.1:5000/?',
                 db: 'parks-5',
-                demo: true,
+                demo: false,
                 origin: [34.0577, -118.2409],
                 zoom: 10,
                 renameProperty: {'NAME': 'name'},
@@ -132,7 +132,9 @@
                     landuse: ['cemetery', 'farm', 'farmland', 'recreation_ground'],
                     amenity: ['college', 'kindergarten', 'school', 'university', 'grave_yard', 'library', 'town_hall']
                 }
-            });
+            };
+
+            osmly.initialize(OSMLY);
         </script>        
     </body>
 </html>

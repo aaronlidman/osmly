@@ -1,4 +1,4 @@
-window.osmly = function () {
+window.osmly = (function () {
 /*
 TODO
     - success + failure callbacks on every request
@@ -26,6 +26,8 @@ TODO
         - make then self contained with geojson properties
         - available to edit tags for multiple items
 */
+
+var osmly = {};
 
 osmly.settings = {
     featuresApi: '',
@@ -62,28 +64,34 @@ osmly.settings = {
     }
 };
 
-var settings = osmly.settings,
-    user = {
+var user = {
         id: -1,
         name: 'demo'
     },
-    current = {},
-    o = {
-        oauth_consumer_key: settings.consumerKey,
-        oauth_signature_method: 'HMAC-SHA1'
-    };
+    current = {};
 
-osmly.go = function(object) {
-    if (typeof object === 'object') {
-        for (var obj in object) {
-            osmly.settings[obj] = object[obj];
+osmly.o = {};
+
+osmly.o.oauth_consumer_key = osmly.settings.consumerKey;
+osmly.o.oauth_signature_method = 'HMAC-SHA1';
+
+osmly.initialize = function(settings) {
+    if (typeof settings === 'object') {
+        for (var obj in settings) {
+            osmly.settings[obj] = settings[obj];
         }
+    } else {
+        console.log('missing settings, see documentation');
+        return;
     }
 
     osmly.map = osmly.map();
-    osmly.ui = osmly.ui();
-    osmly.user = osmly.user();
-    osmly.item = osmly.item();
+    osmly.ui.initialize();
+    // osmly.map = osmly.map();
+    // osmly.item = osmly.item();
+    // osmly.ui = osmly.ui();
+    // osmly.user = osmly.user();
+    // osmly.connect = osmly.connect();
 };
 
 // next 2 functions from iD: https://github.com/systemed/iD/blob/master/js/id/oauth.js
@@ -91,123 +99,17 @@ function keyclean(x) { return x.replace(/\W/g, ''); }
 
 osmly.token = function(k, x) {
     if (arguments.length === 2) {
-        localStorage[keyclean(settings.writeApi) + k] = x;
+        localStorage[keyclean(osmly.settings.writeApi) + k] = x;
     }
-    return localStorage[keyclean(settings.writeApi) + k];
+    return localStorage[keyclean(osmly.settings.writeApi) + k];
 };
 
-function request_oauth() {
-    var url = osmly.settings.writeApi + '/oauth/request_token';
-
-    // https://github.com/systemed/iD/blob/master/js/id/oauth.js#L72
-    var w = 650, h = 500,
-    settings = [
-        ['width', w], ['height', h],
-        ['left', screen.width / 2 - w / 2],
-        ['top', screen.height / 2 - h / 2]].map(function(x) {
-            return x.join('=');
-        }).join(','),
-    popup = window.open('about:blank', 'oauth_window', settings),
-    locationCheck = window.setInterval(function() {
-        if (popup.closed) return window.clearInterval(locationCheck);
-        if (popup.location.search) {
-            var search = popup.location.search,
-            oauth_token = ohauth.stringQs(search.slice(1));
-            popup.close();
-            access_oauth(oauth_token);
-            window.clearInterval(locationCheck);
-        }
-    }, 100);
-
-    o.oauth_timestamp = ohauth.timestamp();
-    o.oauth_nonce = ohauth.nonce();
-    o.oauth_signature = ohauth.signature(osmly.settings.oauth_secret, '',
-        ohauth.baseString('POST', url, o));
-
-    ohauth.xhr('POST', url, o, null, {}, function(xhr) {
-        var string = ohauth.stringQs(xhr.response);
-        token('ohauth_token_secret', string.oauth_token_secret);
-
-        popup.location = osmly.settings.writeApi + '/oauth/authorize?' + ohauth.qsString({
-            oauth_token: string.oauth_token,
-            oauth_callback: location.href
-        });
-
-    });
-}
-
-// https://github.com/systemed/iD/blob/master/js/id/oauth.js#L107
-function access_oauth(oauth_token) {
-    var url = settings.writeApi + '/oauth/access_token',
-        token_secret = token('ohauth_token_secret');
-
-    o.oauth_timestamp = ohauth.timestamp();
-    o.oauth_nonce = ohauth.nonce();
-    o.oauth_token = oauth_token.oauth_token;
-
-    if (!token_secret) return console.error('Required token not found');
-
-    o.oauth_signature = ohauth.signature(settings.oauth_secret, token_secret,
-        ohauth.baseString('POST', url, o));
-
-    ohauth.xhr('POST', url, o, null, {}, function(xhr) {
-        var access_token = ohauth.stringQs(xhr.response);
-        token('token', access_token.oauth_token);
-        token('secret', access_token.oauth_token_secret);
-
-        getUserDetails();
-        userDetailsUI();
-        next();
-    });
-}
-
-function getUserDetails() {
-    // this is all pretty stupid, we just need the username
-    // we're only using the username to link the user to their own profile
-        // ~50 lines for one link, a tiny convenience
-    // probably removing soon
-    var url = settings.writeApi + '/api/0.6/user/details',
-        token_secret = token('secret');
-
-    o.oauth_timestamp = ohauth.timestamp();
-    o.oauth_nonce = ohauth.nonce();
-    o.oauth_token = token('token');
-
-    o.oauth_signature = ohauth.signature(settings.oauth_secret, token_secret,
-        ohauth.baseString('GET', url, o));
-
-    ohauth.xhr('GET', url, o, '', {},
-        function(xhr) {
-            var u = xhr.responseXML.getElementsByTagName('user')[0],
-                img = u.getElementsByTagName('img');
-
-            user.name = u.getAttribute('display_name');
-            user.id = u.getAttribute('id');
-
-            if (img.length) {
-                user.avatar = img[0].getAttribute('href');
-            }
-
-            // not using the id or avatar for anything yet
-            token('userName', user.name);
-            token('userId', user.id);
-            token('userAvatar', user.avatar);
-        });
-}
-
-function userDetailsUI() {
-    $('#user')
-        .html('<a href="' + settings.writeApi + '/user/' +
-            token('userName') + '" target="_blank">' + token('userName') + '</a>')
-        .fadeIn(500);
-}
-
 function updateChangeset(id, callback) {
-    var url = settings.writeApi + '/api/0.6/changeset/' + id,
+    var url = osmly.settings.writeApi + '/api/0.6/changeset/' + id,
         token_secret = token('secret'),
         change = newChangesetXml();
 
-    console.log(settings.changesetTags);
+    console.log(osmly.settings.changesetTags);
     console.log(change);
 
     notify('updating changeset');
@@ -216,7 +118,7 @@ function updateChangeset(id, callback) {
     o.oauth_nonce = ohauth.nonce();
     o.oauth_token = token('token');
 
-    o.oauth_signature = ohauth.signature(settings.oauth_secret, token_secret,
+    o.oauth_signature = ohauth.signature(osmly.settings.oauth_secret, token_secret,
         ohauth.baseString('PUT', url, o));
 
     ohauth.xhr('PUT', url, o, change, {header: {'Content-Type': 'text/xml'}},
@@ -372,4 +274,4 @@ function innerOsm(geojson) {
 }
 
 return osmly;
-};
+}());

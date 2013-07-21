@@ -1,4 +1,4 @@
-osmly.item = function () {
+osmly.item = (function () {
     var item = {};
 
     item.next = function() {
@@ -180,4 +180,4 @@ osmly.item = function () {
     }
 
     return item;
-};
+}());

@@ -1,4 +1,4 @@
-osmly.connect = function(){
+osmly.connect = (function(){
     var connect = {};
 
     connect.submitToServer = function(result) {
@@ -13,7 +13,7 @@ osmly.connect = function(){
         // no callback, not worth slowing down/complicating over, it's reproducable
     };
 
-    openChangeset = function(id, callback) {
+    connect.openChangeset = function(id, callback) {
         if (!id){createChangeset(callback);}
         osmly.ui.notify('checking changeset status');
 
@@ -90,4 +90,104 @@ osmly.connect = function(){
         return '<osmChange version="0.6" generator="osmly"><create>' +
             innerOsm(geojson) + '</create></osmChange>';
     }
-};
+
+    connect.request_oauth = function() {
+        var url = osmly.settings.writeApi + '/oauth/request_token';
+
+        // https://github.com/systemed/iD/blob/master/js/id/oauth.js#L72
+        var w = 650, h = 500,
+        settings = [
+            ['width', w], ['height', h],
+            ['left', screen.width / 2 - w / 2],
+            ['top', screen.height / 2 - h / 2]].map(function(x) {
+                return x.join('=');
+            }).join(','),
+        popup = window.open('about:blank', 'oauth_window', settings),
+        locationCheck = window.setInterval(function() {
+            if (popup.closed) return window.clearInterval(locationCheck);
+            if (popup.location.search) {
+                var search = popup.location.search,
+                oauth_token = ohauth.stringQs(search.slice(1));
+                popup.close();
+                access_oauth(oauth_token);
+                window.clearInterval(locationCheck);
+            }
+        }, 100);
+
+        osmly.o.oauth_timestamp = ohauth.timestamp();
+        osmly.o.oauth_nonce = ohauth.nonce();
+        osmly.o.oauth_signature = ohauth.signature(osmly.settings.oauth_secret, '',
+            ohauth.baseString('POST', url, osmly.o));
+
+        ohauth.xhr('POST', url, osmly.o, null, {}, function(xhr) {
+            var string = ohauth.stringQs(xhr.response);
+            osmly.token('ohauth_token_secret', string.oauth_token_secret);
+
+            popup.location = osmly.settings.writeApi + '/oauth/authorize?' + ohauth.qsString({
+                oauth_token: string.oauth_token,
+                oauth_callback: location.href
+            });
+
+        });
+    };
+
+    // https://github.com/systemed/iD/blob/master/js/id/oauth.js#L107
+    function access_oauth(oauth_token) {
+        var url = osmly.settings.writeApi + '/oauth/access_token',
+            token_secret = osmly.token('ohauth_token_secret');
+
+        osmly.o.oauth_timestamp = ohauth.timestamp();
+        osmly.o.oauth_nonce = ohauth.nonce();
+        osmly.o.oauth_token = oauth_token.oauth_token;
+
+        if (!token_secret) return console.error('Required token not found');
+
+        osmly.o.oauth_signature = ohauth.signature(osmly.settings.oauth_secret, token_secret,
+            ohauth.baseString('POST', url, osmly.o));
+
+        ohauth.xhr('POST', url, osmly.o, null, {}, function(xhr) {
+            var access_token = ohauth.stringQs(xhr.response);
+            osmly.token('token', access_token.oauth_token);
+            osmly.token('secret', access_token.oauth_token_secret);
+
+            getUserDetails();
+            userDetailsUI();
+            next();
+        });
+    }
+
+    function getUserDetails() {
+        // this is all pretty stupid, we just need the username
+        // we're only using the username to link the user to their own profile
+            // ~50 lines for one link, a tiny convenience
+        // probably removing soon
+        var url = osmly.settings.writeApi + '/api/0.6/user/details',
+            token_secret = osmly.token('secret');
+
+        o.oauth_timestamp = ohauth.timestamp();
+        o.oauth_nonce = ohauth.nonce();
+        o.oauth_token = osmly.token('token');
+
+        o.oauth_signature = ohauth.signature(settings.oauth_secret, token_secret,
+            ohauth.baseString('GET', url, o));
+
+        ohauth.xhr('GET', url, o, '', {},
+            function(xhr) {
+                var u = xhr.responseXML.getElementsByTagName('user')[0],
+                    img = u.getElementsByTagName('img'),
+                    name = u.getAttribute('display_name'),
+                    id = u.getAttribute('id');
+
+                if (img.length) {
+                    var avatar = img[0].getAttribute('href');
+                }
+
+                // not using the id or avatar for anything yet
+                osmly.token('userName', user.name);
+                osmly.token('userId', user.id);
+                osmly.token('userAvatar', user.avatar);
+            });
+    }
+
+    return connect;
+}());

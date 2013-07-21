@@ -1,30 +1,30 @@
-osmly.ui = function() {
+osmly.ui = (function() {
     var ui = {},
         settings = osmly.settings;
 
-    function initialize() {
-        if (!settings.demo && osmly.token('token') && osmly.token('secret')) {
+    ui.initialize = function() {
+        if (!osmly.settings.demo && osmly.token('token') && osmly.token('secret')) {
             userDetailsUI();
-            next();
+            osmly.item.next();
         } else {
-            if (settings.demo) $('#login').text('Demonstration »');
+            if (osmly.settings.demo) $('#login').text('Demonstration »');
 
             $('#login').fadeIn(500);
         }
 
         bind();
-    }
+    };
 
     function bind() {
         $('#login').click(function() {
             ui.notify('');
 
-            if (settings.demo) {
+            if (osmly.settings.demo) {
                 $('#login').fadeOut(500);
                 osmly.item.next();
             } else {
                 $('#login').fadeOut(500);
-                request_oauth();
+                osmly.connect.request_oauth();
             }
         });
 
@@ -48,7 +48,7 @@ osmly.ui = function() {
         });
 
         $('#update-change').click(function() {
-            settings.changesetTags.push(['comment', $('#changeset-form').text()]);
+            osmly.settings.changesetTags.push(['comment', $('#changeset-form').text()]);
             updateChangeset(token('changeset_id'), function() {
                 $('#changeset-modal').trigger('reveal:close');
                 $('#notify').fadeOut(250);
@@ -61,7 +61,7 @@ osmly.ui = function() {
             var id = osmly.current.id,
                 geojson = osmly.current.layer.toGeoJSON(),
                 osmChange = toOsm(geojson),
-                request = settings.featuresApi + 'db=' + settings.db + '&id=' + id + '&action=osc',
+                request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=' + id + '&action=osc',
                 bbox = osmly.current.bbox;
 
             $.ajax({
@@ -265,7 +265,7 @@ osmly.ui = function() {
     function submit(result) {
         teardown();
 
-        if (settings.demo) {
+        if (osmly.settings.demo) {
             console.log(osmly.item.layer.toGeoJSON());
             if (result === 'submit') {
                 var geojson = osmly.item.layer.toGeoJSON();
@@ -289,6 +289,13 @@ osmly.ui = function() {
             .fadeOut(750);
     }
 
-    initialize();
+    function userDetailsUI() {
+        $('#user')
+            .html('<a href="' + osmly.settings.writeApi + '/user/' +
+                osmly.token('userName') + '" target="_blank">' +
+                osmly.token('userName') + '</a>')
+            .fadeIn(500);
+    }
+
     return ui;
-};
+}());
