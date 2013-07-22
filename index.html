@@ -48,9 +48,9 @@
         </div>
 
         <ul id="bottom-right">
-            <li id="reset">Reset</li>
-            <li id="josm">Edit in JOSM</li>
-            <li id="osmlink">Open at osm.org</li>
+            <li id="reset">reset</li>
+            <li id="josm">edit in JOSM</li>
+            <li id="osmlink">open at osm.org</li>
         </ul>
 
     <!-- modals -->
@@ -91,9 +91,9 @@
         </div>
     <!-- end modals -->
 
-        <img id="d-problem" class="display" src="static/images/problem_white.svg" />
-        <img id="d-skip" class="display" src="static/images/skip_white.svg" />
-        <img id="d-submit" class="display" src="static/images/upload_white.svg" />
+        <img id="flash-problem" class="display" src="static/images/problem_white.svg" />
+        <img id="flash-skip" class="display" src="static/images/skip_white.svg" />
+        <img id="flash-submit" class="display" src="static/images/upload_white.svg" />
 
         <div id="login">Login with your OSM account »</div>
 
@@ -122,7 +122,7 @@
             var CONFIG = {
                 featuresApi: 'http://127.0.0.1:5000/?',
                 db: 'parks-5',
-                demo: false,
+                demo: true,
                 origin: [34.0577, -118.2409],
                 zoom: 10,
                 renameProperty: {'NAME': 'name'},

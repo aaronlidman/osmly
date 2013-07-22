@@ -42,7 +42,7 @@ a {
     background-color: white;
     font-weight: bold;
     font-size: 24px;
-    padding: 10px 15px !important;
+    padding: 7px 10px !important;
     margin-bottom: 2px;
 }
 
@@ -56,7 +56,7 @@ a {
     margin-bottom: 2px;
     margin-left: 2px;
     background-color: white;
-    padding: 10px 15px;
+    padding: 7px 10px;
 }
 
 #bottom-right {

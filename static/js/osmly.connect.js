@@ -1,8 +1,7 @@
 osmly.connect = (function(){
     var connect = {};
 
-    connect.submitToServer = function(result) {
-        // not the OSM server, feature server
+    connect.updateItem = function(result) {
         var url = osmly.settings.featuresApi + 'db=' + osmly.settings.db +
             '&id=' + osmly.item.id + '&action=problem';
         $.ajax({

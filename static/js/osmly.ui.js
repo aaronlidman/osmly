@@ -3,13 +3,17 @@ osmly.ui = (function() {
         settings = osmly.settings;
 
     ui.initialize = function() {
-        if (!osmly.settings.demo && osmly.token('token') && osmly.token('secret')) {
-            userDetailsUI();
-            osmly.item.next();
-        } else {
+        if (osmly.settings.demo) {
             if (osmly.settings.demo) $('#login').text('Demonstration »');
 
             $('#login').fadeIn(500);
+        } else {
+            if (auth.authenticated()) {
+                setUserDetails();
+                osmly.item.next();
+            } else {
+                console.log('idk');
+            }
         }
 
         bind();
@@ -25,6 +29,7 @@ osmly.ui = (function() {
             } else {
                 $('#login').fadeOut(500);
                 getDetails();
+                osmly.item.next();
             }
         });
 
@@ -58,11 +63,11 @@ osmly.ui = (function() {
         $('#josm').click(function() {
             $('#reset').click();
 
-            var id = osmly.current.id,
-                geojson = osmly.current.layer.toGeoJSON(),
-                osmChange = toOsm(geojson),
+            var id = osmly.item.id,
+                geojson = osmly.item.layer.toGeoJSON(),
+                osmChange = osmly.item.toOsm(geojson),
                 request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=' + id + '&action=osc',
-                bbox = osmly.current.bbox;
+                bbox = osmly.item.bbox;
 
             $.ajax({
                 type: 'POST',
@@ -256,7 +261,7 @@ osmly.ui = (function() {
 
     function skip() {
         teardown();
-        $('#d-skip')
+        $('#flash-skip')
             .show()
             .fadeOut(750);
         osmly.item.next();
@@ -274,7 +279,7 @@ osmly.ui = (function() {
             }
             osmly.item.next();
         } else {
-            osmly.connect.submitToServer(result);
+            osmly.connect.updateItem(result);
             if (result === 'submit') {
                 osmly.connect.openChangeset(osmly.token('changeset_id'), submitToOSM);
             } else {
@@ -284,12 +289,12 @@ osmly.ui = (function() {
 
         if (result !== 'submit') result = 'problem';
 
-        $('#d-' + result)
+        $('#flash-' + result)
             .show()
             .fadeOut(750);
     }
 
-    function userDetailsUI() {
+    function setUserDetails() {
         $('#user')
             .html('<a href="' + osmly.settings.writeApi + '/user/' +
                 osmly.token('user') + '" target="_blank">' +
