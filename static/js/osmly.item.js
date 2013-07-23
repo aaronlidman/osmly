@@ -196,7 +196,7 @@ osmly.item = (function () {
     item.toOsm = function(geojson) {
         console.log(JSON.stringify(geojson));
         // tags are contains within geojson.properties
-        // getTags() has user-editted tags
+        // if needed, getTags() has user-editted tags
         var ret = '<?xml version="1.0" encoding="UTF-8"?>' +
         '<osm version="0.6" generator="osmly">' + innerOsm(geojson) + '</osm>';
         console.log(ret);
@@ -229,13 +229,10 @@ osmly.item = (function () {
         }
 
         function polygon(poly) {
-            // http://geojsonwg.github.io/geojson-spec.html#id4
-            var nds = [],
-                polyWays = [];
+            var nds = [];
 
-            for (var a = 0, b = poly.coordinates.length; a < b; b += 1) {
-                var polyC = poly.coordinates[a];
-
+            if (poly.coordinates.length === 1){
+                var polyC = poly.coordinates[0];
                 // length-1, osm xml doesn't need repeating nodes
                 // use a ref to the first node instead
                 for (var c = 0, d = polyC.length-1; c < d; c += 1) {
@@ -243,28 +240,22 @@ osmly.item = (function () {
                     addNode(polyC[c][1], polyC[c][0]);
                 }
                 nds.push(nds[0]);
-
-                if (a === 0) {
-                    // tags only get applied to the exterior ring way
-                    polyWays.push(way(nds, poly.properties));
-                } else {
-                    polyWays.push(way(nds));
-                }
+                return way(nds, poly.properties);
+            } else {
+                // polygon with a hole, make into a relation w/ inner(s)
+                poly.coordinates = [poly.coordinates];
+                    // coordinate structure of a multipolygon
+                addRelation(poly);
+                return {id: null, way: ''};
             }
-
-            return polyWays;
-
-            // } else {
-            //     // polygon with a hole, make into a relation w/ inner
-            //     // console.log('before: ' + String(poly.coordinates));
-            //     poly.coordinates = [poly.coordinates];
-            //     // console.log('after: ' + String(poly.coordinates));
-            //     addRelation(poly);
-            //     return {id: null, way: ''};
-            // }
         }
 
         function addRelation(rel) {
+            // is this even needed?
+            // addPolygon is needed because polygons make up other items, multipolygons
+            // so we use addPolygon() for a singular feature and polygon() as a backend for more complex stuff
+            // relations don't make up other items, they are always their own items
+            // relation() -> addRelation()?
             var r = relation(rel);
             relations += r;
         }
@@ -272,25 +263,30 @@ osmly.item = (function () {
         function relation(rel) {
             var relStr = '',
                 members = '',
+                tagStr = '',
                 rCoords = rel.coordinates;
 
             for (var a = 0, b = rCoords.length; a < b; a += 1) {
                 for (var c = 0, d = rCoords[a].length; c < d; c += 1) {
-
-                    var poly = addPolygon({coordinates: [rCoords[a][c]]}),
-                        role = ((rel.type == 'Polygon' && c > 0) ? 'inner': 'outer');
-
+                    var poly = addPolygon({
+                        properties: false,
+                        coordinates: [rCoords[a][c]]
+                    });
+                    var role = 'outer';
+                        // just let the user fix it in JOSM, polygon-in-polygon?
                     members += '<member type="way" ref="' + poly + '" role="' + role + '"/>';
                 }
             }
 
-            // need to figure out how to remove tags from the inner way
-            // just do the property tags?
+            rel.properties['type'] = 'multipolygon';
+            for (var e = 0, f = rel.properties.length; e < f; e += 1) {
+                tagStr += '<tag k="' + tags[e][0] + '" v="' + tags[e][1] + '"/>';
+            }
 
             relStr += '<relation id="' + count + '" changeset="' + changeset + '">';
             relStr += members;
-            relStr += '<tag k="type" v="multipolygon"/></relation>';
-
+            relStr += tagStr;
+            relStr += '</relation>';
             count--;
 
             return relStr;
