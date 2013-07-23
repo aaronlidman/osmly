@@ -194,17 +194,15 @@ osmly.item = (function () {
     }
 
     item.toOsm = function(geojson) {
-        console.log(JSON.stringify(geojson));
         // tags are contains within geojson.properties
         // if needed, getTags() has user-editted tags
-        var ret = '<?xml version="1.0" encoding="UTF-8"?>' +
+        return '<?xml version="1.0" encoding="UTF-8"?>' +
         '<osm version="0.6" generator="osmly">' + innerOsm(geojson) + '</osm>';
-        console.log(ret);
-        return ret;
     };
 
     function innerOsm(geojson) {
         // NOT COMPRESHENSIVE at all, adding features as I need them
+            // only testing against leaflet.toGeoJSON output
         // need to handle seperate tagging for each feature, makes block imports possible
         var nodes = '',
             ways = '',
@@ -215,9 +213,10 @@ osmly.item = (function () {
         if (osmly.token('changeset_id')) changeset = osmly.token('changeset_id');
 
         for (var a = 0, b = geojson.features.length; a < b; a += 1) {
-            if (geojson.features[a].type == 'Polygon') {
+            var geo = geojson.features[a];
+            if (geo.geometry.type == 'Polygon') {
                 addPolygon(geo);
-            } else if (geojson.features[a].type == 'MultiPolygon') {
+            } else if (geo.geometry.type == 'MultiPolygon') {
                 addRelation(geo);
             }
         }
@@ -231,8 +230,8 @@ osmly.item = (function () {
         function polygon(poly) {
             var nds = [];
 
-            if (poly.coordinates.length === 1){
-                var polyC = poly.coordinates[0];
+            if (poly.geometry.coordinates.length === 1){
+                var polyC = poly.geometry.coordinates[0];
                 // length-1, osm xml doesn't need repeating nodes
                 // use a ref to the first node instead
                 for (var c = 0, d = polyC.length-1; c < d; c += 1) {
@@ -243,7 +242,7 @@ osmly.item = (function () {
                 return way(nds, poly.properties);
             } else {
                 // polygon with a hole, make into a relation w/ inner(s)
-                poly.coordinates = [poly.coordinates];
+                poly.geometry.coordinates = [poly.geometry.coordinates];
                     // coordinate structure of a multipolygon
                 addRelation(poly);
                 return {id: null, way: ''};
@@ -264,7 +263,7 @@ osmly.item = (function () {
             var relStr = '',
                 members = '',
                 tagStr = '',
-                rCoords = rel.coordinates;
+                rCoords = rel.geometry.coordinates;
 
             for (var a = 0, b = rCoords.length; a < b; a += 1) {
                 for (var c = 0, d = rCoords[a].length; c < d; c += 1) {
@@ -312,8 +311,10 @@ osmly.item = (function () {
             tags = tags || [];
             var tagStr = '';
 
-            for (var a = 0, b = tags.length; a < b; a += 1) {
-                tagStr += '<tag k="' + tags[a][0] + '" v="' + tags[a][1] + '"/>';
+            for (var tag in tags) {
+                if (tags[tag] != null){
+                    tagStr += '<tag k="' + tag + '" v="' + tags[tag] + '"/>';
+                }
             }
 
             var w = '<way id="' + count + '" changeset="' + changeset + '">' +
