@@ -194,31 +194,74 @@ osmly.item = (function () {
     }
 
     item.toOsm = function(geojson) {
-        return '<?xml version="1.0" encoding="UTF-8"?>' +
-        '<osm version="0.6" generator="osmly">' + innerOsm(geojson, getTags()) + '</osm>';
+        console.log(JSON.stringify(geojson));
+        // tags are contains within geojson.properties
+        // getTags() has user-editted tags
+        var ret = '<?xml version="1.0" encoding="UTF-8"?>' +
+        '<osm version="0.6" generator="osmly">' + innerOsm(geojson) + '</osm>';
+        console.log(ret);
+        return ret;
     };
 
-    // geojson object, tags = [[k,v],[k,v],[k,v]]
-    function innerOsm(geojson, tags) {
-        // currently not equipped for tags on individual features, just tags everything with var tags
-            // ideal would be to insert tags into geojson properties beforehand
-            // then this could handle many items at once, makes block imports possible
+    function innerOsm(geojson) {
+        // NOT COMPRESHENSIVE at all, adding features as I need them
+        // need to handle seperate tagging for each feature, makes block imports possible
         var nodes = '',
             ways = '',
             relations = '',
             count = -1,
             changeset = 0;
 
-        if (token('changeset_id')) changeset = token('changeset_id');
+        if (osmly.token('changeset_id')) changeset = osmly.token('changeset_id');
 
-        for (var a = 0, b = geojson.geometries.length; a < b; a += 1) {
-            var geo = geojson.geometries[a];
-
-            if (geo.type == 'MultiPolygon') {
-                addRelation(geo);
-            } else if (geo.type == 'Polygon') {
+        for (var a = 0, b = geojson.features.length; a < b; a += 1) {
+            if (geojson.features[a].type == 'Polygon') {
                 addPolygon(geo);
+            } else if (geojson.features[a].type == 'MultiPolygon') {
+                addRelation(geo);
             }
+        }
+
+        function addPolygon(poly) {
+            var p = polygon(poly);
+            ways += p.way;
+            return p.id;
+        }
+
+        function polygon(poly) {
+            // http://geojsonwg.github.io/geojson-spec.html#id4
+            var nds = [],
+                polyWays = [];
+
+            for (var a = 0, b = poly.coordinates.length; a < b; b += 1) {
+                var polyC = poly.coordinates[a];
+
+                // length-1, osm xml doesn't need repeating nodes
+                // use a ref to the first node instead
+                for (var c = 0, d = polyC.length-1; c < d; c += 1) {
+                    nds.push(count);
+                    addNode(polyC[c][1], polyC[c][0]);
+                }
+                nds.push(nds[0]);
+
+                if (a === 0) {
+                    // tags only get applied to the exterior ring way
+                    polyWays.push(way(nds, poly.properties));
+                } else {
+                    polyWays.push(way(nds));
+                }
+            }
+
+            return polyWays;
+
+            // } else {
+            //     // polygon with a hole, make into a relation w/ inner
+            //     // console.log('before: ' + String(poly.coordinates));
+            //     poly.coordinates = [poly.coordinates];
+            //     // console.log('after: ' + String(poly.coordinates));
+            //     addRelation(poly);
+            //     return {id: null, way: ''};
+            // }
         }
 
         function addRelation(rel) {
@@ -253,37 +296,6 @@ osmly.item = (function () {
             return relStr;
         }
 
-        function addPolygon(poly) {
-            var p = polygon(poly);
-            ways += p.way;
-            return p.id;
-        }
-
-        function polygon(poly) {
-            var nds = [];
-
-            if (poly.coordinates.length === 1){
-                var polyC = poly.coordinates[0];
-
-                // length-1 because osm xml doesn't need repeating nodes
-                // we instead use a reference to the first node
-                for (var a = 0, b = polyC.length-1; a < b; a += 1) {
-                    nds.push(count);
-                    addNode(polyC[a][1], polyC[a][0]);
-                }
-                nds.push(nds[0]); // first node = last
-
-                return way(nds, tags);
-            } else {
-                // polygon with a hole, make into a relation w/ inner
-                // console.log('before: ' + String(poly.coordinates));
-                poly.coordinates = [poly.coordinates];
-                // console.log('after: ' + String(poly.coordinates));
-                addRelation(poly);
-                return {id: null, way: ''};
-            }
-        }
-
         // geojson = lon,lat / osm = lat,lon
         function addNode(lat, lon) {
             var n = '<node id="' + count + '" lat="' + lat + '" lon="' + lon +
@@ -294,23 +306,19 @@ osmly.item = (function () {
 
         function buildNds(array) {
             var xml = '';
-
             for (var a = 0, b = array.length; a < b; a += 1) {
                 xml += '<nd ref="' + array[a] + '"/>';
             }
-
             return xml;
         }
 
         function way(nds, tags) {
-            // nds and tags as unprocessed arrays
-
-            // for temporary external tags, will go away soon, then use tagz or rename to tags
+            tags = tags || [];
             var tagStr = '';
+
             for (var a = 0, b = tags.length; a < b; a += 1) {
                 tagStr += '<tag k="' + tags[a][0] + '" v="' + tags[a][1] + '"/>';
             }
-
 
             var w = '<way id="' + count + '" changeset="' + changeset + '">' +
             buildNds(nds) + tagStr + '</way>';
