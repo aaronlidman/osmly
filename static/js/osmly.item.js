@@ -203,7 +203,6 @@ osmly.item = (function () {
     function innerOsm(geojson) {
         // NOT COMPRESHENSIVE at all, adding features as I need them
             // only testing against leaflet.toGeoJSON output
-        // need to handle seperate tagging for each feature, makes block imports possible
         var nodes = '',
             ways = '',
             relations = '',
@@ -250,19 +249,8 @@ osmly.item = (function () {
         }
 
         function addRelation(rel) {
-            // is this even needed?
-            // addPolygon is needed because polygons make up other items, multipolygons
-            // so we use addPolygon() for a singular feature and polygon() as a backend for more complex stuff
-            // relations don't make up other items, they are always their own items
-            // relation() -> addRelation()?
-            var r = relation(rel);
-            relations += r;
-        }
-
-        function relation(rel) {
             var relStr = '',
                 members = '',
-                tagStr = '',
                 rCoords = rel.geometry.coordinates;
 
             for (var a = 0, b = rCoords.length; a < b; a += 1) {
@@ -278,17 +266,13 @@ osmly.item = (function () {
             }
 
             rel.properties['type'] = 'multipolygon';
-            for (var e = 0, f = rel.properties.length; e < f; e += 1) {
-                tagStr += '<tag k="' + tags[e][0] + '" v="' + tags[e][1] + '"/>';
-            }
-
             relStr += '<relation id="' + count + '" changeset="' + changeset + '">';
             relStr += members;
-            relStr += tagStr;
+            relStr += cleanTags(rel.properties);
             relStr += '</relation>';
             count--;
 
-            return relStr;
+            relations += relStr;
         }
 
         // geojson = lon,lat / osm = lat,lon
@@ -309,22 +293,25 @@ osmly.item = (function () {
 
         function way(nds, tags) {
             tags = tags || [];
-            var tagStr = '';
-
-            for (var tag in tags) {
-                if (tags[tag] != null){
-                    tagStr += '<tag k="' + tag + '" v="' + tags[tag] + '"/>';
-                }
-            }
 
             var w = '<way id="' + count + '" changeset="' + changeset + '">' +
-            buildNds(nds) + tagStr + '</way>';
+            buildNds(nds) + cleanTags(tags) + '</way>';
             count--;
 
             return {
                 id: count + 1,
                 way: w
             };
+        }
+
+        function cleanTags(tags) {
+            var tagStr = '';
+            for (var tag in tags) {
+                if (tags[tag] != null){
+                    tagStr += '<tag k="' + tag + '" v="' + tags[tag] + '"/>';
+                }
+            }
+            return tagStr;
         }
 
         return nodes + ways + relations;
