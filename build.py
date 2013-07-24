@@ -16,7 +16,12 @@ parser = ArgumentParser()
 
 parser.add_argument(
     'source',
-    help='Source file to parse')
+    help='Source geojson file to parse')
+parser.add_argument(
+    '--simplify',
+    help='Simplification tolerance.',
+    type=float,
+    default=0.0001)
 
 args = vars(parser.parse_args())
 
@@ -41,10 +46,10 @@ for feature in data['features']:
     # we want to use simplify() with False param because it's faster
     # but it occasionally deletes all nodes and that upsets mapping()
     try:
-        simple = geo.simplify(0.0001, False)
+        simple = geo.simplify(args['simplify'], False)
         geo = mapping(simple)
     except:
-        simple = geo.simplify(0.0001, True)
+        simple = geo.simplify(args['simplify'], True)
         geo = mapping(simple)
 
     feature['properties']['id'] = count
