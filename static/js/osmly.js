@@ -3,25 +3,12 @@ window.osmly = (function () {
 TODO
     - success + failure callbacks on every request
         - replace .success, .error, .complete w/ .done, .fail, .always
-    - common ohauth.xhr function
-    - group oauth functions like iD
-        - https://github.com/systemed/iD/blob/master/js/id/oauth.js#L53
-        - same idea can be applied to changesets, submitting?
     - crossbrowser test ui
         - especially modal and tag stuff
     - check if done, again, before submitting to osm
     - confirm toOsm multipolygons are valid in josm
         - they're not
-    - bind link in validFeature(), unbind on click
-    - getSetOsm(), setup(), and display() interaction is a mess
-    - instructions modal limits min-height
-    - rethink loading
-        - zoom to, load feature while osm is downloading
-        - when osm is done bring in UI and editing points
-        - allows for a few seconds of planning
-    - bigger action buttons
-    - get for loops figured out, consistency, noob
-        - for vs for-in
+    - modal are limiting min-height
     - handle tags better
         - make then self contained with geojson properties
         - available to edit tags for multiple items
@@ -82,12 +69,12 @@ function keyclean(x) { return x.replace(/\W/g, ''); }
 // from iD
 
 osmly.token = function(k, x) {
+// from iD
     if (arguments.length === 2) {
         localStorage[keyclean(osmly.settings.writeApi) + k] = x;
     }
     return localStorage[keyclean(osmly.settings.writeApi) + k];
 };
-// from iD
 
 function updateChangeset(id, callback) {
     var url = osmly.settings.writeApi + '/api/0.6/changeset/' + id,

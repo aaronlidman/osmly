@@ -6,16 +6,22 @@ osmly.item = (function () {
         $('#tags li').remove();
 
         var request = osmly.settings.featuresApi + 'db=' + osmly.settings.db;
-            // request = settings.featuresApi + 'db=' + settings.db + '&id=1047';
+            // var request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=1047';
                 // simple multipolygon
-            // request = settings.featuresApi + 'db=' + settings.db + '&id=1108';
-                // poly
-            // request = settings.featuresApi + 'db=' + settings.db + '&id=810';
+                // should probably still filter out
+            // var request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=810';
                 // poly with a hole
-            // request = settings.featuresApi + 'db=' + settings.db + '&id=1129';
+                // too complex, already filtered out
+            // var request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=1129';
                 // multipolygon with a hole
-            // request = settings.featuresApi + 'db=' + settings.db + '&id=1146';
+                // too complex, already filtered out
+            // var request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=1146';
                 // context multipolygon isn't showing up, very important it does
+                // too large, shouldn't be here anyway
+            // var request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=747';
+                // polygon w/ hole, don't see hole, crashed geojson2osm
+                // small 3 node hole, all the same point, random
+
             // there was a multipolygon w/ only one coords array in it that screwed things up, didn't get id
                 // structured like a polygon, just had type of multipolygon
                 // try/catch?
@@ -257,7 +263,9 @@ osmly.item = (function () {
                 for (var c = 0, d = rCoords[a].length; c < d; c += 1) {
                     var poly = addPolygon({
                         properties: false,
-                        coordinates: [rCoords[a][c]]
+                        geometry: {
+                            coordinates: [rCoords[a][c]]
+                        }
                     });
                     var role = 'outer';
                         // just let the user fix it in JOSM, polygon-in-polygon?
