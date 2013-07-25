@@ -94,7 +94,7 @@ osmly.ui = (function() {
                         // then show an action dialog, to determine what was done with that feature
                     });
                 }).fail(function() {
-                    $('#reusable-modal span').text('JOSM doesn\'t seem to be running. Make sure you start it first.');
+                    $('#reusable-modal span').text('JOSM doesn\'t seem to be running. Start JOSM and try again.');
                     $('#reusable-modal').reveal({
                          animation: 'fade',
                          animationspeed: 100,

@@ -6,31 +6,22 @@ osmly.item = (function () {
         $('#tags li').remove();
 
         var request = osmly.settings.featuresApi + 'db=' + osmly.settings.db;
-            // var request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=1047';
-                // simple multipolygon
-                // should probably still filter out
-            // var request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=810';
-                // poly with a hole
-                // too complex, already filtered out
-            // var request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=1129';
-                // multipolygon with a hole
-                // too complex, already filtered out
-            // var request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=1146';
-                // context multipolygon isn't showing up, very important it does
-                // too large, shouldn't be here anyway
-            // var request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=747';
-                // polygon w/ hole, don't see hole, crashed geojson2osm
-                // small 3 node hole, all the same point, random
-
-            // there was a multipolygon w/ only one coords array in it that screwed things up, didn't get id
-                // structured like a polygon, just had type of multipolygon
-                // try/catch?
+            // id = 942 doesn't show context correctly
+                // context park is a relation w/ tags, need to pass tags to children
 
         $.ajax(request).done(function(data) {
             item.data = JSON.parse(data);
             item.id = item.data.properties.id;
-            item.bbox = item.data.properties.buffer_bounds;
+            item.bbox = item.data.properties.bounds;
             item.isEditable = isEditable(item.data.geometry);
+
+            // buffer the bounds
+            item.bbox = [
+                item.bbox[0] - 0.001,
+                item.bbox[1] - 0.001,
+                item.bbox[2] + 0.001,
+                item.bbox[3] + 0.001
+            ];
 
             // setFeatureLayer() is purposefully here and not in display() due to timing issues
             // basically if we do it during display the map is still zooming and
@@ -115,13 +106,13 @@ osmly.item = (function () {
 
     function getOsm(callback) {
         osmly.ui.notify('getting nearby OSM data');
-        var bbox = 'bbox=' + item.bbox.join(',');
+        var bbox = 'bbox=' + item.bbox.join(','),
+            request = osmly.settings.readApi + bbox;
 
-        $.ajax(osmly.settings.readApi + bbox).done(function(xml) {
+        $.ajax(request).done(function(xml) {
             osmly.ui.notify('rendering OSM data');
             item.osmContext = osm2geo(xml);
             item.filteredContext = filterContext(item.osmContext);
-
             setOsm(item.filteredContext);
             callback();
         });
