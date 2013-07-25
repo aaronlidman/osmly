@@ -25,6 +25,19 @@ parser.add_argument(
 
 args = vars(parser.parse_args())
 
+
+def isEditable(geo):
+    # items that are easily editable for leaflet
+    # mirrors isEditable() in osmly.item.js
+    # basically is it a simple polygon? is it within the size?
+    if geo['type'] == 'Polygon' and len(geo['coordinates']) > 1:
+        return False
+    elif geo['type'] == 'MultiPolygon':
+        return False
+    # need to limit size to square mile or something
+        # anything over is too difficult
+    return True
+
 data = open(args['source'])
 data = json.load(data)
 
@@ -38,10 +51,24 @@ c.execute('''CREATE TABLE osmly (id INT, geo TEXT, osc TEXT, problem TEXT, done 
 conn.commit()
 
 count = 0
+difficult = 0
+area = []
+toolarge = []
 
 for feature in data['features']:
     geo = asShape(feature['geometry'])
     bounds = geo.buffer(0.001).bounds
+    geoarea = geo.area
+
+
+    # need to get this into isEditable somehow
+    # move isEditable up steam a little bit
+    if geoarea > 0.00020937181:
+        # 1/(69.11*69.11)
+        toolarge.append(geoarea)
+        print json.dumps(feature)
+    else:
+        area.append(geoarea)
 
     # we want to use simplify() with False param because it's faster
     # but it occasionally deletes all nodes and that upsets mapping()
@@ -56,14 +83,19 @@ for feature in data['features']:
     feature['properties']['buffer_bounds'] = bounds
     feature['geometry']['coordinates'] = geo['coordinates']
 
-    if len(feature['geometry']['coordinates']) > 1:
-        # multipolygon
-        print str(count) + ': ' + str(len(feature['geometry']['coordinates']))
+    if isEditable(feature['geometry']):
+        statement = "INSERT INTO osmly VALUES(?, ?, ?, ?, ?);"
+        c.execute(statement, (count, json.dumps(feature), '', '', ''))
+        conn.commit()
+        count = count + 1
+    else:
+        # put it into some other file
+        # print str(count) + ': ' + json.dumps(feature)
+        difficult = difficult + 1
 
-    statement = "INSERT INTO osmly VALUES(?, ?, ?, ?);"
-    c.execute(statement, (id, json.dumps(feature), '', ''))
-    conn.commit()
 
-    count = count + 1
-
+print 'total: ' + str(count)
+print 'too difficult:' + str(difficult)
+print 'mean area: ' + str(sum(area) / float(len(area)))
+print '# too large: ' + str(len(toolarge))
 conn.close()
