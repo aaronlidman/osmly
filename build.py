@@ -12,6 +12,12 @@ import sqlite3
 from shapely.geometry import asShape, mapping
 from argparse import ArgumentParser
 
+# MAX_EDITABLE_AREA = 1/float(69.11*69.11)
+    # square mile
+MAX_EDITABLE_AREA = 1/float(138.22*138.22)
+    # half sqaure mile
+    # obviously not very accurate but it's good enough
+
 parser = ArgumentParser()
 
 parser.add_argument(
@@ -29,13 +35,14 @@ args = vars(parser.parse_args())
 def isEditable(geo):
     # items that are easily editable for leaflet
     # mirrors isEditable() in osmly.item.js
-    # basically is it a simple polygon? is it within the size?
-    if geo['type'] == 'Polygon' and len(geo['coordinates']) > 1:
+    if geo.geom_type == 'Polygon' and geo.interiors:
+        # rare but happens
         return False
-    elif geo['type'] == 'MultiPolygon':
+    elif geo.geom_type == 'MultiPolygon':
         return False
-    # need to limit size to square mile or something
-        # anything over is too difficult
+
+    if geo.area > MAX_EDITABLE_AREA:
+        return False
     return True
 
 data = open(args['source'])
@@ -52,23 +59,12 @@ conn.commit()
 
 count = 0
 difficult = 0
-area = []
-toolarge = []
 
 for feature in data['features']:
     geo = asShape(feature['geometry'])
     bounds = geo.buffer(0.001).bounds
     geoarea = geo.area
-
-
-    # need to get this into isEditable somehow
-    # move isEditable up steam a little bit
-    if geoarea > 0.00020937181:
-        # 1/(69.11*69.11)
-        toolarge.append(geoarea)
-        print json.dumps(feature)
-    else:
-        area.append(geoarea)
+    editable = isEditable(geo)
 
     # we want to use simplify() with False param because it's faster
     # but it occasionally deletes all nodes and that upsets mapping()
@@ -83,7 +79,7 @@ for feature in data['features']:
     feature['properties']['buffer_bounds'] = bounds
     feature['geometry']['coordinates'] = geo['coordinates']
 
-    if isEditable(feature['geometry']):
+    if editable:
         statement = "INSERT INTO osmly VALUES(?, ?, ?, ?, ?);"
         c.execute(statement, (count, json.dumps(feature), '', '', ''))
         conn.commit()
@@ -94,8 +90,6 @@ for feature in data['features']:
         difficult = difficult + 1
 
 
-print 'total: ' + str(count)
-print 'too difficult:' + str(difficult)
-print 'mean area: ' + str(sum(area) / float(len(area)))
-print '# too large: ' + str(len(toolarge))
+print 'leaflet editable: ' + str(count)
+print 'too difficult: ' + str(difficult)
 conn.close()
