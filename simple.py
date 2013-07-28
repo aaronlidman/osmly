@@ -23,11 +23,10 @@ def slash():
 
 
 def get():
-    # need osc path, use same 'osc' in request.args from post()
     conn = sqlite3.connect(request.args['db'] + '.sqlite')
     if 'id' in request.args:
         row = conn.execute(
-            'SELECT geo, osc FROM osmly WHERE id = ? LIMIT 1',
+            'SELECT geo, remote FROM osmly WHERE id = ? LIMIT 1',
             [request.args['id']]
         )
     else:
@@ -37,7 +36,8 @@ def get():
     row = row.fetchone()
     conn.commit()
     conn.close()
-    if 'action' in request.args and request.args['action'] == 'osc':
+
+    if 'action' in request.args and request.args['action'] == 'remote':
         return row[1]
 
     return row[0]
@@ -51,8 +51,8 @@ def post():
     if 'action' in request.args:
         if request.args['action'] == 'problem':
             return problem()
-        elif request.args['action'] == 'osc':
-            return post_osc()
+        elif request.args['action'] == 'remote':
+            return post_remote()
     else:
         return done()
 
@@ -81,13 +81,13 @@ def problem():
     return json.dumps({'id': request.args['id']})
 
 
-def post_osc():
+def post_remote():
     # could do a uid check if needed
     conn = sqlite3.connect(request.args['db'] + '.sqlite')
     c = conn.cursor()
     c.execute(
-        'UPDATE osmly SET osc = ? WHERE id = ?',
-        (request.form['osc'], request.args['id'])
+        'UPDATE osmly SET remote = ? WHERE id = ?',
+        (request.form['remote'], request.args['id'])
     )
     conn.commit()
     conn.close()

@@ -33,6 +33,8 @@ def isEditable(geo):
         return False
     if geo.area > MAX_EDITABLE_AREA:
         return False
+    if geo.area == 0:
+        return False
     return True
 
 data = open(args['source'])
@@ -43,14 +45,14 @@ editableDB = dbName[0] + '.sqlite'
 edit_conn = sqlite3.connect(editableDB)
 edit_c = edit_conn.cursor()
 edit_c.execute("DROP TABLE IF EXISTS osmly")
-edit_c.execute('''CREATE TABLE osmly (id INT, geo TEXT, osc TEXT, problem TEXT, done TEXT)''')
+edit_c.execute('''CREATE TABLE osmly (id INT, geo TEXT, remote TEXT, problem TEXT, done TEXT)''')
 edit_conn.commit()
 
 difficultDB = dbName[0] + '-difficult.sqlite'
 diff_conn = sqlite3.connect(difficultDB)
 diff_c = diff_conn.cursor()
 diff_c.execute("DROP TABLE IF EXISTS osmly")
-diff_c.execute('''CREATE TABLE osmly (id INT, geo TEXT, osc TEXT, problem TEXT, done TEXT)''')
+diff_c.execute('''CREATE TABLE osmly (id INT, geo TEXT, remote TEXT, problem TEXT, done TEXT)''')
 diff_conn.commit()
 
 count = 0
