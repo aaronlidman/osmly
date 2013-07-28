@@ -23,9 +23,7 @@ osmly.item = (function () {
                 item.bbox[3] + 0.001
             ];
 
-            // setFeatureLayer() is purposefully here and not in display() due to timing issues
-            // basically if we do it during display the map is still zooming and
-            // midpoint nodes get all screwed up
+            // this is here and not elsewhere because of timing issues
             item.setItemLayer(item.data);
 
             renameProperties();
@@ -113,12 +111,12 @@ osmly.item = (function () {
             osmly.ui.notify('rendering OSM data');
             item.osmContext = osm2geo(xml);
             item.filteredContext = filterContext(item.osmContext);
-            setOsm(item.filteredContext);
+            setContext(item.filteredContext);
             callback();
         });
     }
 
-    function setOsm(osmjson) {
+    function setContext(osmjson) {
         osmly.item.contextLayer = L.geoJson(osmjson, {
             style: osmly.settings.contextStyle,
             onEachFeature: function(feature, layer) {
@@ -190,131 +188,7 @@ osmly.item = (function () {
         return tags;
     }
 
-    item.toOsm = function(geojson) {
-        // tags are contains within geojson.properties
-        // if needed, getTags() has user-editted tags
-        return '<?xml version="1.0" encoding="UTF-8"?>' +
-        '<osm version="0.6" generator="osmly">' + innerOsm(geojson) + '</osm>';
-    };
-
-    function innerOsm(geojson) {
-        // NOT COMPRESHENSIVE at all, adding features as I need them
-            // only testing against leaflet.toGeoJSON output
-        var nodes = '',
-            ways = '',
-            relations = '',
-            count = -1,
-            changeset = 0;
-
-        if (osmly.token('changeset_id')) changeset = osmly.token('changeset_id');
-
-        for (var a = 0, b = geojson.features.length; a < b; a += 1) {
-            var geo = geojson.features[a];
-            if (geo.geometry.type == 'Polygon') {
-                addPolygon(geo);
-            } else if (geo.geometry.type == 'MultiPolygon') {
-                addRelation(geo);
-            }
-        }
-
-        function addPolygon(poly) {
-            var p = polygon(poly);
-            ways += p.way;
-            return p.id;
-        }
-
-        function polygon(poly) {
-            var nds = [];
-
-            if (poly.geometry.coordinates.length === 1){
-                var polyC = poly.geometry.coordinates[0];
-                // length-1, osm xml doesn't need repeating nodes
-                // use a ref to the first node instead
-                for (var c = 0, d = polyC.length-1; c < d; c += 1) {
-                    nds.push(count);
-                    addNode(polyC[c][1], polyC[c][0]);
-                }
-                nds.push(nds[0]);
-                return way(nds, poly.properties);
-            } else {
-                // polygon with a hole, make into a relation w/ inner(s)
-                poly.geometry.coordinates = [poly.geometry.coordinates];
-                    // coordinate structure of a multipolygon
-                addRelation(poly);
-                return {id: null, way: ''};
-            }
-        }
-
-        function addRelation(rel) {
-            var relStr = '',
-                members = '',
-                rCoords = rel.geometry.coordinates;
-
-            for (var a = 0, b = rCoords.length; a < b; a += 1) {
-                for (var c = 0, d = rCoords[a].length; c < d; c += 1) {
-                    var poly = addPolygon({
-                        properties: false,
-                        geometry: {
-                            coordinates: [rCoords[a][c]]
-                        }
-                    });
-                    var role = 'outer';
-                        // just let the user fix it in JOSM, polygon-in-polygon?
-                    members += '<member type="way" ref="' + poly + '" role="' + role + '"/>';
-                }
-            }
-
-            rel.properties['type'] = 'multipolygon';
-            relStr += '<relation id="' + count + '" changeset="' + changeset + '">';
-            relStr += members;
-            relStr += cleanTags(rel.properties);
-            relStr += '</relation>';
-            count--;
-
-            relations += relStr;
-        }
-
-        // geojson = lon,lat / osm = lat,lon
-        function addNode(lat, lon) {
-            var n = '<node id="' + count + '" lat="' + lat + '" lon="' + lon +
-            '" changeset="' + changeset + '"/>';
-            count--;
-            nodes += n;
-        }
-
-        function buildNds(array) {
-            var xml = '';
-            for (var a = 0, b = array.length; a < b; a += 1) {
-                xml += '<nd ref="' + array[a] + '"/>';
-            }
-            return xml;
-        }
-
-        function way(nds, tags) {
-            tags = tags || [];
-
-            var w = '<way id="' + count + '" changeset="' + changeset + '">' +
-            buildNds(nds) + cleanTags(tags) + '</way>';
-            count--;
-
-            return {
-                id: count + 1,
-                way: w
-            };
-        }
-
-        function cleanTags(tags) {
-            var tagStr = '';
-            for (var tag in tags) {
-                if (tags[tag] != null){
-                    tagStr += '<tag k="' + tag + '" v="' + tags[tag] + '"/>';
-                }
-            }
-            return tagStr;
-        }
-
-        return nodes + ways + relations;
-    }
+    item.toOsm = function(geojson) {};
 
     return item;
 }());

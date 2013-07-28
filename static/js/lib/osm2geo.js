@@ -213,7 +213,6 @@ var osm2geo = function(osm) {
         }
     }
 
-    console.log(relational);
     var r = relational.features.length;
     while (r--) {
         geo.features.push(relational.features[r]);
