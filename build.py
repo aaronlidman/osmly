@@ -45,17 +45,19 @@ editableDB = dbName[0] + '.sqlite'
 edit_conn = sqlite3.connect(editableDB)
 edit_c = edit_conn.cursor()
 edit_c.execute("DROP TABLE IF EXISTS osmly")
-edit_c.execute('''CREATE TABLE osmly (id INT, geo TEXT, remote TEXT, problem TEXT, done TEXT)''')
+edit_c.execute('''CREATE TABLE osmly (id INTEGER PRIMARY KEY, geo TEXT, remote TEXT, problem TEXT, done TEXT)''')
 edit_conn.commit()
 
 difficultDB = dbName[0] + '-difficult.sqlite'
 diff_conn = sqlite3.connect(difficultDB)
 diff_c = diff_conn.cursor()
 diff_c.execute("DROP TABLE IF EXISTS osmly")
-diff_c.execute('''CREATE TABLE osmly (id INT, geo TEXT, remote TEXT, problem TEXT, done TEXT)''')
+diff_c.execute('''CREATE TABLE osmly (id INTEGER PRIMARY KEY, geo TEXT, remote TEXT, problem TEXT, done TEXT)''')
 diff_conn.commit()
 
 count = 0
+easy_count = 0
+diff_count = 0
 
 for feature in data['features']:
     geo = asShape(feature['geometry'])
@@ -64,21 +66,26 @@ for feature in data['features']:
     editable = isEditable(geo)
     geo = mapping(geo)
 
-    feature['properties']['id'] = count
     feature['properties']['bounds'] = bounds
     feature['geometry']['coordinates'] = geo['coordinates']
 
     statement = "INSERT INTO osmly VALUES(?, ?, ?, ?, ?);"
 
     if editable:
-        edit_c.execute(statement, (count, json.dumps(feature), '', '', ''))
+        feature['properties']['id'] = easy_count
+        edit_c.execute(statement, (easy_count, json.dumps(feature), '', '', ''))
         edit_conn.commit()
+        easy_count = easy_count + 1
     else:
-        diff_c.execute(statement, (count, json.dumps(feature), '', '', ''))
+        feature['properties']['id'] = diff_count
+        diff_c.execute(statement, (diff_count, json.dumps(feature), '', '', ''))
         diff_conn.commit()
+        diff_count = diff_count + 1
+
     count = count + 1
 
 
-print '# of items: ' + str(count)
+print str(count) + ' items'
+print str(easy_count) + ' easy, ' + str(diff_count) + ' difficult'
 edit_conn.close()
 diff_conn.close()
