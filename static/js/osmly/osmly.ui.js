@@ -65,7 +65,7 @@ osmly.ui = (function() {
 
             var id = osmly.item.id,
                 geojson = osmly.item.layer.toGeoJSON(),
-                osmChange = osmly.item.toOsm(geojson),
+                osm = osmly.item.toOsm(geojson),
                 request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=' + id + '&action=osc',
                 bbox = osmly.item.bbox;
 
@@ -73,7 +73,7 @@ osmly.ui = (function() {
                 type: 'POST',
                 url: request,
                 crossDomain: true,
-                data: {osc: osmChange}
+                data: {osc: osm}
             }).done(function() {
                 // there's no way to both load data from the api and import a file
                 // so we do them seperately with two requests

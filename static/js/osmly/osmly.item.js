@@ -188,7 +188,14 @@ osmly.item = (function () {
         return tags;
     }
 
-    item.toOsm = function(geojson) {};
+
+    item.toOsm = function(geojson) {
+        return geo2osm(geojson);
+    };
+
+    item.toOsmChange = function(geojson) {
+        return geo2osm(geojson, false, true);
+    };
 
     return item;
 }());

@@ -1,11 +1,8 @@
-// only Point, Polygon, MultiPolygon for now
-// basic structure from:
-// https://github.com/JasonSanford/GeoJSON-to-Google-Maps
+// THIS IS A MODIFIED VERSION OF GEO2OSM
+    // original here: https://github.com/aaronlidman/osm-and-geojson
+var geo2osm = function(geo, changeset, osmchange) {
+    osmchange = osmchange || false;
 
-// todo:
-    // make changeset completely optional
-    // fix indexed output with multipolygon feature collection, should be flat string
-var geo2osm = function(geo, changeset) {
     function togeojson(geo, properties) {
         var nodes = '',
             ways = '',
@@ -61,6 +58,11 @@ var geo2osm = function(geo, changeset) {
 
         osm = '<?xml version="1.0" encoding="UTF-8"?><osm version="0.6" generator="geo2osm.js">' +
         nodes + ways + relations + '</osm>';
+
+        if (osmchange) {
+            osm = '<osmChange version="0.6" generator="geo2osm.js"><create>' +
+            nodes + ways + relations + '</create></osmChange>';
+        }
 
         return {
             'nodes': nodes,
@@ -188,14 +190,25 @@ var geo2osm = function(geo, changeset) {
                 for (var i = 0; i < geo.features.length; i++){
                     obj.push(togeojson(geo.features[i].geometry, geo.features[i].properties));
                 }
+
                 temp['osm'] = '<?xml version="1.0" encoding="UTF-8"?><osm version="0.6" generator="geo2osm.js">';
+                if (osmchange) {
+                    temp['osm'] = '<osmChange version="0.6" generator="geo2osm.js"><create>';
+                }
+
                 for (var n = 0; n < obj.length; n++) {
                     temp['nodes'] += obj[n]['nodes'];
                     temp['ways'] += obj[n]['ways'];
                     temp['relations'] += obj[n]['relations'];
                 }
                 temp['osm'] += temp['nodes'] + temp['ways'] + temp['relations'];
-                temp['osm'] += '</osm>';
+
+                if (osmchange) {
+                    temp['osm'] += '</create></osmChange>';
+                } else {
+                    temp['osm'] += '</osm>';
+                }
+
                 obj = temp['osm'];
             } else {
                 console.log('Invalid GeoJSON object: FeatureCollection object missing \"features\" member.');

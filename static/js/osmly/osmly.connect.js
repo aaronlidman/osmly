@@ -67,10 +67,5 @@ osmly.connect = (function(){
         // removed ohauth
     }
 
-    function toOsmChange(geojson) {
-        return '<osmChange version="0.6" generator="osmly"><create>' +
-            innerOsm(geojson) + '</create></osmChange>';
-    }
-
     return connect;
 }());
