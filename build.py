@@ -20,6 +20,11 @@ parser = ArgumentParser()
 parser.add_argument(
     'source',
     help='Source geojson file to parse')
+parser.add_argument(
+    '--simplify',
+    help='Simplification tolerance.',
+    type=float,
+    default=0.0001)
 
 args = vars(parser.parse_args())
 
@@ -64,7 +69,15 @@ for feature in data['features']:
     bounds = geo.bounds
     geoarea = geo.area
     editable = isEditable(geo)
-    geo = mapping(geo)
+
+    # we want to use simplify() with False because it's faster
+    # but it occasionally deletes all nodes and that upsets mapping()
+    try:
+        simple = geo.simplify(0.0001, False)
+        geo = mapping(simple)
+    except:
+        simple = geo.simplify(0.0001, True)
+        geo = mapping(simple)
 
     feature['properties']['bounds'] = bounds
     feature['geometry']['coordinates'] = geo['coordinates']
