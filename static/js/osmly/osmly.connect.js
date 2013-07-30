@@ -39,8 +39,18 @@ osmly.connect = (function(){
         osmly.auth.xhr({
             method: 'PUT',
             path: '/api/0.6/changeset/create',
-            content: newChangesetXml()
-        }, callback);
+            content: newChangesetXml(),
+            options: {header: {'Content-Type': 'text/xml'}}
+                // fails without correct content type header
+        }, function(err, response){
+            if (err) {
+                // idk, something
+            }
+
+            if (response) {
+                token('changeset_id', reponse);
+            }
+        });
     }
 
     function newChangesetXml() {
