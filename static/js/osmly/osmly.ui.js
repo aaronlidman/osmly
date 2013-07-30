@@ -5,14 +5,13 @@ osmly.ui = (function() {
     ui.initialize = function() {
         if (osmly.settings.demo) {
             if (osmly.settings.demo) $('#login').text('Demonstration »');
-
             $('#login').fadeIn(500);
         } else {
-            if (auth.authenticated()) {
+            if (osmly.auth.authenticated()) {
                 setUserDetails();
                 osmly.item.next();
             } else {
-                console.log('idk');
+                $('#login').fadeIn(500);
             }
         }
 
@@ -28,7 +27,7 @@ osmly.ui = (function() {
                 osmly.item.next();
             } else {
                 $('#login').fadeOut(500);
-                getDetails();
+                osmly.connect.getDetails();
                 osmly.item.next();
             }
         });
@@ -281,7 +280,7 @@ osmly.ui = (function() {
         } else {
             osmly.connect.updateItem(result);
             if (result === 'submit') {
-                osmly.connect.openChangeset(osmly.token('changeset_id'), submitToOSM);
+                osmly.connect.openChangeset(osmly.connect.submitToOSM);
             } else {
                 osmly.item.next();
             }

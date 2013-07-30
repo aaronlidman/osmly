@@ -10,39 +10,42 @@ osmly.connect = (function(){
             crossDomain: true,
             data: {problem: result, user: osmly.user.name}
         });
-        // no callback, not worth slowing down/complicating over, it's reproducable
+        // no blocking, not worth slowing down over, it's reproducable
     };
 
-    connect.openChangeset = function(id, callback) {
-        if (!id){createChangeset(callback);}
-        osmly.ui.notify('checking changeset status');
+    connect.openChangeset = function(callback) {
+        if (!osmly.token('changeset_id')){
+            createChangeset(callback);
+        } else {
+            osmly.ui.notify('checking changeset status');
 
-        $.ajax({
-            url: osmly.settings.writeApi + '/api/0.6/changeset/' + id,
-            cache: false
-        }).done(function(xml) {
-            var cs = xml.getElementsByTagName('changeset');
-            if (cs[0].getAttribute('open') === 'true') {
-                callback();
-            } else {
-                createChangeset(callback);
-            }
-        });
+            $.ajax({
+                url: osmly.settings.writeApi + '/api/0.6/changeset/' + osmly.token('changeset_id'),
+                cache: false
+            }).done(function(xml) {
+                var cs = xml.getElementsByTagName('changeset');
+                if (cs[0].getAttribute('open') === 'true') {
+                    callback();
+                } else {
+                    createChangeset(callback);
+                }
+            });
+        }
     };
 
     function createChangeset(callback) {
-        var url = osmly.settings.writeApi + '/api/0.6/changeset/create',
-            token_secret = osmly.token('secret'),
-            change = newChangesetXml();
-
         osmly.ui.notify('creating a new changeset');
 
-        // removed ohauth
+        osmly.auth.xhr({
+            method: 'PUT',
+            path: '/api/0.6/changeset/create',
+            content: newChangesetXml()
+        }, callback);
     }
 
     function newChangesetXml() {
         var tags = '';
-        for (var c = 0; i < osmly.settings.changesetTags.length; c++) {
+        for (var c = 0; c < osmly.settings.changesetTags.length; c++) {
             tags +=
                 '<tag k="' + osmly.settings.changesetTags[c][0] +
                 '" v="' + osmly.settings.changesetTags[c][1] + '"/>';
@@ -50,21 +53,47 @@ osmly.connect = (function(){
         return '<osm><changeset>' + tags + '<\/changeset><\/osm>';
     }
 
-    function submitToOSM() {
+    connect.getDetails = function() {
+        osmly.auth.xhr({
+            method: 'GET',
+            path: '/api/0.6/user/details'
+        }, setDetails);
+    };
+
+    function setDetails(err, res) {
+        if (err) {
+            console.log('error! try clearing your browser cache');
+            return;
+        }
+        var u = res.getElementsByTagName('user')[0];
+        osmly.token('name', u.getAttribute('display_name'));
+        // there's more if needed
+        // http://wiki.openstreetmap.org/wiki/API_v0.6#Details_of_the_logged-in_user
+    }
+
+    connect.submitToOSM = function() {
         var id = osmly.token('changeset_id');
         $('#changeset').fadeIn(500);
         $('#changeset-link')
             .html('<a href="' + osmly.settings.writeApi + '/browse/changeset/' +
                 id + '" target="_blank">Details on osm.org »</a>');
 
-        var url = osmly.settings.writeApi + '/api/0.6/changeset/' + id + '/upload',
-            token_secret = osmly.token('secret'),
-            geojson = osmly.item.layer.toGeoJSON(),
-            osmChange = toOsmChange(geojson);
+        var geojson = osmly.item.layer.toGeoJSON(),
+            osmChange = osmly.item.toOsmChange(geojson);
 
         osmly.ui.notify('uploading to OSM');
 
-        // removed ohauth
+        osmly.auth.xhr({
+            method: 'POST',
+            path: '/api/0.6/changeset/' + id + '/upload',
+            content: osmChange
+        }, after_submit);
+    };
+
+    function after_submit(err, res) {
+        console.log(err);
+        console.log(res);
+        osmly.item.next();
     }
 
     return connect;

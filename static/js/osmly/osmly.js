@@ -65,6 +65,13 @@ osmly.initialize = function(settings) {
     osmly.ui.initialize();
 };
 
+osmly.auth = osmAuth({
+    oauth_secret: osmly.settings.oauth_secret,
+    oauth_consumer_key: osmly.settings.consumerKey,
+    auto: true,
+    url: osmly.settings.writeApi
+});
+
 function keyclean(x) { return x.replace(/\W/g, ''); }
 // from iD
 

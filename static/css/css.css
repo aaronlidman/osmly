@@ -52,6 +52,7 @@ a {
 }
 
 #top-right li, #bottom-right li {
+    box-shadow: 0 0 8px rgba(0,0,0,0.5);
     float: right;
     margin-bottom: 2px;
     margin-left: 2px;
