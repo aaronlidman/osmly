@@ -27,8 +27,10 @@ osmly.ui = (function() {
                 osmly.item.next();
             } else {
                 $('#login').fadeOut(500);
-                osmly.connect.getDetails();
-                osmly.item.next();
+                osmly.auth.authenticate(function() {
+                    osmly.connect.getDetails();
+                    osmly.item.next();
+                });
             }
         });
 

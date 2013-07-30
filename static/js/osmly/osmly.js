@@ -68,7 +68,7 @@ osmly.initialize = function(settings) {
 osmly.auth = osmAuth({
     oauth_secret: osmly.settings.oauth_secret,
     oauth_consumer_key: osmly.settings.consumerKey,
-    auto: true,
+    auto: false,
     url: osmly.settings.writeApi
 });
 
