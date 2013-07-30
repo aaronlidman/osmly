@@ -65,6 +65,30 @@ osmly.connect = (function(){
         return '<osm><changeset>' + tags + '<\/changeset><\/osm>';
     }
 
+    connect.updateComment = function(callback) {
+        // the actual comment is kept in osmly.settings.changesetTags.comment
+        // we have no way of knowing if openChangeset created a new changeset just before this
+            // it would have the new comment in it, making this unnecessary
+            // we just do it twice, this update option is only available for existing changesets
+            // worse case senario: we do two almost identical requests instead of one
+        osmly.connect.openChangeset(function() {
+            osmly.ui.notify('updating changeset');
+            osmly.auth.xhr({
+                method: 'PUT',
+                path: '/api/0.6/changeset/' + osmly.token('changeset_id'),
+                content: newChangesetXml(),
+                options: {header: {'Content-Type': 'text/xml'}}
+            }, function(err, response){
+                if (err) {
+                    // notify('changeset update failed, try again')?
+                } else {
+                    callback();
+                }
+            });
+        });
+
+    };
+
     connect.getDetails = function() {
         osmly.auth.xhr({
             method: 'GET',
@@ -78,9 +102,10 @@ osmly.connect = (function(){
             return;
         }
         var u = res.getElementsByTagName('user')[0];
-        osmly.token('name', u.getAttribute('display_name'));
+        osmly.token('user', u.getAttribute('display_name'));
         // there's more if needed
         // http://wiki.openstreetmap.org/wiki/API_v0.6#Details_of_the_logged-in_user
+        osmly.ui.setUserDetails();
     }
 
     connect.submitToOSM = function() {

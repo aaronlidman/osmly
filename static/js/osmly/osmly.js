@@ -83,18 +83,5 @@ osmly.token = function(k, x) {
     return localStorage[keyclean(osmly.settings.writeApi) + k];
 };
 
-function updateChangeset(id, callback) {
-    var url = osmly.settings.writeApi + '/api/0.6/changeset/' + id,
-        token_secret = token('secret'),
-        change = newChangesetXml();
-
-    console.log(osmly.settings.changesetTags);
-    console.log(change);
-
-    notify('updating changeset');
-
-    // removed ohauth
-}
-
 return osmly;
 }());

@@ -8,7 +8,7 @@ osmly.ui = (function() {
             $('#login').fadeIn(500);
         } else {
             if (osmly.auth.authenticated()) {
-                setUserDetails();
+                osmly.ui.setUserDetails();
                 osmly.item.next();
             } else {
                 $('#login').fadeIn(500);
@@ -55,7 +55,7 @@ osmly.ui = (function() {
 
         $('#update-change').click(function() {
             osmly.settings.changesetTags.push(['comment', $('#changeset-form').text()]);
-            updateChangeset(token('changeset_id'), function() {
+            osmly.connect.updateComment(function() {
                 $('#changeset-modal').trigger('reveal:close');
                 $('#notify').fadeOut(250);
             });
@@ -295,13 +295,13 @@ osmly.ui = (function() {
             .fadeOut(750);
     }
 
-    function setUserDetails() {
+    ui.setUserDetails = function() {
         $('#user')
             .html('<a href="' + osmly.settings.writeApi + '/user/' +
-                osmly.token('user') + '" target="_blank">' +
+                osmly.token('user') + '/edits" target="_blank">' +
                 osmly.token('user') + '</a>')
             .fadeIn(500);
-    }
+    };
 
     return ui;
 }());
