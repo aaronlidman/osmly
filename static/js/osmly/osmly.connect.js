@@ -45,10 +45,12 @@ osmly.connect = (function(){
         }, function(err, response){
             if (err) {
                 // idk, something
+                // notify('changeset creation failed, try again')?
             }
 
             if (response) {
-                token('changeset_id', reponse);
+                osmly.token('changeset_id', response);
+                callback();
             }
         });
     }
@@ -89,20 +91,26 @@ osmly.connect = (function(){
                 id + '" target="_blank">Details on osm.org »</a>');
 
         var geojson = osmly.item.layer.toGeoJSON(),
-            osmChange = osmly.item.toOsmChange(geojson);
+            osmChange = osmly.item.toOsmChange(geojson, osmly.token('changeset_id'));
 
         osmly.ui.notify('uploading to OSM');
 
         osmly.auth.xhr({
             method: 'POST',
             path: '/api/0.6/changeset/' + id + '/upload',
-            content: osmChange
+            content: osmChange,
+            options: {header: {'Content-Type': 'text/xml'}}
         }, after_submit);
     };
 
     function after_submit(err, res) {
-        console.log(err);
-        console.log(res);
+        if (res && !err) {
+            // do some kind of special green checkmark
+            // can we double notify?
+        } else {
+            console.log(err);
+            // :/
+        }
         osmly.item.next();
     }
 

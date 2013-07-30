@@ -193,8 +193,8 @@ osmly.item = (function () {
         return geo2osm(geojson);
     };
 
-    item.toOsmChange = function(geojson) {
-        return geo2osm(geojson, false, true);
+    item.toOsmChange = function(geojson, changesetId) {
+        return geo2osm(geojson, changesetId, true);
     };
 
     return item;
