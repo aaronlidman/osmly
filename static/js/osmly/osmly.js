@@ -33,6 +33,11 @@ osmly.settings = {
         ['osmly:version', '0'],
         ['imagery_used', 'Bing']
     ],
+    changesetTags: {
+        'created_by': 'osmly',
+        'osmly:version': '0',
+        'imagery_used': 'Bing'
+    },
     renameProperty: {}, // {'MEssy55': 'clean'}, only converts key not value
     usePropertyAsTag: [], // just keys
     appendTag: {}, // {'key': 'value'}, will overwrite existing tags

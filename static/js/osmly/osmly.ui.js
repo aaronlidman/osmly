@@ -54,7 +54,7 @@ osmly.ui = (function() {
         });
 
         $('#update-change').click(function() {
-            osmly.settings.changesetTags.push(['comment', $('#changeset-form').text()]);
+            osmly.settings.changesetTags['comment'] = $('#changeset-form').text();
             osmly.connect.updateComment(function() {
                 $('#changeset-modal').trigger('reveal:close');
                 $('#notify').fadeOut(250);

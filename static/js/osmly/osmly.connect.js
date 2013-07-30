@@ -57,10 +57,8 @@ osmly.connect = (function(){
 
     function newChangesetXml() {
         var tags = '';
-        for (var c = 0; c < osmly.settings.changesetTags.length; c++) {
-            tags +=
-                '<tag k="' + osmly.settings.changesetTags[c][0] +
-                '" v="' + osmly.settings.changesetTags[c][1] + '"/>';
+        for (var key in osmly.settings.changesetTags) {
+            tags += '<tag k="' + key + '" v="' + osmly.settings.changesetTags[key] + '"/>';
         }
         return '<osm><changeset>' + tags + '<\/changeset><\/osm>';
     }
