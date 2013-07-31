@@ -113,8 +113,10 @@ osmly.connect = (function(){
             .html('<a href="' + osmly.settings.writeApi + '/browse/changeset/' +
                 id + '" target="_blank">Details on osm.org »</a>');
 
-        var geojson = osmly.item.layer.toGeoJSON(),
-            osmChange = osmly.item.toOsmChange(geojson, osmly.token('changeset_id'));
+        var geojson = osmly.item.layer.toGeoJSON();
+        geojson['features'][0]['properties'] = osmly.item.getTags();
+            // this is sketchy but works for single items
+        var osmChange = osmly.item.toOsmChange(geojson, osmly.token('changeset_id'));
 
         osmly.ui.notify('uploading to OSM');
 
@@ -134,6 +136,7 @@ osmly.connect = (function(){
             console.log(err);
             // :/
         }
+        osmly.ui.teardown();
         osmly.item.next();
     }
 

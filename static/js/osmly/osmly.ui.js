@@ -176,7 +176,8 @@ osmly.ui = (function() {
         });
 
         $('#reset').click(function() {
-            teardown();
+            hide();
+            osmly.ui.teardown();
             osmly.item.setItemLayer(osmly.item.data);
             ui.setupItem(osmly.item.data.properties);
             ui.displayItem(true);
@@ -246,22 +247,26 @@ osmly.ui = (function() {
         $('.v').width( $('.v').width() + 12);
     }
 
-    function teardown() {
+    function hide() {
+        console.log('hide');
         $('#action-block, #tags, #bottom-right').hide();
+        osmly.map.closePopup();
+        osmly.map.removeLayer(osmly.item.layer);
+        if (osmly.item.contextLayer) osmly.map.removeLayer(osmly.item.contextLayer);
+    }
+
+    ui.teardown = function() {
+        console.log('teardown');
         $('#problem, #skip, #submit, .minus, #add-new-tag, #reset').unbind();
         $('.k, .v').unbind();
         $('#problem').val('problem'); // resets problem menu
         $("#problem, #submit").removeAttr('style');
         $('#tags li').remove();
-
-        osmly.map.closePopup();
-        osmly.map.removeLayer(osmly.item.layer);
-
-        if (osmly.item.contextLayer) osmly.map.removeLayer(osmly.item.contextLayer);
-    }
+    };
 
     function skip() {
-        teardown();
+        hide();
+        osmly.ui.teardown();
         $('#flash-skip')
             .show()
             .fadeOut(750);
@@ -269,9 +274,10 @@ osmly.ui = (function() {
     }
 
     function submit(result) {
-        teardown();
+        hide();
 
         if (osmly.settings.demo) {
+            osmly.ui.teardown();
             console.log(osmly.item.layer.toGeoJSON());
             if (result === 'submit') {
                 var geojson = osmly.item.layer.toGeoJSON();
@@ -284,6 +290,7 @@ osmly.ui = (function() {
             if (result === 'submit') {
                 osmly.connect.openChangeset(osmly.connect.submitToOSM);
             } else {
+                osmly.ui.teardown();
                 osmly.item.next();
             }
         }

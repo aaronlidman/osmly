@@ -174,27 +174,28 @@ osmly.item = (function () {
         }
     }
 
-    function getTags() {
+    item.getTags = function () {
         var $tags = $('#tags li'),
-            tags = [];
+            tags = {};
 
         $tags.each(function(i,ele) {
             var k = $(ele).children('.k').text(),
                 v = $(ele).children('.v').text();
-
-            if (k !== '' && v !== '') tags.push([k,v]);
+            if (k !== '' && v !== '') {
+                tags[k] = v;
+            }
         });
-
         return tags;
-    }
-
+    };
 
     item.toOsm = function(geojson) {
         return geo2osm(geojson);
     };
 
     item.toOsmChange = function(geojson, changesetId) {
-        return geo2osm(geojson, changesetId, true);
+        var geo = geo2osm(geojson, changesetId, true);
+        console.log(geo);
+        return geo;
     };
 
     return item;
