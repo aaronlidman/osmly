@@ -11,6 +11,7 @@ button:focus {
 }
 
 body, html {
+    overflow-y: hidden;
     color: #222;
     margin: 0;
     height: 100%;
@@ -52,7 +53,6 @@ a {
 }
 
 #top-right li, #bottom-right li {
-    box-shadow: 0 0 8px rgba(0,0,0,0.5);
     float: right;
     margin-bottom: 2px;
     margin-left: 2px;
@@ -68,6 +68,7 @@ a {
     right: 0;
     z-index: 10;
     overflow: visible;
+    box-shadow: 0 0 8px rgba(0,0,0,0.5);
 }
 
 #bottom-right li {
@@ -225,16 +226,20 @@ a {
 }
 
 .display {
+    color: white;
     display: none;
     pointer-events: none;
-    width: 640px;
-    height: 640px;
-    margin: -320px -320px 0 0;
-    right: 50%;
-    top: 50%;
+    font-size: 640px;
     position: absolute;
     overflow: visible;
     z-index: 10;
+    width: 640px;
+    height: 640px;
+    left: 50%;
+    top: 50%; 
+    margin-left: -320px;
+    margin-top: -420px;
+    text-shadow: 0px 0px 10px black;
 }
 
 #login {

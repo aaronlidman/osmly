@@ -238,13 +238,13 @@ osmly.ui = (function() {
             children: '.k',
             equalize: 'width',
             reset: true});
-        $('.k').width( $('.k').width() + 12);
+        $('.k').width( $('.k').width() + 13);
 
         $('ul').equalize({
             children: '.v',
             equalize: 'width',
             reset: true});
-        $('.v').width( $('.v').width() + 12);
+        $('.v').width( $('.v').width() + 13);
     }
 
     function hide() {
@@ -267,7 +267,7 @@ osmly.ui = (function() {
     function skip() {
         hide();
         osmly.ui.teardown();
-        $('#flash-skip')
+        $('.foundicon-right-arrow')
             .show()
             .fadeOut(750);
         osmly.item.next();
@@ -297,9 +297,15 @@ osmly.ui = (function() {
 
         if (result !== 'submit') result = 'problem';
 
-        $('#flash-' + result)
-            .show()
-            .fadeOut(750);
+        if (result == 'submit') {
+           $('.foundicon-up-arrow')
+               .show()
+               .fadeOut(750);
+        } else if (result == 'problem') {
+            $('.foundicon-remove')
+                .show()
+                .fadeOut(750);
+        }
     }
 
     ui.setUserDetails = function() {
