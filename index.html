@@ -1,44 +1,29 @@
 <!doctype html>
-<!--
- ______     ______     __    __     __         __  __    
-/\  __ \   /\  ___\   /\ "-./  \   /\ \       /\ \_\ \   
-\ \ \/\ \  \ \___  \  \ \ \-./\ \  \ \ \____  \ \____ \  
- \ \_____\  \/\_____\  \ \_\ \ \_\  \ \_____\  \/\_____\ 
-  \/_____/   \/_____/   \/_/  \/_/   \/_____/   \/_____/ 
--->
 <html>
     <head>
-        <title>rawr</title>
+        <title>OSMLY - Simple imports</title>
         <meta charset='utf-8'> 
-
-        <link rel="stylesheet" href="static/css/leaflet0.5.css" />
-        <link rel="stylesheet" href="static/css/leaflet.label.css" />
-        <link rel="stylesheet" href="static/css/css.css" />
-        <link rel="stylesheet" href="static/css/reveal.css" />
-        <!--[if lte IE 8]>
-            <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.ie.css" />
-        <![endif]-->
-        <script src="static/js/leaflet0.5.js"></script>
-        <script src="static/js/leaflet.label.js"></script>
-        <script src="static/js/jquery1.8.2.min.js"></script>
-        <script src="static/js/osmly.js"></script>
-        <script src="static/js/sha.js"></script>
-        <script src="static/js/ohauth.js"></script>
-        <script src="static/js/Bing.js"></script>
-        <script src="static/js/equalize.js"></script>
-        <script src="static/js/jquery.reveal.js"></script>
-        <script src="static/js/osm2geo.js"></script>
+        <link rel="stylesheet" href="css/osmly.min.css" />
+        <script src="osmly.min.js"></script>
     </head>
     <body>
-        <ul id="top_right">
-            <li id="title">Outline the nearby park</li>
-            <li id="instruction">Instructions</li>
-            <li id="user"></li>
-            <li id="changeset">Changeset</li>
+        <div id="top-right">
+            <span id="title">Outline the nearby park</span>
+            <ul>
+                <li id="instruction">Instructions</li>
+                <li id="user"></li>
+                <li id="changeset">Changeset</li>
+            </ul>
+        </div>
+
+        <ul id="bottom-right">
+            <li id="reset">reset</li>
+            <li id="josm">edit in JOSM</li>
+            <li id="osmlink">open at osm.org</li>
         </ul>
 
+    <!-- modals -->
         <div id="changeset-modal" class="reveal-modal medium">
-            <!-- still needs logic behind button -->
             <!-- eventually, prefill comment with existing comment -->
             <span>Changeset comment:</span>
             <div id="changeset-form" contenteditable="true"></div>
@@ -47,7 +32,7 @@
             <a class="close-reveal-modal">&#215;</a>
         </div>
 
-        <div id="instruction-modal" class="reveal-modal large">
+        <div id="instruction-modal" class="reveal-modal xlarge">
             <h3>Instructions</h3>
             <li>Make a more accurate outline of the nearby park.</li>
             <li>It's possible the data is out of date or just wrong; report problems accordingly.</li>
@@ -61,17 +46,20 @@
             <li>Yellow features are other OSM references there to help you. You can't edit them here but clicking them provides more information. Use this info to help make your features more accurate</li>
             <li>If you want to edit from another editor, click the coordinates in the bottom right corner which will take you to osm.org</li>
 
-            <h3 style="margin-top: 15px;">About</h3>
-            <li>Data from TIGER 2011 area landmarks.</li>
-            <li>xx original parks, xx processed, xx new to OSM</li>
-            <li><a href="http://thenounproject.com/noun/arrow/#icon-No8828" target="_blank">Skip arrow</a> and <a href="http://thenounproject.com/noun/delete/#icon-No8843" target="_blank">problem X</a> designed by <a href="http://thenounproject.com/cr" target="_blank">Chris Robinson</a> from The Noun Project</li>
-
             <a class="close-reveal-modal">&#215;</a>
         </div>
 
-        <img id="d-problem" class="display" src="static/images/problem_white.svg" />
-        <img id="d-skip" class="display" src="static/images/skip_white.svg" />
-        <img id="d-submit" class="display" src="static/images/upload_white.svg" />
+        <div id="reusable-modal" class="reveal-modal large">
+            <span></span>
+            <a class="close-reveal-modal">&#215;</a>
+        </div>
+    <!-- end modals -->
+
+        <div id="flash" style="width: 640px; margin: 0 auto;">
+            <i class="foundicon-remove hidden display"></i>
+            <i class="foundicon-right-arrow hidden display"></i>
+            <i class="foundicon-up-arrow hidden display"></i>
+        </div>
 
         <div id="login">Login with your OSM account »</div>
 
@@ -89,30 +77,30 @@
         </div>
 
         <div id="tags">
-            <span id="add-new-tag" alt="Add a new tag">+</span>
             <ul></ul>
+            <span class="k" id="add-new-tag" alt="Add a new tag">+</span>
         </div>
 
         <div id="notify"></div>
 
         <div id="map"></div>
         <script type="text/javascript">
-            var OSMly = osmly().set({
+            var CONFIG = {
                 featuresApi: 'http://127.0.0.1:5000/?',
                 db: 'parks-5',
                 demo: true,
-                center: [34.0577, -118.2409],
+                origin: [34.0577, -118.2409],
                 zoom: 10,
-                renameProperty: {'NAME': 'name'},
                 usePropertyAsTag: ['name'],
                 appendTag: {'leisure': 'park'},
                 context: {
                     leisure: ['park', 'nature_reserve', 'stadium', 'golf_course', 'dog_park'],
                     landuse: ['cemetery', 'farm', 'farmland', 'recreation_ground'],
-                    amenity: ['college', 'kindergarten', 'school', 'university', 'grave_yard']}
-            });
+                    amenity: ['college', 'kindergarten', 'school', 'university', 'grave_yard', 'library', 'town_hall']
+                }
+            };
 
-            OSMly.go();
+            osmly.initialize(CONFIG);
         </script>        
     </body>
 </html>
