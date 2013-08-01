@@ -1,6 +1,5 @@
 osmly.ui = (function() {
-    var ui = {},
-        settings = osmly.settings;
+    var ui = {};
 
     ui.initialize = function() {
         if (osmly.settings.demo) {

@@ -1,6 +1,5 @@
 osmly.user = (function() {
-    var user = {},
-        settings = osmly.settings;
+    var user = {};
 
     function initialize() {
     }
