@@ -114,7 +114,7 @@ osmly.ui = (function() {
 
     ui.notify = function(string) {
         if (string !== '') string = '<span>' + string + '</span>';
-        string = '<img src="static/images/loader.gif" />' + string;
+        string = '<img src="loader.gif" />' + string;
 
         $('#notify')
             .html(string)

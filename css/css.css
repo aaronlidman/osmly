@@ -68,11 +68,11 @@ a {
     right: 0;
     z-index: 10;
     overflow: visible;
-    box-shadow: 0 0 8px rgba(0,0,0,0.5);
 }
 
 #bottom-right li {
     clear: both;
+    box-shadow: 0 0 8px rgba(0,0,0,0.5);
 }
 
 #instruction, #changeset, #bottom-right li {
