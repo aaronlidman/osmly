@@ -7,11 +7,14 @@ OSMLY_JS = \
 
 CSS = \
 	css/css.css \
-	css/general_foundicons.css \
+	js/lib/leaflet-0.6.4/leaflet.css \
 	css/leaflet.label.css \
+	css/general_foundicons.css \
 	css/reveal.css \
 
 JS_LIBS = \
+	js/lib/leaflet-0.6.4/leaflet.js \
+	js/lib/jquery-2.0.3.min.js \
 	js/lib/Bing.js \
 	js/lib/equalize.js \
 	js/lib/geo2osm.js \
