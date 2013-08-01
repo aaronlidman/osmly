@@ -8,7 +8,7 @@ osmly.connect = (function(){
             type: 'POST',
             url: url,
             crossDomain: true,
-            data: {problem: result, user: osmly.user.name}
+            data: {problem: result, user: osmly.token('user')}
         });
         // no blocking, not worth slowing down over, it's reproducable
     };

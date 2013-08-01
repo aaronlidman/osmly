@@ -10,6 +10,7 @@ osmly.ui = (function() {
                 osmly.ui.setUserDetails();
                 osmly.item.next();
             } else {
+                osmly.token('user', 'demo');
                 $('#login').fadeIn(500);
             }
         }
@@ -247,7 +248,6 @@ osmly.ui = (function() {
     }
 
     function hide() {
-        console.log('hide');
         $('#action-block, #tags, #bottom-right').hide();
         osmly.map.closePopup();
         osmly.map.removeLayer(osmly.item.layer);
@@ -255,7 +255,6 @@ osmly.ui = (function() {
     }
 
     ui.teardown = function() {
-        console.log('teardown');
         $('#problem, #skip, #submit, .minus, #add-new-tag, #reset').unbind();
         $('.k, .v').unbind();
         $('#problem').val('problem'); // resets problem menu
