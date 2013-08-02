@@ -6,11 +6,11 @@ OSMLY_JS = \
 	js/osmly/osmly.item.js
 
 CSS = \
-	css/css.css \
 	js/lib/leaflet-0.6.4/leaflet.css \
 	css/leaflet.label.css \
 	css/general_foundicons.css \
 	css/reveal.css \
+	css/css.css
 
 JS_LIBS = \
 	js/lib/leaflet-0.6.4/leaflet.js \
@@ -26,8 +26,8 @@ JS_LIBS = \
 	js/lib/sha.js
 
 JS_FILES = \
-	$(OSMLY_JS) \
-	$(JS_LIBS)
+	$(JS_LIBS) \
+	$(OSMLY_JS)
 
 all: dist/osmly.min.js dist/osmly.min.css
 
