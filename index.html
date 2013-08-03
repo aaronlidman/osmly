@@ -4,7 +4,7 @@
         <title>OSMLY</title>
         <meta charset='utf-8'>
         <link rel="stylesheet" href="css/osmly.min.css" />
-        <script src="osmly.js"></script>
+        <script src="osmly.min.js"></script>
         <style type="text/css">
             * {padding: 0; margin: 0; color: #222;}
             #map {
@@ -41,7 +41,7 @@
                 position: absolute;
                 left: 30px;
                 bottom: 30px;
-                padding: 10px 15px;
+                padding: 15px 20px;
                 font-size: 16px;
                 background-color: white;
                 line-height: 1.5;
@@ -94,19 +94,20 @@
         <div id="map"></div>
         <div id="above">
             <span id="osmly">OSMLY</span>
-            <div id="description"><p>OSMLY is a simple importer for OpenStreetMap. It makes importing basic features very simple by presenting them one-by-one, allowing you to make any necessary adjustment to positions or tags, flagging problems, or uploading directly to OSM. Other users can also edit simultaneously from the same pool of features. The aim is to make importing simple features quick and easy.</p>
+            <div id="description"><p>OSMLY is a simple importer for OpenStreetMap. It makes importing basic features simple by presenting them one-by-one, allowing you to make any necessary adjustment to positions or tags, flag problems, or upload directly to OSM. Other users can also edit simultaneously from the same pool of features. The aim is to make importing basic features quick, easy, and cooperative.</p>
+            <br/>
             <p>blah blah blah, tutorial, screenshots, etc...</p>
             <br/>
-            <p>check out the code for more or to report bugs: <a style="border-bottom: 1px solid #aaa;" href="https://github.com/aaronlidman/osmly">github.com/aaronlidman/osmly</a></p></div>
+            <p><a style="border-bottom: 1px solid #aaa;" href="https://github.com/aaronlidman/osmly">check out the code for more or to report bugs</a></p></div>
             <div id="available">
                 <ul>
                     </a><li class="group">Los Angeles County</li>
                     <a href="/la-parks.html"><li><span>demo</span>parks</li></a>
-                    <a href="/la-schools.html"><li><span>demo</span>schools</li></a>
-                    <a href="/la-golf.html"><li><span>demo</span>gold courses</li></a>
-                    <a href="/la-cemeteries.html"><li><span>demo</span>cemeteries</li></a>
-                    <a href="/la-retail.html"><li><span>demo</span>retail landuse</li></a>
-                    <a href="/la-libraries.html"><li><span>demo</span>libraries</li></a>
+                    <a><li><span>demo</span>schools</li></a>
+                    <a><li><span>demo</span>gold courses</li></a>
+                    <a><li><span>demo</span>cemeteries</li></a>
+                    <a><li><span>demo</span>retail landuse</li></a>
+                    <a><li><span>demo</span>libraries</li></a>
                 </ul>
             </div>
         </div>
@@ -133,7 +134,11 @@
             [32.292513, -64.884969, 18],
             [29.002282, -81.941249, 18],
             [53.218085, 5.0984287, 14],
-            [28.87337, -118.295094, 17]
+            [28.87337, -118.295094, 17],
+            [37.748338, 53.83595, 17],
+            [45.464465, 54.38301, 15],
+            [45.510527, 53.031649, 15],
+            [46.394327, 9.9549221, 18]
         ], num = Math.floor((Math.random()*places.length)),
         place = places[num];
 
