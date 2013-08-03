@@ -22,24 +22,44 @@ def slash():
 
 
 def get():
+    out = ''
     conn = sqlite3.connect(request.args['db'] + '.sqlite')
+    c = conn.cursor()
     if 'id' in request.args:
-        row = conn.execute(
+        row = c.execute(
             'SELECT geo, remote FROM osmly WHERE id = ? LIMIT 1',
             [request.args['id']]
         )
+        row = row.fetchone()
+        conn.commit()
+        conn.close()
+
+        if 'action' in request.args and request.args['action'] == 'remote':
+            out = row[1]
+    elif 'everything' in request.args:
+        # all everything requests must have a difficulty
+            # 0 for easy, 1 for difficult, -1 for everything
+        query = 'SELECT id, problem, done, difficulty, bounds, area, user, time FROM osmly'
+
+        if request.args['difficulty'] == u'0':
+            query = query + ' WHERE difficulty = 0'
+        elif request.args['difficulty'] == u'1':
+            query = query + ' WHERE difficulty = 1'
+        # lame, i know
+
+        query = query + ' ORDER BY id'
+
+        c.execute(query)
+        out = json.dumps(c.fetchall());
     else:
-        row = conn.execute(
-            'SELECT geo FROM osmly WHERE problem="" AND done=0 AND difficulty=0 ORDER BY RANDOM() LIMIT 1'
-        )
-    row = row.fetchone()
-    conn.commit()
-    conn.close()
+        row = c.execute(
+            'SELECT geo FROM osmly WHERE problem = "" AND done = 0 AND difficulty = 0 ORDER BY RANDOM() LIMIT 1')
+        row = row.fetchone()
+        conn.commit()
+        conn.close()
+        out = row[0]
 
-    if 'action' in request.args and request.args['action'] == 'remote':
-        return row[1]
-
-    return row[0]
+    return out
 
 
 def post():

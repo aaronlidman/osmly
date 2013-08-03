@@ -2,11 +2,12 @@
 <html>
     <head>
         <title>Everything</title>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
     </head>
     <body>
         <script type="text/javascript">
 
-        function location() {
+        function locate() {
             // absolutely in no way comprehensive
             var location = {};
             if (window.location.search) {
@@ -30,8 +31,19 @@
             return location;
         }
 
-        if (location()['db']) {
-            // make a request for lots of the content
+        var loc = locate()
+
+        if (loc['db']) {
+            if (!loc['difficulty']) {
+                loc['difficulty'] = -1
+            }
+            loc['db'] = decodeURIComponent(loc['db']);
+            console.log(loc['db']);
+            // by default we get minor details, everything is fetched on demand
+            $.ajax({
+                url: loc['db'] + '&everything&difficulty=' + loc['difficulty'],
+                cache: false
+            });
         } else {
             console.log('need a db to load. /?db=');
         }
