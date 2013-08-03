@@ -44,21 +44,14 @@ def isEditable(geo):
 
 data = open(args['source'])
 data = json.load(data)
-dbName = args['source'].split('.')
+dbName = args['source'].split('.')[0] + '.sqlite'
 
-editableDB = dbName[0] + '.sqlite'
-edit_conn = sqlite3.connect(editableDB)
-edit_c = edit_conn.cursor()
-edit_c.execute("DROP TABLE IF EXISTS osmly")
-edit_c.execute('''CREATE TABLE osmly (id INTEGER PRIMARY KEY, geo TEXT, remote TEXT, problem TEXT, done TEXT)''')
-edit_conn.commit()
-
-difficultDB = dbName[0] + '-difficult.sqlite'
-diff_conn = sqlite3.connect(difficultDB)
-diff_c = diff_conn.cursor()
-diff_c.execute("DROP TABLE IF EXISTS osmly")
-diff_c.execute('''CREATE TABLE osmly (id INTEGER PRIMARY KEY, geo TEXT, remote TEXT, problem TEXT, done TEXT)''')
-diff_conn.commit()
+db_conn = sqlite3.connect(dbName)
+db_c = db_conn.cursor()
+db_c.execute('DROP TABLE IF EXISTS osmly')
+db_c.execute('CREATE TABLE osmly (id INTEGER PRIMARY KEY, geo TEXT, remote TEXT,' +
+             'problem TEXT, done TEXT, difficulty INT, bounds TEXT, area REAL, comments TEXT)')
+db_conn.commit()
 
 count = 0
 easy_count = 0
@@ -66,9 +59,15 @@ diff_count = 0
 
 for feature in data['features']:
     geo = asShape(feature['geometry'])
-    bounds = geo.bounds
+    boundz = geo.bounds
+    bounds = [0, 1, 2, 3]
     geoarea = geo.area
     editable = isEditable(geo)
+
+    bounds[0] = float('{0:.5f}'.format(boundz[0]))
+    bounds[1] = float('{0:.5f}'.format(boundz[1]))
+    bounds[2] = float('{0:.5f}'.format(boundz[2]))
+    bounds[3] = float('{0:.5f}'.format(boundz[3]))
 
     # we want to use simplify() with False because it's faster
     # but it occasionally deletes all nodes and that upsets mapping()
@@ -81,24 +80,21 @@ for feature in data['features']:
 
     feature['properties']['bounds'] = bounds
     feature['geometry']['coordinates'] = geo['coordinates']
-
-    statement = "INSERT INTO osmly VALUES(?, ?, ?, ?, ?);"
+    feature['properties']['id'] = count
+    statement = 'INSERT INTO osmly VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);'
 
     if editable:
-        feature['properties']['id'] = easy_count
-        edit_c.execute(statement, (easy_count, json.dumps(feature), '', '', ''))
-        edit_conn.commit()
+        difficulty = 0
         easy_count = easy_count + 1
     else:
-        feature['properties']['id'] = diff_count
-        diff_c.execute(statement, (diff_count, json.dumps(feature), '', '', ''))
-        diff_conn.commit()
+        difficulty = 1
         diff_count = diff_count + 1
 
+    db_c.execute(statement, (count, json.dumps(feature), '', '', '', difficulty, json.dumps(bounds), geoarea, ''))
+    db_conn.commit()
+        # need to bulk these up, transaction
     count = count + 1
-
 
 print str(count) + ' items'
 print str(easy_count) + ' easy, ' + str(diff_count) + ' difficult'
-edit_conn.close()
-diff_conn.close()
+db_conn.close()
