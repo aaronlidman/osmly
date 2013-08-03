@@ -42,16 +42,26 @@ def isEditable(geo):
         return False
     return True
 
+
+def trunc_bounds(bounds):
+    out = [1, 2, 3, 4]
+    out[0] = float('{0:.5f}'.format(bounds[0]))
+    out[1] = float('{0:.5f}'.format(bounds[1]))
+    out[2] = float('{0:.5f}'.format(bounds[2]))
+    out[3] = float('{0:.5f}'.format(bounds[3]))
+    return out
+
 data = open(args['source'])
 data = json.load(data)
 dbName = args['source'].split('.')[0] + '.sqlite'
 
 db_conn = sqlite3.connect(dbName)
+db_conn.isolation_level = None
+    # autocommit
 db_c = db_conn.cursor()
 db_c.execute('DROP TABLE IF EXISTS osmly')
 db_c.execute('CREATE TABLE osmly (id INTEGER PRIMARY KEY, geo TEXT, remote TEXT,' +
              'problem TEXT, done TEXT, difficulty INT, bounds TEXT, area REAL, comments TEXT)')
-db_conn.commit()
 
 count = 0
 easy_count = 0
@@ -59,15 +69,9 @@ diff_count = 0
 
 for feature in data['features']:
     geo = asShape(feature['geometry'])
-    boundz = geo.bounds
-    bounds = [0, 1, 2, 3]
+    bounds = trunc_bounds(geo.bounds)
     geoarea = geo.area
     editable = isEditable(geo)
-
-    bounds[0] = float('{0:.5f}'.format(boundz[0]))
-    bounds[1] = float('{0:.5f}'.format(boundz[1]))
-    bounds[2] = float('{0:.5f}'.format(boundz[2]))
-    bounds[3] = float('{0:.5f}'.format(boundz[3]))
 
     # we want to use simplify() with False because it's faster
     # but it occasionally deletes all nodes and that upsets mapping()
@@ -91,8 +95,6 @@ for feature in data['features']:
         diff_count = diff_count + 1
 
     db_c.execute(statement, (count, json.dumps(feature), '', '', '', difficulty, json.dumps(bounds), geoarea, ''))
-    db_conn.commit()
-        # need to bulk these up, transaction
     count = count + 1
 
 print str(count) + ' items'
