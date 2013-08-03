@@ -6,10 +6,14 @@
         <link rel="stylesheet" href="css/osmly.min.css" />
         <script src="osmly.js"></script>
         <style type="text/css">
-            * {padding: 0; margin: 0;}
+            * {padding: 0; margin: 0; color: #222;}
             #map {
                 height: 100%;
                 width: 100%;
+            }
+
+            a {
+                pointer-events: auto;
             }
 
             .leaflet-control-container {
@@ -32,13 +36,25 @@
                 font-size: 200px;
             }
 
+            #description {
+                width: 640px;
+                position: absolute;
+                left: 30px;
+                bottom: 30px;
+                padding: 10px 15px;
+                font-size: 16px;
+                background-color: white;
+                line-height: 1.5;
+            }
+
             #available {
                 position: absolute;
-                right: 35px;
-                bottom: 50px;
+                right: 30px;
+                bottom: 10px;
+                    /* coincides with ul margin */
                 width: 660px;
                 font-weight: bold;
-                color: black;
+                color: #222;
                 text-transform: lowercase;
                 max-height: 100%;
             }
@@ -56,11 +72,21 @@
                 pointer-events: auto;
             }
 
+            #available ul a li:hover {
+                background-color: #eee;
+            }
+
             #available .group {
-                background-color: black;
+                background-color: #222;
                 color: white;
                 text-transform: capitalize;
                 padding: 10px 15px;
+            }
+
+            #available ul li span {
+                /* used for some kind of simple descriptor */
+                font-weight: normal;
+                padding-right: 5px;
             }
         </style>
     </head>
@@ -68,16 +94,19 @@
         <div id="map"></div>
         <div id="above">
             <span id="osmly">OSMLY</span>
-            <div id="description"></div>
+            <div id="description"><p>OSMLY is a simple importer for OpenStreetMap. It makes importing basic features very simple by presenting them one-by-one, allowing you to make any necessary adjustment to positions or tags, flagging problems, or uploading directly to OSM. Other users can also edit simultaneously from the same pool of features. The aim is to make importing simple features quick and easy.</p>
+            <p>blah blah blah, tutorial, screenshots, etc...</p>
+            <br/>
+            <p>check out the code for more or to report bugs: <a style="border-bottom: 1px solid #aaa;" href="https://github.com/aaronlidman/osmly">github.com/aaronlidman/osmly</a></p></div>
             <div id="available">
                 <ul>
-                    <li class="group">Los Angeles County</li>
-                    <li>parks</li>
-                    <li>schools</li>
-                    <li>gold courses</li>
-                    <li>cemeteries</li>
-                    <li>retail landuse</li>
-                    <li>libraries</li>
+                    </a><li class="group">Los Angeles County</li>
+                    <a href="/la-parks.html"><li><span>demo</span>parks</li></a>
+                    <a href="/la-schools.html"><li><span>demo</span>schools</li></a>
+                    <a href="/la-golf.html"><li><span>demo</span>gold courses</li></a>
+                    <a href="/la-cemeteries.html"><li><span>demo</span>cemeteries</li></a>
+                    <a href="/la-retail.html"><li><span>demo</span>retail landuse</li></a>
+                    <a href="/la-libraries.html"><li><span>demo</span>libraries</li></a>
                 </ul>
             </div>
         </div>
