@@ -19,6 +19,7 @@
             #above {
                 pointer-events: none;
                 width: 100%;
+                height: 100%;
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -30,6 +31,37 @@
                 font-weight: bold;
                 font-size: 200px;
             }
+
+            #available {
+                position: absolute;
+                right: 35px;
+                bottom: 50px;
+                width: 660px;
+                font-weight: bold;
+                color: black;
+                text-transform: lowercase;
+                max-height: 100%;
+            }
+
+            #available ul {
+                float: right;
+                list-style-type: none;
+                margin: 20px;
+                width: 200px;
+            }
+
+            #available ul li {
+                padding: 5px 15px;
+                background-color: white;
+                pointer-events: auto;
+            }
+
+            #available .group {
+                background-color: black;
+                color: white;
+                text-transform: capitalize;
+                padding: 10px 15px;
+            }
         </style>
     </head>
     <body>
@@ -37,14 +69,24 @@
         <div id="above">
             <span id="osmly">OSMLY</span>
             <div id="description"></div>
-            <div id="available"></div>
+            <div id="available">
+                <ul>
+                    <li class="group">Los Angeles County</li>
+                    <li>parks</li>
+                    <li>schools</li>
+                    <li>gold courses</li>
+                    <li>cemeteries</li>
+                    <li>retail landuse</li>
+                    <li>libraries</li>
+                </ul>
+            </div>
         </div>
         <script type="text/javascript">
         var places = [
             [-21.815289, 114.164930, 15],
             [-22.7667, 113.680, 17],
             [-26.6922, 113.6009, 17],
-            [-31.6457, 131.6096, 16],
+            [-31.61751, 131.5492, 17],
             [29.17023, -118.32509, 16],
             [48.38595, -124.72506, 17],
             [29.99712, 48.1951332, 14],
@@ -54,10 +96,17 @@
             [38.35783, -111.0064280, 17],
             [37.810945, -111.409413, 18],
             [48.16474, -116.295604, 15],
-            [48.11478, -121.1146545, 16]
+            [48.11478, -121.1146545, 16],
+            [-21.93253, 128.1610, 11],
+            [-22.62036, 128.02964, 15],
+            [-17.55526, 128.479421, 16],
+            [-24.61546, 153.251767, 17],
+            [32.292513, -64.884969, 18],
+            [29.002282, -81.941249, 18],
+            [53.218085, 5.0984287, 14],
+            [28.87337, -118.295094, 17]
         ], num = Math.floor((Math.random()*places.length)),
         place = places[num];
-        console.log(num)
 
             var CONFIG = {
                 justMap: true,
