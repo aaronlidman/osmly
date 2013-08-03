@@ -194,7 +194,6 @@ osmly.item = (function () {
 
     item.toOsmChange = function(geojson, changesetId) {
         var geo = geo2osm(geojson, changesetId, true);
-        console.log(geo);
         return geo;
     };
 

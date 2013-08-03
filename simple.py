@@ -10,11 +10,10 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def slash():
-    if request.method == 'POST':
-        response = post()
-    elif request.method == 'GET':
+    if request.method == 'GET':
         response = get()
-
+    elif request.method == 'POST':
+        response = post()
     response = make_response(response)
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
@@ -31,7 +30,7 @@ def get():
         )
     else:
         row = conn.execute(
-            'SELECT geo FROM osmly WHERE problem="" AND done="" ORDER BY RANDOM() LIMIT 1'
+            'SELECT geo FROM osmly WHERE problem="" AND done=0 AND difficulty=0 ORDER BY RANDOM() LIMIT 1'
         )
     row = row.fetchone()
     conn.commit()
@@ -44,25 +43,30 @@ def get():
 
 
 def post():
-    # how do you execute a function named by a variable?
-    # map .args['action'] directly to functions here rather than a growing list
-    # request.args['action'] = 'problem' etc...
-    # request.args['action']() -> problem()
-    if 'action' in request.args:
+    # obviously these are public facing and could be abused easily, marked all done
+    # taking the risk right now, if needed it can easily be limited
+        # on osm login or changeset creation, we log them in here with a window
+        # as they perform actions that window stays open, like changesets
+
+    # polymorphism much?
+    if 'action' in request.args and 'id' in request.args:
         if request.args['action'] == 'problem':
             return problem()
         elif request.args['action'] == 'remote':
             return post_remote()
+        elif request.args['action'] == 'submit':
+            return done()
     else:
-        return done()
+        a = 1
+        # idk
 
 
 def done():
     conn = sqlite3.connect(request.args['db'] + '.sqlite')
     c = conn.cursor()
     c.execute(
-        'UPDATE osmly SET done = ? WHERE id = ?',
-        (log(), request.args['id'])
+        'UPDATE osmly SET done = ?, user = ?, time = ? WHERE id = ?',
+        (1, request.form['user'], int(time.time()), request.args['id'])
     )
     conn.commit()
     conn.close()
@@ -73,8 +77,8 @@ def problem():
     conn = sqlite3.connect(request.args['db'] + '.sqlite')
     c = conn.cursor()
     c.execute(
-        'UPDATE osmly SET problem = ?, done = ? WHERE id = ?',
-        (request.form['problem'], log(), request.args['id'])
+        'UPDATE osmly SET problem = ?, user = ?, time = ? WHERE id = ?',
+        (request.form['problem'], request.form['user'], int(time.time()), request.args['id'])
     )
     conn.commit()
     conn.close()
@@ -82,7 +86,6 @@ def problem():
 
 
 def post_remote():
-    # could do a uid check if needed
     conn = sqlite3.connect(request.args['db'] + '.sqlite')
     c = conn.cursor()
     c.execute(
@@ -91,19 +94,7 @@ def post_remote():
     )
     conn.commit()
     conn.close()
-    return json.dumps({'id': 'ugg'})
-
-
-def log():
-    if 'user' in request.form:
-        user = request.form['user']
-    else:
-        user = -1
-    return json.dumps({
-        'user': user,
-        'time': int(time.time())
-    })
-
+    return json.dumps('remoted')
 
 if __name__ == '__main__':
     app.run(debug=True)

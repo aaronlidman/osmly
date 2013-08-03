@@ -62,6 +62,7 @@ osmly.ui = (function() {
         });
 
         $('#josm').click(function() {
+            // update the same db, could send it to gist instead
             $('#reset').click();
 
             var id = osmly.item.id,
@@ -70,15 +71,9 @@ osmly.ui = (function() {
                 request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=' + id + '&action=remote',
                 bbox = osmly.item.bbox;
 
-            $.ajax({
-                type: 'POST',
-                url: request,
-                crossDomain: true,
-                data: {remote: osm}
-            }).done(function() {
+            function callback() {
                 // there's no way to both load data from the api and import a file
                 // so we do them seperately with two requests
-
                 $.ajax('http://127.0.0.1:8111/load_and_zoom?left=' + bbox[0] +
                     '&right=' + bbox[2] + '&top=' + bbox[3] + '&bottom=' + bbox[1]
                 ).done(function() {
@@ -103,8 +98,9 @@ osmly.ui = (function() {
                          dismissmodalclass: 'close-reveal-modal'
                     });
                 });
-            });
+            }
 
+            osmly.connect.updateItem('remote', {remote: osm}, callback);
         });
 
         $('#osmlink').click(function() {
@@ -272,6 +268,7 @@ osmly.ui = (function() {
     }
 
     function submit(result) {
+        // should really split submit from problem
         hide();
 
         if (osmly.settings.demo) {
@@ -284,10 +281,11 @@ osmly.ui = (function() {
             }
             osmly.item.next();
         } else {
-            osmly.connect.updateItem(result);
             if (result === 'submit') {
+                osmly.connect.updateItem('submit');
                 osmly.connect.openChangeset(osmly.connect.submitToOSM);
             } else {
+                osmly.connect.updateItem('problem', {problem: result});
                 osmly.ui.teardown();
                 osmly.item.next();
             }

@@ -1,16 +1,21 @@
 osmly.connect = (function(){
     var connect = {};
 
-    connect.updateItem = function(result) {
+    connect.updateItem = function(action, data, callback) {
         var url = osmly.settings.featuresApi + 'db=' + osmly.settings.db +
-            '&id=' + osmly.item.id + '&action=problem';
+            '&id=' + osmly.item.id + '&action=' + action;
+
+        if (typeof data != 'object') data = {};
+        data['user'] = osmly.token('user');
+
         $.ajax({
             type: 'POST',
             url: url,
             crossDomain: true,
-            data: {problem: result, user: osmly.token('user')}
+            data: data
+        }).done(function(){
+            if (callback) callback();
         });
-        // no blocking, not worth slowing down over, it's reproducable
     };
 
     connect.openChangeset = function(callback) {
