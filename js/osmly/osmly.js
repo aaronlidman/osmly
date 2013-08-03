@@ -6,17 +6,12 @@ window.osmly = (function () {
         - crossbrowser test ui
             - especially modal and tag stuff
         - check if done, again, before submitting to osm
-        - confirm toOsm multipolygons are valid in josm
-            - they're not
-        - modal are limiting min-height
-        - handle tags better
-            - make then self contained with geojson properties
-            - available to edit tags for multiple items
     */
 
     var osmly = {};
 
     osmly.settings = {
+        justMap: false,
         featuresApi: '',
         db: '',
         writeApi: 'http://api06.dev.openstreetmap.org',
@@ -62,7 +57,8 @@ window.osmly = (function () {
         }
 
         osmly.map = osmly.map();
-        osmly.ui.initialize();
+
+        if (!osmly.settings.justMap) osmly.ui.initialize();
     };
 
     osmly.auth = osmAuth({

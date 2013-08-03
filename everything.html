@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Everything</title>
+    </head>
+    <body>
+        <script type="text/javascript">
+
+        function location() {
+            // absolutely in no way comprehensive
+            var location = {};
+            if (window.location.search) {
+                var search = window.location.search.split('?');
+                for (var a = 0; a < search.length; a++) {
+                    if (a == search.length-1) {
+                        /* remove trailing slash */
+                        if (search[a].substr(-1) == '/') {
+                            search[a] = search[a].slice(0,-1);
+                        }
+                    }
+
+                    if (search[a] != '') {
+                        var split = search[a].split('=');
+                        if (split.length = 2) {
+                            location[split[0]] = split[1];
+                        }
+                    }
+                }
+            }
+            return location;
+        }
+
+        if (location()['db']) {
+            // make a request for lots of the content
+        } else {
+            console.log('need a db to load. /?db=');
+        }
+
+        </script>
+    </body>
+</html>
