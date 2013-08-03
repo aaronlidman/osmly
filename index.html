@@ -27,10 +27,8 @@
                 pointer-events: none;
                 padding-left: 20px;
                 color: white;
-                text-shadow: 0px 0px 25px black;
                 font-weight: bold;
                 font-size: 200px;
-                text-shadow: 0 0 25px black;
             }
         </style>
     </head>
@@ -42,10 +40,29 @@
             <div id="available"></div>
         </div>
         <script type="text/javascript">
+        var places = [
+            [-21.815289, 114.164930, 15],
+            [-22.7667, 113.680, 17],
+            [-26.6922, 113.6009, 17],
+            [-31.6457, 131.6096, 16],
+            [29.17023, -118.32509, 16],
+            [48.38595, -124.72506, 17],
+            [29.99712, 48.1951332, 14],
+            [5.283854, 100.310164, 17],
+            [37.27266, -112.945032, 16],
+            [38.23988, -111.03021, 17],
+            [38.35783, -111.0064280, 17],
+            [37.810945, -111.409413, 18],
+            [48.16474, -116.295604, 15],
+            [48.11478, -121.1146545, 16]
+        ], num = Math.floor((Math.random()*places.length)),
+        place = places[num];
+        console.log(num)
+
             var CONFIG = {
                 justMap: true,
-                origin: [34.2,-23.1],
-                zoom: 3
+                origin: [place[0],place[1]],
+                zoom: place[2]
             };
             osmly.initialize(CONFIG);
         </script>
