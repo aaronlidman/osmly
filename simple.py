@@ -37,14 +37,20 @@ def get():
         if 'action' in request.args and request.args['action'] == 'remote':
             out = row[1]
     elif 'everything' in request.args:
-        # all everything requests must have a difficulty
-            # 0 for easy, 1 for difficult, -1 for everything
+        # difficulty: 0 for easy (default), 1 for difficult, -1 for everything
         query = 'SELECT id, problem, done, difficulty, bounds, area, user, time FROM osmly'
 
+        if 'difficulty' not in request.args:
+            difficulty = 0
+        else:
+            difficulty = request.args['difficulty']
+
+        # something is missing here
+
         if request.args['difficulty'] == u'0':
-            query = query + ' WHERE difficulty = 0'
+            query = query + ' WHERE difficulty = ' + difficulty
         elif request.args['difficulty'] == u'1':
-            query = query + ' WHERE difficulty = 1'
+            query = query + ' WHERE difficulty = ' + difficulty
         # lame, i know
 
         query = query + ' ORDER BY id'
