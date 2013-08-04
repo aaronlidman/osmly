@@ -2,37 +2,88 @@
 <html>
     <head>
         <title>Everything</title>
-        <link rel="stylesheet" type="text/css" href="css/bootstrap-tables.css">
         <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
         <style type="text/css">
+            /* basic table styling from bootstrap */
             * {
                 padding: 0;
                 margin: 0;
             }
 
             body {
-                font-size; 14px;
+                font-size: 14px;
                 font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
                 color: #222;
             }
-
             thead {
-                font-weight: bold;
+                color: white;
+                background-color: black;
+            }
+            table {
+              max-width: 100%;
+              background-color: transparent;
+              border-collapse: collapse;
+              border-spacing: 0;
+            }
+            .table {
+              width: 100%;
+              margin-bottom: 20px;
+            }
+            .table th,
+            .table td {
+              padding: 5px;
+              line-height: 15px;
+              text-align: left;
+              vertical-align: top;
+            }
+            .table th {
+              font-weight: bold;
+            }
+            .table thead th {
+              vertical-align: bottom;
+            }
+            .table tbody tr.success {
+              background-color: #dff0d8;
+              border-top: 1px solid black;
+              border-bottom: 1px solid black;
+            }
+            .table tbody tr.error {
+              background-color: #FF8080;
+              border-top: 1px solid black;
+              border-bottom: 1px solid black;
+            }
+            .table tbody tr.warning {
+              background-color: #fcf8e3;
+              border-top: 1px solid black;
+              border-bottom: 1px solid black;
+            }
+            .table tbody tr.info {
+              background-color: #d9edf7;
+            }
+            .table-hover tbody tr.success:hover > td {
+              background-color: #d0e9c6;
+            }
+            .table-hover tbody tr.error:hover > td {
+              background-color: #FF6666;
+            }
+            .table-hover tbody tr.warning:hover > td {
+              background-color: #faf2cc;
+            }
+            .table-hover tbody tr.info:hover > td {
+              background-color: #c4e3f3;
             }
         </style>
     </head>
     <body>
-        <table class='table'>
+        <table class='table table-hover'>
             <thead>
                 <tr>
-                    <th>id</th>
-                    <th>problem</th>
-                    <th>done</th>
-                    <th>difficult</th>
-                    <th>bounds</th>
-                    <th>area</th>
-                    <th>user</th>
-                    <th>time</th>
+                    <th>#</th>
+                    <th>Problem</th>
+                    <th>Done</th>
+                    <th>Difficult</th>
+                    <th>User</th>
+                    <th>Time</th>
                 </tr>
             </thead>
             <tbody id='tbody'>
@@ -89,6 +140,17 @@
                         column.appendChild(text);
                         tr.appendChild(column);
                     }
+
+                    // careful with the order here, it's not obvious
+                    // some problems might have been fixed manually yet still have 'problem' in db
+                    if (items[a][2] === 1) {
+                        tr.setAttribute('class', 'success');
+                    } else if (items[a][1] != '') {
+                        tr.setAttribute('class', 'error');
+                    } else if (items[a][3] === 1) {
+                        tr.setAttribute('class', 'error');
+                    }
+
                     table.appendChild(tr);
                 }
             });
