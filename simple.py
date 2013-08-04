@@ -38,7 +38,7 @@ def get():
             out = row[1]
     elif 'everything' in request.args:
         # difficulty: 0 for easy (default), 1 for difficult, -1 for everything
-        query = 'SELECT id, problem, done, difficulty, bounds, area, user, time FROM osmly'
+        query = 'SELECT id, problem, done, difficulty, user, time FROM osmly'
 
         if 'difficulty' not in request.args:
             difficulty = 0

@@ -61,7 +61,7 @@ db_conn.isolation_level = None
 db_c = db_conn.cursor()
 db_c.execute('DROP TABLE IF EXISTS osmly')
 db_c.execute('CREATE TABLE osmly (id INTEGER PRIMARY KEY, geo TEXT, remote TEXT,' +
-             'problem TEXT, done INT, difficulty INT, bounds TEXT, area REAL,' +
+             'problem TEXT, done INT, difficulty INT, ' +
              'comments TEXT, user TEXT, time INT)')
 
 count = 0
@@ -71,10 +71,9 @@ diff_count = 0
 for feature in data['features']:
     geo = asShape(feature['geometry'])
     bounds = trunc_bounds(geo.bounds)
-    geoarea = geo.area
     editable = isEditable(geo)
 
-    # we want to use simplify() with False because it's faster
+    # simplify() False is faster
     # but it occasionally deletes all nodes and that upsets mapping()
     try:
         simple = geo.simplify(0.0001, False)
@@ -86,7 +85,7 @@ for feature in data['features']:
     feature['properties']['bounds'] = bounds
     feature['geometry']['coordinates'] = geo['coordinates']
     feature['properties']['id'] = count
-    statement = 'INSERT INTO osmly VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);'
+    statement = 'INSERT INTO osmly VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);'
 
     if editable:
         difficulty = 0
@@ -96,8 +95,7 @@ for feature in data['features']:
         diff_count = diff_count + 1
 
     db_c.execute(statement, (
-        count, json.dumps(feature), '', '', 0, difficulty,
-        json.dumps(bounds), geoarea, '', '', ''))
+        count, json.dumps(feature), '', '', 0, difficulty, '', '', ''))
     count = count + 1
 
 print str(count) + ' items'
