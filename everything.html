@@ -124,66 +124,74 @@
             return location;
         }
 
-        var loc = locate()
+        function buildTable() {
+            items = window.everything;
+            var table = document.getElementById('tbody');
 
-        if (loc['db']) {
-            if (!loc['difficulty']) {
-                loc['difficulty'] = -1
+            for (var a = 0; a < items.length; a++) {
+                // rows
+                var tr = document.createElement('tr');
+                for (var b = 0; b < items[a].length; b++) {
+                    // columns
+                    var column = document.createElement('td'),
+                        text = document.createTextNode(items[a][b]);
+                    column.appendChild(text);
+                    tr.appendChild(column);
+                }
+
+                // mark as done
+                var column = document.createElement('td');
+                if (items[a][2] === 0) {
+                    // put a button in there, alert for confirmation
+                    // need to pass the id somehow
+                    // need to pass the id
+                    column.innerHTML = '<a href="" id="' + items[a][0] +'">mark as done?</a>';
+                }
+                tr.appendChild(column);
+
+                // edit in josm
+                var column = document.createElement('td');
+                if (items[a][2] === 0) {
+                    // put a button in there, use modal for notifying it's ready/failed
+                    // need to pass the id
+                    column.innerHTML = '<a href="" id="' + items[a][0] +'">edit in JOSM</a>';
+                }
+                tr.appendChild(column);
+
+                // background-colors
+                // careful with the order here, it's not obvious
+                // some problems might have been fixed manually yet still have 'problem' in db
+                if (items[a][2] === 1) {
+                    tr.setAttribute('class', 'success');
+                } else if (items[a][1] != '') {
+                    tr.setAttribute('class', 'error');
+                } else if (items[a][3] === 1) {
+                    tr.setAttribute('class', 'error');
+                }
+
+                table.appendChild(tr);
             }
-            loc['db'] = decodeURIComponent(loc['db']);
-            console.log(loc['db']);
-            // by default we get minor details, big stuff is fetched on demand
+        }
+
+        function everything(query, callback) {
             $.ajax({
-                url: loc['db'] + '&everything&difficulty=' + loc['difficulty'],
+                url: query,
                 cache: false
             }).done(function(items){
-                items = JSON.parse(items);
-                var table = document.getElementById('tbody');
-
-                for (var a = 0; a < items.length; a++) {
-                    // rows
-                    var tr = document.createElement('tr');
-                    for (var b = 0; b < items[a].length; b++) {
-                        // columns
-                        var column = document.createElement('td'),
-                            text = document.createTextNode(items[a][b]);
-                        column.appendChild(text);
-                        tr.appendChild(column);
-                    }
-
-                    // mark as done
-                    var column = document.createElement('td');
-                    if (items[a][2] === 0) {
-                        // put a button in there, alert for confirmation
-                        // need to pass the id somehow
-                        // need to pass the id
-                        column.innerHTML = '<a href="" id="' + items[a][0] +'">mark as done?</a>';
-                    }
-                    tr.appendChild(column);
-
-                    // edit in josm
-                    var column = document.createElement('td');
-                    if (items[a][2] === 0) {
-                        // put a button in there, use modal for notifying it's ready/failed
-                        // need to pass the id
-                        column.innerHTML = '<a href="" id="' + items[a][0] +'">edit in JOSM</a>';
-                    }
-                    tr.appendChild(column);
-
-                    // background-colors
-                    // careful with the order here, it's not obvious
-                    // some problems might have been fixed manually yet still have 'problem' in db
-                    if (items[a][2] === 1) {
-                        tr.setAttribute('class', 'success');
-                    } else if (items[a][1] != '') {
-                        tr.setAttribute('class', 'error');
-                    } else if (items[a][3] === 1) {
-                        tr.setAttribute('class', 'error');
-                    }
-
-                    table.appendChild(tr);
-                }
+                window.everything = JSON.parse(items);
+                callback();
             });
+        }
+
+        function refresh(callback) {
+            everything(window.loc['db'] + '&everything', callback)
+        }
+
+
+        window.loc = locate()
+        if (window.loc['db']) {
+            window.loc['db'] = decodeURIComponent(loc['db']);
+            refresh(buildTable)
         } else {
             console.log('need a db to load. /?db=');
         }
