@@ -83,7 +83,7 @@
         </style>
     </head>
     <body>
-        <table class='table'>
+        <table id='main_table' class='table'>
             <thead>
                 <tr>
                     <th>#</th>
@@ -96,8 +96,6 @@
                     <th>Edit in JOSM</th>
                 </tr>
             </thead>
-            <tbody id='tbody'>
-            </tbody>
         </table>
         <script type="text/javascript">
         function locate() {
@@ -125,8 +123,20 @@
         }
 
         function buildTable() {
+            // need to check the current state of filters, possibly apply them
+            // then buildTable as a callback
+
+
+            // index from simple.py: id, problem, done, difficulty, user, time
             items = window.everything;
-            var table = document.getElementById('tbody');
+
+            if (document.getElementsByTagName('tbody').length) {
+                // clear the way
+                var table = document.getElementById('main_table');
+                table.removeChild(document.getElementsByTagName('tbody')[0]);
+            }
+
+            var table = document.createElement('tbody');
 
             for (var a = 0; a < items.length; a++) {
                 // rows
@@ -170,28 +180,60 @@
                 }
 
                 table.appendChild(tr);
+                document.getElementById('main_table').appendChild(table);
             }
         }
 
-        function everything(query, callback) {
+        function request(query, callback) {
             $.ajax({
                 url: query,
                 cache: false
             }).done(function(items){
                 window.everything = JSON.parse(items);
-                callback();
+                if (callback) callback();
             });
         }
 
         function refresh(callback) {
-            everything(window.loc['db'] + '&everything', callback)
+            request(window.loc['db'] + '&everything', callback)
+        }
+
+        function filter(options){
+            // {'problem': 1, 'user': 'Joe Fake Name'}
+            // index from simple.py: id, problem, done, difficulty, user, time
+            // there's probably a better way, not going to think about it too much
+            var ndx = {
+                'problem': 1,
+                'done': 2,
+                'difficulty': 3,
+                'user': 4,
+                'time': 5
+            }
+
+            var items = window.everything,
+                out = [];
+
+            for (var a = 0; a < items.length; a++) {
+                var keep = false;
+                for (var option in options) {
+                    if (items[a][ndx[option]] == options[option]) {
+                        keep = true;
+                    }
+                    if (keep) out.push(items[a]);
+                }
+            }
+            window.everything = out;
         }
 
 
         window.loc = locate()
         if (window.loc['db']) {
             window.loc['db'] = decodeURIComponent(loc['db']);
-            refresh(buildTable)
+            refresh(buildTable);
+            // filter({
+            //     'done': 1
+            // });
+            // buildTable();
         } else {
             console.log('need a db to load. /?db=');
         }
