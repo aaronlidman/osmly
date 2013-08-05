@@ -9,15 +9,25 @@
                 padding: 0;
                 margin: 0;
             }
-
             body {
                 font-size: 14px;
                 font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
                 color: #222;
             }
+            tr {
+                border-top: 1px solid #eee;
+            }
+            td a {
+                text-decoration: none;
+                color: black;
+            }
             thead {
                 color: white;
                 background-color: black;
+            }
+            thead tr {
+                border: none;
+                line-height: 36px;
             }
             table {
               max-width: 100%;
@@ -38,17 +48,16 @@
             }
             .table th {
               font-weight: bold;
+              line-height: 30px;
             }
             .table thead th {
               vertical-align: bottom;
             }
             .table tbody tr.success {
-              background-color: #dff0d8;
-              border-top: 1px solid black;
-              border-bottom: 1px solid black;
+              background-color: #71CC66;
             }
             .table tbody tr.error {
-              background-color: #FF8080;
+              background-color: #FF5757;
               border-top: 1px solid black;
               border-bottom: 1px solid black;
             }
@@ -60,22 +69,21 @@
             .table tbody tr.info {
               background-color: #d9edf7;
             }
-            .table-hover tbody tr.success:hover > td {
-              background-color: #d0e9c6;
+            .table tbody tr.error:hover {
+              background-color: #FF3D3D;
+              border-top: 1px solid black;
+              border-bottom: 1px solid black;
             }
-            .table-hover tbody tr.error:hover > td {
-              background-color: #FF6666;
-            }
-            .table-hover tbody tr.warning:hover > td {
+            .table-hover tbody tr.warning:hover {
               background-color: #faf2cc;
             }
-            .table-hover tbody tr.info:hover > td {
+            .table-hover tbody tr.info:hover {
               background-color: #c4e3f3;
             }
         </style>
     </head>
     <body>
-        <table class='table table-hover'>
+        <table class='table'>
             <thead>
                 <tr>
                     <th>#</th>
@@ -84,6 +92,8 @@
                     <th>Difficult</th>
                     <th>User</th>
                     <th>Time</th>
+                    <th>Mark as done</th>
+                    <th>Edit in JOSM</th>
                 </tr>
             </thead>
             <tbody id='tbody'>
@@ -141,6 +151,26 @@
                         tr.appendChild(column);
                     }
 
+                    // mark as done
+                    var column = document.createElement('td');
+                    if (items[a][2] === 0) {
+                        // put a button in there, alert for confirmation
+                        // need to pass the id somehow
+                        // need to pass the id
+                        column.innerHTML = '<a href="" id="' + items[a][0] +'">mark as done?</a>';
+                    }
+                    tr.appendChild(column);
+
+                    // edit in josm
+                    var column = document.createElement('td');
+                    if (items[a][2] === 0) {
+                        // put a button in there, use modal for notifying it's ready/failed
+                        // need to pass the id
+                        column.innerHTML = '<a href="" id="' + items[a][0] +'">edit in JOSM</a>';
+                    }
+                    tr.appendChild(column);
+
+                    // background-colors
                     // careful with the order here, it's not obvious
                     // some problems might have been fixed manually yet still have 'problem' in db
                     if (items[a][2] === 1) {

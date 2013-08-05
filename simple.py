@@ -37,25 +37,24 @@ def get():
         if 'action' in request.args and request.args['action'] == 'remote':
             out = row[1]
     elif 'everything' in request.args:
-        # difficulty: 0 for easy (default), 1 for difficult, -1 for everything
         query = 'SELECT id, problem, done, difficulty, user, time FROM osmly'
 
+        # difficulty: 0 for easy (default), 1 for difficult, -1 for everything
         if 'difficulty' not in request.args:
             difficulty = 0
         else:
             difficulty = request.args['difficulty']
 
-        # something is missing here
-
-        if request.args['difficulty'] == u'0':
-            query = query + ' WHERE difficulty = ' + difficulty
-        elif request.args['difficulty'] == u'1':
-            query = query + ' WHERE difficulty = ' + difficulty
-        # lame, i know
+        if request.args['difficulty'] > u'-1':
+            query = query + ' WHERE difficulty = ?'
 
         query = query + ' ORDER BY id'
 
-        c.execute(query)
+        if request.args['difficulty'] > u'-1':
+            c.execute(query, (difficulty,))
+        else:
+            c.execute(query)
+
         out = json.dumps(c.fetchall());
     else:
         row = c.execute(
