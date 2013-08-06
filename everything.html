@@ -254,6 +254,29 @@
             return out;
         }
 
+        function unique(column) {
+            // lists unique values for a given column
+            // probably only useful for 'problem' and 'user'
+            var ndx = {
+                'problem': 1,
+                'done': 2,
+                'difficulty': 3,
+                'user': 4,
+                'time': 5
+            }
+            
+            var items = window.everything,
+                unique = [];
+
+            for (var a = 0; a < items.length; a++) {
+                if (items[a][ndx[column]] && unique.indexOf(items[a][ndx[column]]) === -1) {
+                    unique.push(items[a][ndx[column]]);
+                }
+            }
+
+            return unique;
+        }
+
 
         window.loc = locate()
         if (window.loc['db']) {
