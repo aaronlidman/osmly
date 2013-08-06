@@ -54,31 +54,12 @@
               vertical-align: bottom;
             }
             .table tbody tr.success {
-              background-color: #71CC66;
+              background-color: #A6D96A;
             }
             .table tbody tr.error {
-              background-color: #FF5757;
+              background-color: #FF0000;
               border-top: 1px solid black;
               border-bottom: 1px solid black;
-            }
-            .table tbody tr.warning {
-              background-color: #fcf8e3;
-              border-top: 1px solid black;
-              border-bottom: 1px solid black;
-            }
-            .table tbody tr.info {
-              background-color: #d9edf7;
-            }
-            .table tbody tr.error:hover {
-              background-color: #FF3D3D;
-              border-top: 1px solid black;
-              border-bottom: 1px solid black;
-            }
-            .table-hover tbody tr.warning:hover {
-              background-color: #faf2cc;
-            }
-            .table-hover tbody tr.info:hover {
-              background-color: #c4e3f3;
             }
         </style>
     </head>
@@ -200,10 +181,12 @@
 
         function filter(options){
             // {'problem': 1, 'user': 'Joe Fake Name'}
+            // also takes values as a list of multiple possible values
+                // {'problem': ['no_park', 'bad_imagery', 'you_ugly']}
+                // or even better: {'problem': unique('problem')}
             // index from simple.py: id, problem, done, difficulty, user, time
-            // there's probably a better way, not going to think about it too much
-            // also need to remember that each filter is reducing window.everything
-                // might need to get a fresh set and filter that, hense refresh()
+            // BE AWARE: this alters window.everything which the table relies on
+                // also redrawing the table is a seperate function, buildTable()
             var ndx = {
                 'problem': 1,
                 'done': 2,
@@ -218,7 +201,11 @@
             for (var a = 0; a < items.length; a++) {
                 var keep = false;
                 for (var option in options) {
-                    if (items[a][ndx[option]] == options[option]) {
+                    if (typeof options[option] == 'object') {
+                        if (options[option].indexOf(items[a][ndx[option]]) !== -1) {
+                            keep = true
+                        }
+                    } else if (items[a][ndx[option]] == options[option]) {
                         keep = true;
                     }
                     if (keep) out.push(items[a]);
@@ -228,6 +215,7 @@
         }
 
         function count(options) {
+            // {'done': 1, 'user': 'Joe'}
             var ndx = {
                 'problem': 1,
                 'done': 2,
