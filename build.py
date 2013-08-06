@@ -61,7 +61,7 @@ db_conn.isolation_level = None
 db_c = db_conn.cursor()
 db_c.execute('DROP TABLE IF EXISTS osmly')
 db_c.execute('CREATE TABLE osmly (id INTEGER PRIMARY KEY, geo TEXT, remote TEXT,' +
-             'problem TEXT, done INT, difficulty INT, ' +
+             'problem TEXT, done INT, difficult INT, ' +
              'comments TEXT, user TEXT, time INT)')
 
 count = 0
@@ -85,17 +85,17 @@ for feature in data['features']:
     feature['properties']['bounds'] = bounds
     feature['geometry']['coordinates'] = geo['coordinates']
     feature['properties']['id'] = count
-    statement = 'INSERT INTO osmly VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);'
+    statement = 'INSERT INTO osmly VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);'
 
     if editable:
-        difficulty = 0
+        difficult = 0
         easy_count = easy_count + 1
     else:
-        difficulty = 1
+        difficult = 1
         diff_count = diff_count + 1
 
     db_c.execute(statement, (
-        count, json.dumps(feature), '', '', 0, difficulty, '', '', ''))
+        count, json.dumps(feature), '', '', 0, difficult, '', '', ''))
     count = count + 1
 
 print str(count) + ' items'

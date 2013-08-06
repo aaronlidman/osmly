@@ -108,7 +108,7 @@
             // then buildTable as a callback
 
 
-            // index from simple.py: id, problem, done, difficulty, user, time
+            // index from simple.py: id, problem, done, difficult, user, time
             items = window.everything;
 
             if (document.getElementsByTagName('tbody').length) {
@@ -184,13 +184,13 @@
             // also takes values as a list of multiple possible values
                 // {'problem': ['no_park', 'bad_imagery', 'you_ugly']}
                 // or even better: {'problem': unique('problem')}
-            // index from simple.py: id, problem, done, difficulty, user, time
+            // index from simple.py: id, problem, done, difficult, user, time
             // BE AWARE: this alters window.everything which the table relies on
                 // also redrawing the table is a seperate function, buildTable()
             var ndx = {
                 'problem': 1,
                 'done': 2,
-                'difficulty': 3,
+                'difficult': 3,
                 'user': 4,
                 'time': 5
             }
@@ -219,7 +219,7 @@
             var ndx = {
                 'problem': 1,
                 'done': 2,
-                'difficulty': 3,
+                'difficult': 3,
                 'user': 4,
                 'time': 5
             }
@@ -248,7 +248,7 @@
             var ndx = {
                 'problem': 1,
                 'done': 2,
-                'difficulty': 3,
+                'difficult': 3,
                 'user': 4,
                 'time': 5
             }

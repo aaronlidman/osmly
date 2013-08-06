@@ -37,13 +37,13 @@ def get():
         if 'action' in request.args and request.args['action'] == 'remote':
             out = row[1]
     elif 'everything' in request.args:
-        query = 'SELECT id, problem, done, difficulty, user, time FROM osmly ORDER BY id'
+        query = 'SELECT id, problem, done, difficult, user, time FROM osmly ORDER BY id'
         c.execute(query)
         out = json.dumps(c.fetchall());
         # it got too complicated, filter/sort clientside
     else:
         row = c.execute(
-            'SELECT geo FROM osmly WHERE problem = "" AND done = 0 AND difficulty = 0 ORDER BY RANDOM() LIMIT 1')
+            'SELECT geo FROM osmly WHERE problem = "" AND done = 0 AND difficult = 0 ORDER BY RANDOM() LIMIT 1')
         row = row.fetchone()
         conn.commit()
         conn.close()
