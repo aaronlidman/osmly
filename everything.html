@@ -61,9 +61,31 @@
               border-top: 1px solid black;
               border-bottom: 1px solid black;
             }
+
+            #controls {
+                bottom: 0;
+                right: 0;
+                background-color: white;
+                position: fixed;
+                padding: 10px;
+                box-shadow: 0 0 50px rgba(0,0,0,0.2);
+                line-height: 1.5em;
+            }
+            input[type='radio'] {
+                margin-right: 5px;
+            }
         </style>
     </head>
     <body>
+        <div id='controls'>
+            <input type='radio' name='filter' value='everything' id='everything' checked><label for='everything'>everything</label><br>
+            <input type='radio' name='filter' value='red' id='red'><label for='red'>problems (red)</label><br>
+            <input type='radio' name='filter' value='green' id='green'><label for='green'>done (green)</label><br>
+            <input type='radio' name='filter' value='users' id='users'><label for='users'>user: 
+                <select id='user-select'></select></label><br>
+            <input type='radio' name='filter' value='problems' id='problems'><label for='problems'>problem: 
+                <select id='problem-select'></select></label><br>
+        </div>
         <table id='main_table' class='table'>
             <thead>
                 <tr>
@@ -263,6 +285,30 @@
             }
 
             return unique;
+        }
+
+        function problem_selection() {
+            var problems = unique('problem'),
+                html = '',
+                select = document.getElementById('problem-select');
+
+            for (var a = 0; a < problems.length; a++) {
+                html += '<option>' + problems[a] + '</option>';
+            }
+
+            select.innerHTML = html;
+        }
+
+        function user_selection() {
+            var problems = unique('user'),
+                html = '',
+                select = document.getElementById('user-select');
+
+            for (var a = 0; a < problems.length; a++) {
+                html += '<option>' + problems[a] + '</option>';
+            }
+
+            select.innerHTML = html;
         }
 
 
