@@ -202,6 +202,8 @@
             // {'problem': 1, 'user': 'Joe Fake Name'}
             // index from simple.py: id, problem, done, difficulty, user, time
             // there's probably a better way, not going to think about it too much
+            // also need to remember that each filter is reducing window.everything
+                // might need to get a fresh set and filter that, hense refresh()
             var ndx = {
                 'problem': 1,
                 'done': 2,
@@ -223,6 +225,33 @@
                 }
             }
             window.everything = out;
+        }
+
+        function count(options) {
+            var ndx = {
+                'problem': 1,
+                'done': 2,
+                'difficulty': 3,
+                'user': 4,
+                'time': 5
+            }
+
+            var items = window.everything,
+                out = {};
+
+            for (var option in options) {
+                out[option] = 0;
+            }
+
+            for (var a = 0; a < items.length; a++) {
+                for (var option in options) {
+                    if (items[a][ndx[option]] == options[option]) {
+                        out[option]++;
+                    }
+                }
+            }
+
+            return out;
         }
 
 
