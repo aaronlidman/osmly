@@ -67,8 +67,8 @@
                 right: 0;
                 background-color: white;
                 position: fixed;
-                padding: 10px;
-                box-shadow: 0 0 50px rgba(0,0,0,0.2);
+                padding: 10px 15px;
+                box-shadow: 0 0 10px rgba(0,0,0,0.5);
                 line-height: 1.5em;
             }
             input[type='radio'] {
@@ -78,13 +78,13 @@
     </head>
     <body>
         <div id='controls'>
-            <input type='radio' name='filter' value='everything' id='everything' checked><label for='everything'>everything</label><br>
-            <input type='radio' name='filter' value='red' id='red'><label for='red'>problems (red)</label><br>
-            <input type='radio' name='filter' value='green' id='green'><label for='green'>done (green)</label><br>
-            <input type='radio' name='filter' value='users' id='users'><label for='users'>user: 
-                <select id='user-select'></select></label><br>
-            <input type='radio' name='filter' value='problems' id='problems'><label for='problems'>problem: 
-                <select id='problem-select'></select></label><br>
+            <input type='radio' name='filter' value='everything' id='everything' onclick='click_everything()' checked><label for='everything'> everything</label><br>
+            <input type='radio' name='filter' value='red' id='red' onclick='click_red()'><label for='red'> problems (red)</label><br>
+            <input type='radio' name='filter' value='green' id='green'onclick='click_green()'><label for='green'> done (green)</label><br>
+            <input type='radio' name='filter' value='users' id='users' onclick='drop_selection("users-select")'><label for='users'> user: </label>
+                <select id='users-select' onchange='drop_selection("users-select")'></select><br>
+            <input type='radio' name='filter' value='problems' id='problems' onclick='drop_selection("problems-select")'><label for='problems'> problem: </label>
+                <select id='problems-select' onchange='drop_selection("problems-select")'></select><br>
         </div>
         <table id='main_table' class='table'>
             <thead>
@@ -193,6 +193,9 @@
                 cache: false
             }).done(function(items){
                 window.everything = JSON.parse(items);
+                window.everythingRaw = JSON.parse(items);
+                // window.everything is the current state of the table
+                // window.everythingRaw is the originally fetched data
                 if (callback) callback();
             });
         }
@@ -217,7 +220,7 @@
                 'time': 5
             }
 
-            var items = window.everything,
+            var items = window.everythingRaw,
                 out = [];
 
             for (var a = 0; a < items.length; a++) {
@@ -275,7 +278,7 @@
                 'time': 5
             }
             
-            var items = window.everything,
+            var items = window.everythingRaw,
                 unique = [];
 
             for (var a = 0; a < items.length; a++) {
@@ -290,36 +293,86 @@
         function problem_selection() {
             var problems = unique('problem'),
                 html = '',
-                select = document.getElementById('problem-select');
+                select = document.getElementById('problems-select');
 
             for (var a = 0; a < problems.length; a++) {
-                html += '<option>' + problems[a] + '</option>';
+                html += '<option value="problem:' + problems[a] + '">' + problems[a] + '</option>';
             }
 
             select.innerHTML = html;
         }
 
         function user_selection() {
-            var problems = unique('user'),
+            var user = unique('user'),
                 html = '',
-                select = document.getElementById('user-select');
+                select = document.getElementById('users-select');
 
-            for (var a = 0; a < problems.length; a++) {
-                html += '<option>' + problems[a] + '</option>';
+            for (var a = 0; a < user.length; a++) {
+                html += '<option value="user:' + user[a] +'">' + user[a] + '</option>';
             }
 
             select.innerHTML = html;
+        }
+
+        function click_everything() {
+            window.everything = window.everythingRaw;
+            buildTable();
+        }
+
+        function click_red() {
+            filter({
+                'problem': unique('problem'),
+                'difficult': 1
+            });
+            buildTable();
+        }
+
+        function click_green() {
+            filter({'done': 1});
+            buildTable();
+        }
+
+        function drop_selection(select) {
+            // this is much too involved for what it does
+            // gets the value of the changed dropdown menu and filters based on it
+            // also selects the parent radio button
+            var selector = document.getElementById(select),
+                value = selector.options[selector.selectedIndex].value,
+                dict = {};
+            value = value.split(':');
+            dict[value[0]] = value[1];
+                // dict is necessary because value = {value[0]: value[1]} didn't work
+                    // seems like it should?
+
+            // filter the items, rebuild the table w/ filtered items
+            filter(dict);
+            buildTable();
+
+            // select the parent radio button
+            var parentRadio = select.split('-')[0],
+                controls = document.getElementById('controls'),
+                radios = controls.getElementsByTagName('input');
+
+            for (var i = 0; i < radios.length; i++) {
+                if (radios[i].type === 'radio') {
+                    if (radios[i].value == parentRadio) {
+                        radios[i].checked = true;
+                    } else {
+                        radios[i].checked = false;
+                    }
+                }
+            }
         }
 
 
         window.loc = locate()
         if (window.loc['db']) {
             window.loc['db'] = decodeURIComponent(loc['db']);
-            refresh(buildTable);
-            // filter({
-            //     'done': 1
-            // });
-            // buildTable();
+            refresh(function() {
+                buildTable();
+                problem_selection();
+                user_selection();
+            });
         } else {
             console.log('need a db to load. /?db=');
         }
