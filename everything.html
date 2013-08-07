@@ -91,12 +91,17 @@
     <body>
         <div id='controls'>
             <span id='count'></span>
-            <input type='radio' name='filter' value='everything' id='everything' onclick='click_everything()' checked><label for='everything'> everything</label><br>
-            <input type='radio' name='filter' value='red' id='red' onclick='click_red()'><label for='red'> problems (red)</label><br>
-            <input type='radio' name='filter' value='green' id='green'onclick='click_green()'><label for='green'> done (green)</label><br>
-            <input type='radio' name='filter' value='users' id='users' onclick='drop_selection("users-select")'><label for='users'> user: </label>
+            <input type='radio' name='filter' value='everything' id='everything' onclick='click_everything()' checked>
+                <label for='everything'> everything</label><br>
+            <input type='radio' name='filter' value='red' id='red' onclick='click_red()'>
+                <label for='red'> problems (red)</label><br>
+            <input type='radio' name='filter' value='green' id='green'onclick='click_green()'>
+                <label for='green'> done (green)</label><br>
+            <input type='radio' name='filter' value='users' id='users' onclick='drop_selection("users-select")'>
+                <label for='users'> user: </label>
                 <select id='users-select' onchange='drop_selection("users-select")'></select><br>
-            <input type='radio' name='filter' value='problems' id='problems' onclick='drop_selection("problems-select")'><label for='problems'> problem: </label>
+            <input type='radio' name='filter' value='problems' id='problems' onclick='drop_selection("problems-select")'>
+                <label for='problems'> problem: </label>
                 <select id='problems-select' onchange='drop_selection("problems-select")'></select><br>
         </div>
         <table id='main_table' class='table'>
@@ -158,9 +163,29 @@
                 var tr = document.createElement('tr');
                 for (var b = 0; b < items[a].length; b++) {
                     // columns
-                    var column = document.createElement('td'),
-                        text = document.createTextNode(items[a][b]);
-                    column.appendChild(text);
+                    var column = document.createElement('td');
+
+                    if (b == 2) {
+                        // checkmark for done items
+                        if (items[a][b] === 1) {
+                            var text = '&#x2713;';
+                        } else {
+                            var text = '';
+                        }
+                    } else {
+                        var text = items[a][b];
+                    }
+
+                    if (b == 4) {
+                        if (items[a][b]) {
+                            var date = new Date(items[a][b]*1000),
+                                months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+                                text = months[date.getMonth()] + ' ' + date.getDate() + ' ' + date.getFullYear() + ' ' + 
+                                    date.getHours() + ':' + date.getMinutes();
+                        }
+                    }
+
+                    column.innerHTML = text;
                     tr.appendChild(column);
                 }
 
