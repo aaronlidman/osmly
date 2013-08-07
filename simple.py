@@ -37,13 +37,13 @@ def get():
         if 'action' in request.args and request.args['action'] == 'remote':
             out = row[1]
     elif 'everything' in request.args:
-        query = 'SELECT id, problem, done, difficult, user, time FROM osmly ORDER BY id'
+        query = 'SELECT id, problem, done, user, time FROM osmly ORDER BY id'
         c.execute(query)
         out = json.dumps(c.fetchall());
         # it got too complicated, filter/sort clientside
     else:
         row = c.execute(
-            'SELECT geo FROM osmly WHERE problem = "" AND done = 0 AND difficult = 0 ORDER BY RANDOM() LIMIT 1')
+            'SELECT geo FROM osmly WHERE problem = "" AND done = 0 ORDER BY RANDOM() LIMIT 1')
         row = row.fetchone()
         conn.commit()
         conn.close()
@@ -53,9 +53,9 @@ def get():
 
 
 def post():
-    # obviously these are public facing and could be abused easily, marked all done
-    # taking the risk right now, if needed it can easily be limited
-        # on osm login or changeset creation, we log them in here with a window
+    # obviously these are public facing and could be abused easily, marked all done etc...
+    # taking the risk right now, if needed it can be limited easily
+        # on osm login or changeset creation, we log them in here with a time window
         # as they perform actions that window stays open, like changesets
 
     # polymorphism much?
@@ -80,7 +80,7 @@ def done():
     )
     conn.commit()
     conn.close()
-    return json.dumps({'id': request.args['id']})
+    return 'ok'
 
 
 def problem():

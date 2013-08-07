@@ -2,7 +2,7 @@
 
 # converts a geojson file with polygons to a sqlite database with individuals features as rows
 # run: python build.py file.geojson
-# creates two sqlite databases, named [file].sqlite and [file]-difficult.sqlite
+# creates a sqlite database named [file].sqlite
     # [file] is taken from the source file
 import json
 import sqlite3
@@ -33,14 +33,14 @@ def isEditable(geo):
     # items that are easily editable for leaflet
     # mirrors isEditable() in osmly.item.js
     if geo.geom_type == 'Polygon' and geo.interiors:
-        return False
+        return 'incompatible (complex polygon)'
     elif geo.geom_type == 'MultiPolygon':
-        return False
+        return 'incompatible (multipolygon)'
     if geo.area > MAX_EDITABLE_AREA:
-        return False
+        return 'too large for the browser'
     if geo.area == 0:
-        return False
-    return True
+        return 'data problem'
+    return ''
 
 
 def trunc_bounds(bounds):
@@ -61,17 +61,14 @@ db_conn.isolation_level = None
 db_c = db_conn.cursor()
 db_c.execute('DROP TABLE IF EXISTS osmly')
 db_c.execute('CREATE TABLE osmly (id INTEGER PRIMARY KEY, geo TEXT, remote TEXT,' +
-             'problem TEXT, done INT, difficult INT, ' +
-             'comments TEXT, user TEXT, time INT)')
+             'problem TEXT, done INT, comments TEXT, user TEXT, time INT)')
 
 count = 0
-easy_count = 0
-diff_count = 0
 
 for feature in data['features']:
     geo = asShape(feature['geometry'])
     bounds = trunc_bounds(geo.bounds)
-    editable = isEditable(geo)
+    problem = isEditable(geo)
 
     # simplify() False is faster
     # but it occasionally deletes all nodes and that upsets mapping()
@@ -85,19 +82,11 @@ for feature in data['features']:
     feature['properties']['bounds'] = bounds
     feature['geometry']['coordinates'] = geo['coordinates']
     feature['properties']['id'] = count
-    statement = 'INSERT INTO osmly VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);'
-
-    if editable:
-        difficult = 0
-        easy_count = easy_count + 1
-    else:
-        difficult = 1
-        diff_count = diff_count + 1
+    statement = 'INSERT INTO osmly VALUES (?, ?, ?, ?, ?, ?, ?, ?);'
 
     db_c.execute(statement, (
-        count, json.dumps(feature), '', '', 0, difficult, '', '', ''))
+        count, json.dumps(feature), '', problem, 0, '', '', ''))
     count = count + 1
 
 print str(count) + ' items'
-print str(easy_count) + ' easy, ' + str(diff_count) + ' difficult'
 db_conn.close()

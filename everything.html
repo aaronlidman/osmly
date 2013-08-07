@@ -105,7 +105,6 @@
                     <th>#</th>
                     <th>Problem</th>
                     <th>Done</th>
-                    <th>Difficult</th>
                     <th>User</th>
                     <th>Time</th>
                     <th>Mark as done</th>
@@ -143,7 +142,7 @@
             // then buildTable as a callback
 
 
-            // index from simple.py: id, problem, done, difficult, user, time
+            // index from simple.py: id, problem, done, user, time
             items = window.everything;
 
             if (document.getElementsByTagName('tbody').length) {
@@ -191,8 +190,6 @@
                     tr.setAttribute('class', 'success');
                 } else if (items[a][1] != '') {
                     tr.setAttribute('class', 'error');
-                } else if (items[a][3] === 1) {
-                    tr.setAttribute('class', 'error');
                 }
 
                 table.appendChild(tr);
@@ -224,15 +221,14 @@
             // also takes values as a list of multiple possible values
                 // {'problem': ['no_park', 'bad_imagery', 'you_ugly']}
                 // or even better: {'problem': unique('problem')}
-            // index from simple.py: id, problem, done, difficult, user, time
+            // index from simple.py: id, problem, done, user, time
             // BE AWARE: this alters window.everything which the table relies on
                 // also redrawing the table is a seperate function, buildTable()
             var ndx = {
                 'problem': 1,
                 'done': 2,
-                'difficult': 3,
-                'user': 4,
-                'time': 5
+                'user': 3,
+                'time': 4
             }
 
             var items = window.everythingRaw,
@@ -259,9 +255,8 @@
             var ndx = {
                 'problem': 1,
                 'done': 2,
-                'difficult': 3,
-                'user': 4,
-                'time': 5
+                'user': 3,
+                'time': 4
             }
 
             var items = window.everything,
@@ -288,9 +283,8 @@
             var ndx = {
                 'problem': 1,
                 'done': 2,
-                'difficult': 3,
-                'user': 4,
-                'time': 5
+                'user': 3,
+                'time': 4
             }
             
             var items = window.everythingRaw,
@@ -336,8 +330,7 @@
 
         function click_red() {
             filter({
-                'problem': unique('problem'),
-                'difficult': 1
+                'problem': unique('problem')
             });
             buildTable();
         }
