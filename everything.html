@@ -54,10 +54,10 @@
               vertical-align: bottom;
             }
             .table tbody tr.success {
-              background-color: #A6D96A;
+              background-color: #00BF00;
             }
             .table tbody tr.error {
-              background-color: #FF0000;
+              background-color: #FF2626;
               border-top: 1px solid black;
               border-bottom: 1px solid black;
             }
@@ -74,10 +74,23 @@
             input[type='radio'] {
                 margin-right: 5px;
             }
+            #count {
+                right: 20px;
+                position: absolute;
+                font-weight: bold;
+                color: white;
+                font-size: 48px;
+                text-shadow: 0 0px 10px rgba(0,0,0,0.5);
+                top: -40px;
+            }
+            #count span {
+                font-size: 24px;
+            }
         </style>
     </head>
     <body>
         <div id='controls'>
+            <span id='count'></span>
             <input type='radio' name='filter' value='everything' id='everything' onclick='click_everything()' checked><label for='everything'> everything</label><br>
             <input type='radio' name='filter' value='red' id='red' onclick='click_red()'><label for='red'> problems (red)</label><br>
             <input type='radio' name='filter' value='green' id='green'onclick='click_green()'><label for='green'> done (green)</label><br>
@@ -185,6 +198,8 @@
                 table.appendChild(tr);
                 document.getElementById('main_table').appendChild(table);
             }
+
+            count_current_rows();
         }
 
         function request(query, callback) {
@@ -361,6 +376,16 @@
                         radios[i].checked = false;
                     }
                 }
+            }
+        }
+
+        function count_current_rows() {
+            var count = document.getElementById('count');
+
+            if (window.everything.length === window.everythingRaw.length) {
+                count.innerHTML = window.everything.length;
+            } else {
+                count.innerHTML = window.everything.length.toString() + '<span>/' + window.everythingRaw.length + '</span>';
             }
         }
 
