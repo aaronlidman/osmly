@@ -36,37 +36,27 @@ osmly.ui = (function() {
 
         $('#instruction').click(function() {
             $('#instruction-modal').reveal({
-                 animation: 'fade',
-                 animationspeed: 100,
-                 closeonbackgroundclick: true,
-                 dismissmodalclass: 'close-reveal-modal'
+                animation: 'fade',
+                animationspeed: 100
             });
         });
 
         $('#changeset').click(function(e) {
             e.preventDefault();
             $('#changeset-modal').reveal({
-                 animation: 'fade',
-                 animationspeed: 100,
-                 closeonbackgroundclick: true,
-                 dismissmodalclass: 'close-reveal-modal'
+                animation: 'fade',
+                animationspeed: 100
             });
         });
 
         $('#go_everything').click(function(){
-            $('#everything_block').load(
-                window.location.origin + '/everything.html?' +
-                osmly.settings.featuresApi + 'db=' + osmly.settings.db,
-                function() {
-                    osmly.everything.go();
-                    $('#everything_block').reveal({
-                         animation: 'fade',
-                         animationspeed: 100,
-                         closeonbackgroundclick: true,
-                         dismissmodalclass: 'close-reveal-modal'
-                    });
-                }
-            );
+            osmly.everything.go();
+            $('#everything_block').reveal({
+                animation: 'fade',
+                animationspeed: 100,
+                open: function(){$('#everything-controls').fadeIn(100);},
+                close: function(){$('#everything-controls').fadeOut(100);}
+            });
         });
 
         $('#update-change').click(function() {
@@ -97,10 +87,8 @@ osmly.ui = (function() {
                     .done(function() {
                         $('#reusable-modal span').text('Opened in JOSM');
                         $('#reusable-modal').reveal({
-                             animation: 'fade',
-                             animationspeed: 100,
-                             closeonbackgroundclick: true,
-                             dismissmodalclass: 'close-reveal-modal'
+                            animation: 'fade',
+                            animationspeed: 100
                         });
                         // fade this out after some seconds (idk 10-15?)
                         // then show an action dialog, to determine what was done with that feature
@@ -108,10 +96,8 @@ osmly.ui = (function() {
                 }).fail(function() {
                     $('#reusable-modal span').text('JOSM doesn\'t seem to be running. Start JOSM and try again.');
                     $('#reusable-modal').reveal({
-                         animation: 'fade',
-                         animationspeed: 100,
-                         closeonbackgroundclick: true,
-                         dismissmodalclass: 'close-reveal-modal'
+                        animation: 'fade',
+                        animationspeed: 100
                     });
                 });
             }
@@ -219,10 +205,9 @@ osmly.ui = (function() {
             // put an 'Edit in JOSM' button right there, when clicked close the modal and let the other modal open
             // literally bind, $('#josm').click()
                 $('#reusable-modal').reveal({
-                     animation: 'fade',
-                     animationspeed: 200,
-                     closeonbackgroundclick: true,
-                     dismissmodalclass: 'close-reveal-modal'
+                    animation: 'fade',
+                    animationspeed: 200,
+                    closeonbackgroundclick: true
                 });
         }
     };
