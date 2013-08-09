@@ -1,33 +1,7 @@
 osmly.everything = (function () {
-    function locate() {
-        // absolutely in no way comprehensive
-        var location = {};
-        if (window.location.search) {
-            var search = window.location.search.split('?');
-            for (var a = 0; a < search.length; a++) {
-                if (a == search.length-1) {
-                    /* remove trailing slash */
-                    if (search[a].substr(-1) == '/') {
-                        search[a] = search[a].slice(0,-1);
-                    }
-                }
-
-                if (search[a] != '') {
-                    var split = search[a].split('=');
-                    if (split.length = 2) {
-                        location[split[0]] = split[1];
-                    }
-                }
-            }
-        }
-        return location;
-    }
+    var everything = {};
 
     function buildTable() {
-        // need to check the current state of filters, possibly apply them
-        // then buildTable as a callback
-
-
         // index from simple.py: id, problem, done, user, time
         items = window.everything;
 
@@ -103,7 +77,7 @@ osmly.everything = (function () {
         }
 
         count_current_rows();
-    };
+    }
 
     function request(query, callback) {
         $.ajax({
@@ -119,7 +93,10 @@ osmly.everything = (function () {
     }
 
     function refresh(callback) {
-        request(window.loc['db'] + '&everything', callback)
+        request(
+            osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&everything',
+            callback
+        );
     }
 
     function filter(options){
@@ -133,7 +110,7 @@ osmly.everything = (function () {
             'done': 2,
             'user': 3,
             'time': 4
-        }
+        };
 
         var items = window.everythingRaw,
             out = [];
@@ -143,7 +120,7 @@ osmly.everything = (function () {
             for (var option in options) {
                 if (typeof options[option] == 'object') {
                     if (options[option].indexOf(items[a][ndx[option]]) !== -1) {
-                        keep = true
+                        keep = true;
                     }
                 } else if (items[a][ndx[option]] == options[option]) {
                     keep = true;
@@ -161,7 +138,7 @@ osmly.everything = (function () {
             'done': 2,
             'user': 3,
             'time': 4
-        }
+        };
 
         var items = window.everything,
             out = {};
@@ -171,9 +148,9 @@ osmly.everything = (function () {
         }
 
         for (var a = 0; a < items.length; a++) {
-            for (var option in options) {
-                if (items[a][ndx[option]] == options[option]) {
-                    out[option]++;
+            for (var optn in options) {
+                if (items[a][ndx[optn]] == options[optn]) {
+                    out[optn]++;
                 }
             }
         }
@@ -189,18 +166,18 @@ osmly.everything = (function () {
             'done': 2,
             'user': 3,
             'time': 4
-        }
+        };
         
         var items = window.everythingRaw,
-            unique = [];
+            vals = [];
 
         for (var a = 0; a < items.length; a++) {
-            if (items[a][ndx[column]] && unique.indexOf(items[a][ndx[column]]) === -1) {
-                unique.push(items[a][ndx[column]]);
+            if (items[a][ndx[column]] && vals.indexOf(items[a][ndx[column]]) === -1) {
+                vals.push(items[a][ndx[column]]);
             }
         }
 
-        return unique;
+        return vals;
     }
 
     function problem_selection() {
@@ -286,17 +263,13 @@ osmly.everything = (function () {
         }
     }
 
-    window.loc = locate()
-    if (window.loc['db']) {
-        window.loc['db'] = decodeURIComponent(loc['db']);
+    everything.go = function() {
         refresh(function() {
             buildTable();
             problem_selection();
             user_selection();
         });
-    } else {
-        console.log('need a db to load. /?db=');
-    }
+    };
 
     return everything;
 }());

@@ -1,14 +1,18 @@
+<!--
+    everything.html is invoked by OSMLY in osmly.ui.js, everything else about it
+    is in osmly.everything.js
+
+    The original idea was to have it be a self sufficient way of getting a look
+    at any osmly database, without the requirement of logging in. Right now it's
+    a bit more dependent on osmly. I would like to get it independent again
+    eventually.
+-->
+
 <!doctype html>
 <html>
     <head>
         <title>Everything</title>
         <meta charset='utf-8'> 
-        <script src="js/lib/jquery-2.0.3.min.js"></script>
-        <script src="js/lib/geo2osm.js"></script>
-
-        <script src="js/osmly/osmly.js"></script>
-        <script src="js/osmly/osmly.item.js"></script>
-        <script src="js/osmly/osmly.everything.js"></script>
         <style type="text/css">
             /* basic table styling from bootstrap */
             * {
@@ -123,9 +127,5 @@
                 </tr>
             </thead>
         </table>
-        <script type="text/javascript">
-            // osmly.everything.go();
-            // or something like it, i think
-        </script>
     </body>
 </html>
