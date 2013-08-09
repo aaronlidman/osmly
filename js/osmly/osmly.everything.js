@@ -1,6 +1,8 @@
 osmly.everything = (function () {
     var everything = {};
 
+    // todo: dom selections are way too wide right now
+
     function buildTable() {
         // index from simple.py: id, problem, done, user, time
         items = window.everything;
@@ -261,6 +263,27 @@ osmly.everything = (function () {
             count.innerHTML = window.everything.length.toString() + '<span>/' + window.everythingRaw.length + '</span>';
         }
     }
+
+    everything.close = function() {
+        // trash the tbody
+        if (document.getElementsByTagName('tbody').length) {
+            var table = document.getElementById('main_table');
+            table.removeChild(document.getElementsByTagName('tbody')[0]);
+        }
+
+        // reset the radio button to 'everything'
+        var controls = document.getElementById('everything-controls'),
+            radios = controls.getElementsByTagName('input');
+        for (var i = 0; i < radios.length; i++) {
+            if (radios[i].type === 'radio') {
+                if (radios[i].value == 'everything') {
+                    radios[i].checked = true;
+                } else {
+                    radios[i].checked = false;
+                }
+            }
+        }
+    };
 
     everything.go = function() {
         refresh(function() {

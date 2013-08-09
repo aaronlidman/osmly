@@ -55,7 +55,10 @@ osmly.ui = (function() {
                 animation: 'fade',
                 animationspeed: 100,
                 open: function(){$('#everything-controls').fadeIn(100);},
-                close: function(){$('#everything-controls').fadeOut(100);}
+                close: function(){
+                    $('#everything-controls').fadeOut(100);
+                    osmly.everything.close();
+                }
             });
         });
 
