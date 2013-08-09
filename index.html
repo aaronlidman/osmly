@@ -106,9 +106,39 @@
             <ul></ul>
             <span class="k" id="add-new-tag" alt="Add a new tag">+</span>
         </div>
+
         <div id="everything_block" class="reveal-modal xlarge">
+            <table id='main_table' class='table'>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Problem</th>
+                        <th>Done</th>
+                        <th>User</th>
+                        <th>Time</th>
+                        <th>Mark as done</th>
+                        <th>Edit in JOSM</th>
+                    </tr>
+                </thead>
+            </table>
             <a class="close-reveal-modal">&#215;</a>
         </div>
+        <div id="everything-controls">
+            <span id='count'></span>
+            <input type='radio' name='filter' value='everything' id='everything' onclick='click_everything()' checked>
+                <label for='everything'> everything</label><br>
+            <input type='radio' name='filter' value='red' id='red' onclick='click_red()'>
+                <label for='red'> problems (red)</label><br>
+            <input type='radio' name='filter' value='green' id='green'onclick='click_green()'>
+                <label for='green'> done (green)</label><br>
+            <input type='radio' name='filter' value='users' id='users' onclick='drop_selection("users-select")'>
+                <label for='users'> user: </label>
+                <select id='users-select' onchange='drop_selection("users-select")'></select><br>
+            <input type='radio' name='filter' value='problems' id='problems' onclick='drop_selection("problems-select")'>
+                <label for='problems'> problem: </label>
+                <select id='problems-select' onchange='drop_selection("problems-select")'></select><br>
+        </div>
+
         <div id="notify"></div>
         <div id="map"></div>
         <script type="text/javascript">

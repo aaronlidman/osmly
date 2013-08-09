@@ -17,7 +17,7 @@
 	.reveal-modal {
 		box-sizing: border-box;
 		line-height: 150%;
-		visibility: hidden;
+		display: none;
 		top: 100px; 
 		left: 50%;
 		margin-left: -300px;
@@ -26,9 +26,7 @@
 		position: absolute;
 		z-index: 9001;
 		padding: 20px 25px;
-		-moz-box-shadow: 0 0 10px rgba(0,0,0,.4);
-		-webkit-box-shadow: 0 0 10px rgba(0,0,0,.4);
-		-box-shadow: 0 0 10px rgba(0,0,0,.4);
+		box-shadow: 0 0 10px rgba(0,0,0,.4);
 	}
 		
 	.reveal-modal.small 		{ width: 200px; margin-left: -140px;}
