@@ -30,17 +30,8 @@
         <script src="js/osmly/osmly.connect.js"></script>
         <script src="js/osmly/osmly.item.js"></script>
         <script src="js/osmly/osmly.everything.js"></script>
-
-        <style type="text/css">
-            #everything {
-                visibility: hidden;
-                width: 800px;
-            }
-        </style>
     </head>
     <body>
-        <div id="everything"></div>
-
         <div id="top-right">
             <span id="title">Outline the nearby park</span>
             <ul>
@@ -115,9 +106,10 @@
             <ul></ul>
             <span class="k" id="add-new-tag" alt="Add a new tag">+</span>
         </div>
-
+        <div id="everything_block" class="reveal-modal xlarge">
+            <a class="close-reveal-modal">&#215;</a>
+        </div>
         <div id="notify"></div>
-
         <div id="map"></div>
         <script type="text/javascript">
             var CONFIG = {

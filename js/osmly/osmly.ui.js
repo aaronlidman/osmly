@@ -53,6 +53,22 @@ osmly.ui = (function() {
             });
         });
 
+        $('#go_everything').click(function(){
+            $('#everything_block').load(
+                window.location.origin + '/everything.html?' +
+                osmly.settings.featuresApi + 'db=' + osmly.settings.db,
+                function() {
+                    osmly.everything.go();
+                    $('#everything_block').reveal({
+                         animation: 'fade',
+                         animationspeed: 100,
+                         closeonbackgroundclick: true,
+                         dismissmodalclass: 'close-reveal-modal'
+                    });
+                }
+            );
+        });
+
         $('#update-change').click(function() {
             osmly.settings.changesetTags['comment'] = $('#changeset-form').text();
             osmly.connect.updateComment(function() {
