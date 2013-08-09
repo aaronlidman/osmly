@@ -29,11 +29,22 @@
         <script src="js/osmly/osmly.ui.js"></script>
         <script src="js/osmly/osmly.connect.js"></script>
         <script src="js/osmly/osmly.item.js"></script>
+        <script src="js/osmly/osmly.everything.js"></script>
+
+        <style type="text/css">
+            #everything {
+                visibility: hidden;
+                width: 800px;
+            }
+        </style>
     </head>
     <body>
+        <div id="everything"></div>
+
         <div id="top-right">
             <span id="title">Outline the nearby park</span>
             <ul>
+                <li id="go_everything">Everything</li>
                 <li id="instruction">Instructions</li>
                 <li id="user"></li>
                 <li id="changeset">Changeset</li>
@@ -110,9 +121,9 @@
         <div id="map"></div>
         <script type="text/javascript">
             var CONFIG = {
-                featuresApi: 'http://192.241.171.230/?',
+                featuresApi: 'http://127.0.0.1:5000/?',
                 db: 'parks-5',
-                demo: true,
+                demo: false,
                 origin: [34.0577, -118.2409],
                 zoom: 10,
                 usePropertyAsTag: ['name'],
