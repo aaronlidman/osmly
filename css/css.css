@@ -303,6 +303,7 @@ a {
     top: 0 !important;
     height: 100%;
     overflow-y: scroll;
+    font-size: 14px;
 }
 
 #everything-controls {
@@ -379,12 +380,14 @@ input[type='radio'] {
   vertical-align: bottom;
 }
 .table tbody tr.success {
-  background-color: #00BF00;
+  background-color: #ceffce;
+  border-top: 1px solid #b4e2b4 !important;
+  border-bottom: 1px solid #b4e2b4;
 }
 .table tbody tr.error {
-  background-color: #FF2626;
-  border-top: 1px solid black !important;
-  border-bottom: 1px solid black;
+  background-color: #f7c8c8;
+  border-top: 1px solid #e9aeae !important;
+  border-bottom: 1px solid #e9aeae;
 }
 
 

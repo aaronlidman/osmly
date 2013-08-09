@@ -204,25 +204,24 @@ osmly.everything = (function () {
         select.innerHTML = html;
     }
 
-    function click_everything() {
+    everything.click_everything = function() {
         window.everything = window.everythingRaw;
         buildTable();
-    }
+    };
 
-    function click_red() {
+    everything.click_red = function() {
         filter({
             'problem': unique('problem')
         });
         buildTable();
-    }
+    };
 
-    function click_green() {
+    everything.click_green = function() {
         filter({'done': 1});
         buildTable();
-    }
+    };
 
-    function drop_selection(select) {
-        // this is much too involved for what it does
+    everything.drop_selection = function(select) {
         // gets the value of the changed dropdown menu and filters based on it
         // also selects the parent radio button
         var selector = document.getElementById(select),
@@ -239,7 +238,7 @@ osmly.everything = (function () {
 
         // select the parent radio button
         var parentRadio = select.split('-')[0],
-            controls = document.getElementById('controls'),
+            controls = document.getElementById('everything-controls'),
             radios = controls.getElementsByTagName('input');
 
         for (var i = 0; i < radios.length; i++) {
@@ -251,7 +250,7 @@ osmly.everything = (function () {
                 }
             }
         }
-    }
+    };
 
     function count_current_rows() {
         var count = document.getElementById('count');
