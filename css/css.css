@@ -43,24 +43,29 @@ a {
     overflow: visible;
 }
 
+#top-right li {
+    float: right;
+    margin-left: 2px;
+}
+
+#top-right ul {
+    max-width: 320px;
+    list-style-type: none;
+    float: right;
+}
+
 #title {
     display: block;
     background-color: white;
     font-weight: bold;
-    font-size: 24px;
+    font-size: 26px;
     padding: 7px 10px !important;
     margin-bottom: 2px;
 }
 
-#top-right ul, #bottom-right {
-    float: right;
-    list-style-type: none;
-}
-
 #top-right li, #bottom-right li {
-    float: right;
+    text-align: center;
     margin-bottom: 2px;
-    margin-left: 2px;
     background-color: white;
     padding: 7px 10px;
 }
@@ -70,14 +75,9 @@ a {
     list-style-type: none;
     position: absolute;
     bottom: 25px;
-    right: 0;
+    right: 10px;
     z-index: 10;
     overflow: visible;
-}
-
-#bottom-right li {
-    clear: both;
-    box-shadow: 0 0 8px rgba(0,0,0,0.5);
 }
 
 #instruction, #changeset, #bottom-right li {
@@ -121,7 +121,8 @@ a {
     color: white;
     z-index: 10;
     position: absolute;
-    bottom: 20px;
+    bottom: 10px;
+    left: 10px;
 }
 
 #action-block li {
@@ -171,15 +172,13 @@ a {
     z-index: 10;
     position: absolute;
     width: auto;
-    left: 20px;
-    bottom: 75px;
+    left: 10px;
+    bottom: 65px;
     font-size: 16px;
     padding: 7px;
-    box-shadow: 0 0 8px rgba(0,0,0,0.4);
 }
 
 #add-new-tag {
-    /* missing box-shadow */
     cursor: pointer;
     font-size: 16px;
     font-weight: bold;
@@ -267,8 +266,8 @@ a {
     display: none;
     z-index: 10;
     background-color: white;
-    bottom: 30px;
-    right: 20px;
+    bottom: 25px;
+    right: 10px;
     padding: 3px;
     position: absolute;
     height: 40px;
@@ -452,4 +451,12 @@ input[type='radio'] {
 
 .leaflet-control-zoom-in {
     font: bold 21px/30px Arial, Helvetica, sans-serif !important;
+}
+
+.leaflet-bar a:last-child {
+    border-radius: 0 !important;
+}
+
+.leaflet-bar a:first-child {
+    border-radius: 0 !important;
 }
