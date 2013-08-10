@@ -312,7 +312,6 @@ a {
     background-color: white;
     position: fixed;
     padding: 10px 15px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
     line-height: 1.5em;
     z-index: 9000;
 }
@@ -326,8 +325,7 @@ input[type='radio'] {
     font-weight: bold;
     color: white;
     font-size: 48px;
-    text-shadow: 0 0px 10px rgba(0,0,0,0.5);
-    top: -40px;
+    top: -28px;
 }
 #count span {
     font-size: 24px;

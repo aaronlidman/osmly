@@ -1,9 +1,10 @@
 osmly.connect = (function(){
     var connect = {};
 
-    connect.updateItem = function(action, data, callback) {
+    connect.updateItem = function(action, data, callback, id) {
+        id = id || osmly.item.id;
         var url = osmly.settings.featuresApi + 'db=' + osmly.settings.db +
-            '&id=' + osmly.item.id + '&action=' + action;
+            '&id=' + id + '&action=' + action;
 
         if (typeof data != 'object') data = {};
         data['user'] = osmly.token('user');
