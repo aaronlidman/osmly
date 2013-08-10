@@ -89,13 +89,10 @@ osmly.ui = (function() {
                 ).done(function() {
                     $.ajax('http://127.0.0.1:8111/import?url=' + request)
                     .done(function() {
-                        $('#reusable-modal span').text('Opened in JOSM');
-                        $('#reusable-modal').reveal({
+                        $('#remote-edit-modal').reveal({
                             animation: 'fade',
                             animationspeed: 100
                         });
-                        // fade this out after some seconds (idk 10-15?)
-                        // then show an action dialog, to determine what was done with that feature
                     });
                 }).fail(function() {
                     $('#reusable-modal span').text('JOSM doesn\'t seem to be running. Start JOSM and try again.');

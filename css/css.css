@@ -406,6 +406,20 @@ input[type='radio'] {
   border-bottom: 1px solid #e9aeae;
 }
 
+button {
+    color: white;
+    border: none;
+    background-color: black;
+    font-size: 14px;
+    padding: 7px 10px;
+    margin-left: 20px;
+}
+
+button:hover {
+    transition: all 200ms ease;
+    background-color: #333;
+}
+
 
 /* just spammed !important, which isn't nice */
 .leaflet-control-attribution {

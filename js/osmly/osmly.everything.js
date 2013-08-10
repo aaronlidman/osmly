@@ -267,6 +267,9 @@ osmly.everything = (function () {
     }
 
     everything.close = function() {
+        window.everything = false;
+        window.everythingRaw = false;
+
         // trash the tbody
         if (document.getElementsByTagName('tbody').length) {
             var table = document.getElementById('main_table');
@@ -285,6 +288,10 @@ osmly.everything = (function () {
                 }
             }
         }
+
+        // remove the count
+        var count = document.getElementById('count');
+        count.innerHTML = '';
     };
 
     everything.done = function(id) {
@@ -348,11 +355,10 @@ osmly.everything = (function () {
                     console.log('http://127.0.0.1:8111/import?url=' + request + '&action=remote');
                     $.ajax('http://127.0.0.1:8111/import?url=' + request + '&action=remote')
                     .done(function() {
-                        // $('#reusable-modal span').text('Opened item #' + id + 'in JOSM');
-                        // $('#reusable-modal').reveal({
-                        //     animation: 'fade',
-                        //     animationspeed: 100
-                        // });
+                        $('#remote-edit-modal').reveal({
+                            animation: 'fade',
+                            animationspeed: 100
+                        });
                     });
                 }).fail(function() {
                     $('#reusable-modal span').text('JOSM doesn\'t seem to be running. Start JOSM and try again.');
