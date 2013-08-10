@@ -107,7 +107,10 @@
             <span class="k" id="add-new-tag" alt="Add a new tag">+</span>
         </div>
 
-        <div id="everything_block" class="reveal-modal xlarge">
+        <div id="everything_block_bg"></div>
+            <!-- reveal can't handle more than one modal, which causes problems
+             this is a bit of a hack, need a better modal lib -->
+        <div id="everything_block">
             <table id='main_table' class='table'>
                 <thead>
                     <tr>
@@ -121,7 +124,6 @@
                     </tr>
                 </thead>
             </table>
-            <a class="close-reveal-modal">&#215;</a>
         </div>
         <div id="everything-controls">
             <span id='count'></span>

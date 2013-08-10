@@ -68,6 +68,7 @@ a {
     margin-bottom: 2px;
     background-color: white;
     padding: 7px 10px;
+    cursor: pointer;
 }
 
 #bottom-right {
@@ -78,10 +79,6 @@ a {
     right: 10px;
     z-index: 10;
     overflow: visible;
-}
-
-#instruction, #changeset, #bottom-right li {
-    cursor: pointer;
 }
 
 #user, #changeset {
@@ -298,11 +295,33 @@ a {
     border-bottom: none !important;
 }
 
-#everything_block {
-    top: 0 !important;
+#everything_block_bg {
+    cursor: pointer;
+    z-index: 8000;
+    background: rgba(0,0,0,0.5);
+    width: 100%;
     height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+}
+
+#everything_block {
+    z-index: 8001;
+    position: absolute;
+    background-color: white;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    margin: auto;
+    height: 100%;
+    max-width: 900px;
     overflow-y: scroll;
     font-size: 14px;
+    line-height: 1.5em;
+    display: none;
 }
 
 #everything-controls {
@@ -313,7 +332,7 @@ a {
     position: fixed;
     padding: 10px 15px;
     line-height: 1.5em;
-    z-index: 9000;
+    z-index: 8002;
 }
 input[type='radio'] {
     margin-right: 5px;

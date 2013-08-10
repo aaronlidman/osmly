@@ -50,15 +50,16 @@ osmly.ui = (function() {
         });
 
         $('#go_everything').click(function(){
-            osmly.everything.go();
-            $('#everything_block').reveal({
-                animation: 'fade',
-                animationspeed: 100,
-                open: function(){$('#everything-controls').fadeIn(100);},
-                close: function(){
-                    $('#everything-controls').fadeOut(100);
-                    osmly.everything.close();
-                }
+            $('#everything_block_bg').fadeIn(100);
+            $('#everything-controls').fadeIn(100);
+            $('#everything_block').fadeIn(100, osmly.everything.go);
+        });
+
+        $('#everything_block_bg').click(function(){
+            $('#everything_block_bg').fadeOut(100);
+            $('#everything-controls').fadeOut(100);
+            $('#everything_block').fadeOut(100, function(){
+                osmly.everything.close();
             });
         });
 
