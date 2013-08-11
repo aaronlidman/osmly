@@ -3,7 +3,8 @@ OSMLY_JS = \
 	js/osmly/osmly.map.js \
 	js/osmly/osmly.ui.js \
 	js/osmly/osmly.connect.js \
-	js/osmly/osmly.item.js
+	js/osmly/osmly.item.js \
+	js/osmly/osmly.everything.js
 
 CSS = \
 	js/lib/leaflet-0.6.4/leaflet.css \
@@ -14,7 +15,7 @@ CSS = \
 
 JS_LIBS = \
 	js/lib/leaflet-0.6.4/leaflet.js \
-	js/lib/jquery-2.0.3.min.js \
+	js/lib/custom.jquery.min.js \
 	js/lib/Bing.js \
 	js/lib/equalize.js \
 	js/lib/geo2osm.js \
@@ -37,7 +38,8 @@ dist/osmly.js: $(JS_FILES) Makefile
 
 dist/osmly.min.js: dist/osmly.js Makefile
 	@rm -f $@
-	node_modules/.bin/uglifyjs $< -c -m -o $@
+	node_modules/.bin/uglifyjs2 $< -c -m -o $@
+	rm -f dist/osmly.js
 
 dist/osmly.css: $(CSS) Makefile
 	@rm -f $@
@@ -46,3 +48,4 @@ dist/osmly.css: $(CSS) Makefile
 dist/osmly.min.css: dist/osmly.css Makefile
 	@rm -f $@
 	node_modules/.bin/uglifycss $< > $@
+	rm -f dist/osmly.css

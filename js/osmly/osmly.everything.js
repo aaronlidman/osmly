@@ -133,33 +133,6 @@ osmly.everything = (function () {
         everything.data = out;
     }
 
-    function count(options) {
-        // {'done': 1, 'user': 'Joe'}
-        var ndx = {
-            'problem': 1,
-            'done': 2,
-            'user': 3,
-            'time': 4
-        };
-
-        var items = everything.rawData,
-            out = {};
-
-        for (var option in options) {
-            out[option] = 0;
-        }
-
-        for (var a = 0; a < items.length; a++) {
-            for (var optn in options) {
-                if (items[a][ndx[optn]] == options[optn]) {
-                    out[optn]++;
-                }
-            }
-        }
-
-        return out;
-    }
-
     function unique(column) {
         // lists unique values for a given column
         // probably only useful for 'problem' and 'user'

@@ -149,7 +149,7 @@ a {
 
 #problem {
     font-weight: bold;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: black;
     color: rgba(255,255,255,1);
     font-size: 14px;
     height: 36px;
@@ -164,7 +164,7 @@ a {
 #skip {background-color: rgba(0, 69, 144, 1);}
 #skip:hover {background-color: rgba(0, 78, 179, 1);}
 #skip:active {background-color: rgba(0, 49, 109, 1);}
-#problem:hover {background-color: rgba(0, 0, 0, 1);}
+#problem:hover {background-color: #333;}
 
 #tags {
     display: none;
