@@ -110,6 +110,47 @@ osmly.ui = (function() {
             window.open(osmly.osmlink);
         });
 
+        $('#skip').click(skip);
+
+        $('#submit').click(function() {
+            submit(event.target.id);
+        });
+
+        $('#problem').change(function() {
+            submit($('#problem').val());
+            $('#problem').val('problem');
+                // resets problem menu
+        });
+
+        $('#reset').click(function() {
+            hide();
+            osmly.ui.teardown();
+            osmly.item.setItemLayer(osmly.item.data);
+            ui.setupItem(osmly.item.data.properties);
+            ui.displayItem();
+            // true, just implying if they can click it, it was editable to begin with
+        });
+
+        $('#tags').on('click', '.minus', function() {
+            if ($('#tags li').length > 1) {
+                $(this).parent().remove();
+                equalizeTags();
+            }
+        });
+
+        $('#tags').on('keypress', '.k, .v', function(){
+            equalizeTags();
+        });
+
+        $('#add-new-tag').click(function() {
+            $('#tags ul').append(
+                '<li>' +
+                '<span class="k" spellcheck="false" contenteditable="true"></span>' +
+                '<span class="v" spellcheck="false" contenteditable="true"></span>' +
+                '<span class="minus">-</span>' +
+                '</li>');
+            equalizeTags();
+        });
     }
 
     ui.notify = function(string) {
@@ -125,66 +166,11 @@ osmly.ui = (function() {
     };
 
     ui.setupItem = function(properties) {
-        // bindings and populating fields for a new item
         populateTags(properties);
-
-        $('#submit').click(function() {
-            submit(event.target.id);
-        });
-
-        $('#skip').click(function(){
-            skip();
-        });
-
-        $('#problem').change(function() {
-            submit($('#problem').val());
-        });
-
-        $('.k, .v').keypress(function() {
-            equalizeTags();
-        });
-
-        $('.minus').click(function() {
-            if ($('#tags li').length > 1) {
-                $(this).parent().remove();
-                equalizeTags();
-            }
-        });
-
-        $('#add-new-tag').click(function() {
-            // what a freakin mess, what have I done
-            $('#tags ul').append(
-                '<li>' +
-                '<span class="k" spellcheck="false" contenteditable="true"></span>' +
-                '<span class="v" spellcheck="false" contenteditable="true"></span>' +
-                '<span class="minus">-</span>' +
-                '</li>');
-
-            equalizeTags();
-
-            $('.k, .v').keypress(function() {
-                equalizeTags();
-            });
-
-            $('.minus').click(function() {
-                if ($('#tags li').length > 1) {
-                    $(this).parent().remove();
-                    equalizeTags();
-                }
-            });
-        });
-
-        $('#reset').click(function() {
-            hide();
-            osmly.ui.teardown();
-            osmly.item.setItemLayer(osmly.item.data);
-            ui.setupItem(osmly.item.data.properties);
-            ui.displayItem(true);
-            // true, just implying if they can click it, it was editable to begin with
-        });
     };
 
-    ui.displayItem = function(isEditable) {
+    ui.displayItem = function() {
+        var isEditable = osmly.item.isEditable;
         osmly.item.layer.addTo(osmly.map);
 
         if (osmly.item.contextLayer) {
@@ -198,7 +184,6 @@ osmly.ui = (function() {
         if (isEditable) {
             $('#tags').fadeIn(250);
             equalizeTags();
-
         } else {
             $('#problem, #submit').hide();
             $('#reusable-modal span').html(
@@ -253,10 +238,7 @@ osmly.ui = (function() {
     }
 
     ui.teardown = function() {
-        $('#problem, #skip, #submit, .minus, #add-new-tag, #reset').unbind();
-        $('.k, .v').unbind();
-        $('#problem').val('problem'); // resets problem menu
-        $("#problem, #submit").removeAttr('style');
+        // $("#problem, #submit").removeAttr('style');
         $('#tags li').remove();
     };
 
@@ -267,6 +249,7 @@ osmly.ui = (function() {
             .show()
             .fadeOut(750);
         osmly.item.next();
+        console.log('skipped');
     }
 
     function submit(result) {
@@ -312,6 +295,11 @@ osmly.ui = (function() {
                 osmly.token('user') + '/edits" target="_blank">' +
                 osmly.token('user') + '</a>')
             .fadeIn(500);
+    };
+
+    ui.josmResults = function(id) {
+        // clicking the results buttons from the #remote-edit-modal
+
     };
 
     return ui;

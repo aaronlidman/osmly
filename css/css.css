@@ -10,6 +10,10 @@ button:focus {
     outline: none;
 }
 
+hr {
+    border: 1px solid black;
+}
+
 * {
     margin: 0;
     padding: 0;

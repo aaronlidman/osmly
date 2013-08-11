@@ -33,11 +33,11 @@ osmly.item = (function () {
             if (item.isEditable) {
                 getOsm(function() {
                     osmly.ui.setupItem(item.data.properties);
-                    osmly.ui.displayItem(item.isEditable);
+                    osmly.ui.displayItem();
                 });
             } else {
                 osmly.ui.setupItem(item.data.properties);
-                osmly.ui.displayItem(item.isEditable);
+                osmly.ui.displayItem();
             }
         });
     };
