@@ -5,7 +5,7 @@ osmly.everything = (function () {
 
     function buildTable() {
         // index from simple.py: id, problem, done, user, time
-        items = window.everything;
+        items = everything.data;
 
         if (document.getElementsByTagName('tbody').length) {
             // clear the way
@@ -88,10 +88,8 @@ osmly.everything = (function () {
             url: query,
             cache: false
         }).done(function(items){
-            window.everything = JSON.parse(items);
-            window.everythingRaw = JSON.parse(items);
-            // window.everything is the current state of the table
-            // window.everythingRaw is the originally fetched data
+            everything.data = JSON.parse(items);
+            everything.rawData = JSON.parse(items);
             if (callback) callback();
         });
     }
@@ -116,7 +114,7 @@ osmly.everything = (function () {
             'time': 4
         };
 
-        var items = window.everythingRaw,
+        var items = everything.rawData,
             out = [];
 
         for (var a = 0; a < items.length; a++) {
@@ -132,7 +130,7 @@ osmly.everything = (function () {
                 if (keep) out.push(items[a]);
             }
         }
-        window.everything = out;
+        everything.data = out;
     }
 
     function count(options) {
@@ -144,7 +142,7 @@ osmly.everything = (function () {
             'time': 4
         };
 
-        var items = window.everything,
+        var items = everything.rawData,
             out = {};
 
         for (var option in options) {
@@ -172,7 +170,7 @@ osmly.everything = (function () {
             'time': 4
         };
         
-        var items = window.everythingRaw,
+        var items = everything.rawData,
             vals = [];
 
         for (var a = 0; a < items.length; a++) {
@@ -209,7 +207,7 @@ osmly.everything = (function () {
     }
 
     everything.click_everything = function() {
-        window.everything = window.everythingRaw;
+        everything.data = everything.rawData;
         buildTable();
     };
 
@@ -259,16 +257,16 @@ osmly.everything = (function () {
     function count_current_rows() {
         var count = document.getElementById('count');
 
-        if (window.everything.length === window.everythingRaw.length) {
-            count.innerHTML = window.everything.length;
+        if (everything.data.length === everything.rawData.length) {
+            count.innerHTML = everything.data.length;
         } else {
-            count.innerHTML = window.everything.length.toString() + '<span>/' + window.everythingRaw.length + '</span>';
+            count.innerHTML = everything.data.length.toString() + '<span>/' + everything.rawData.length + '</span>';
         }
     }
 
     everything.close = function() {
-        window.everything = false;
-        window.everythingRaw = false;
+        everything.data = false;
+        everything.rawData = false;
 
         // trash the tbody
         if (document.getElementsByTagName('tbody').length) {
