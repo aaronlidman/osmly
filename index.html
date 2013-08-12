@@ -29,14 +29,14 @@
         <script src="js/osmly/osmly.ui.js"></script>
         <script src="js/osmly/osmly.connect.js"></script>
         <script src="js/osmly/osmly.item.js"></script>
-        <script src="js/osmly/osmly.everything.js"></script>
+        <script src="js/osmly/osmly.overview.js"></script>
     </head>
     <body>
         <div id="top-right">
             <span id="title">Outline the nearby park</span>
             <ul>
                 <li id="instruction">Instructions</li>
-                <li id="go_everything">Overview</li>
+                <li id="go_overview">Overview</li>
                 <li id="user"></li>
                 <li id="changeset">Changeset</li>
             </ul>
@@ -119,10 +119,10 @@
             <span class="k" id="add-new-tag" alt="Add a new tag">+</span>
         </div>
 
-        <div id="everything_block_bg"></div>
+        <div id="overview_bg"></div>
             <!-- reveal can't handle more than one modal, which causes problems
              this is a bit of a hack, need a better modal lib -->
-        <div id="everything_block">
+        <div id="overview_block">
             <table id='main_table' class='table'>
                 <thead>
                     <tr>
@@ -137,20 +137,20 @@
                 </thead>
             </table>
         </div>
-        <div id="everything-controls">
+        <div id="overview-controls">
             <span id='count'></span>
-            <input type='radio' name='filter' value='everything' id='everything' onclick='osmly.everything.click_everything()' checked>
+            <input type='radio' name='filter' value='everything' id='everything' onclick='osmly.overview.click_everything()' checked>
                 <label for='everything'> everything</label><br>
-            <input type='radio' name='filter' value='red' id='red' onclick='osmly.everything.click_red()'>
+            <input type='radio' name='filter' value='red' id='red' onclick='osmly.overview.click_red()'>
                 <label for='red'> problems (red)</label><br>
-            <input type='radio' name='filter' value='green' id='green'onclick='osmly.everything.click_green()'>
+            <input type='radio' name='filter' value='green' id='green'onclick='osmly.overview.click_green()'>
                 <label for='green'> done (green)</label><br>
-            <input type='radio' name='filter' value='users' id='users' onclick='osmly.everything.drop_selection("users-select")'>
+            <input type='radio' name='filter' value='users' id='users' onclick='osmly.overview.drop_selection("users-select")'>
                 <label for='users'> user: </label>
                 <select id='users-select' onchange='drop_selection("users-select")'></select><br>
-            <input type='radio' name='filter' value='problems' id='problems' onclick='osmly.everything.drop_selection("problems-select")'>
+            <input type='radio' name='filter' value='problems' id='problems' onclick='osmly.overview.drop_selection("problems-select")'>
                 <label for='problems'> problem: </label>
-                <select id='problems-select' onchange='osmly.everything.drop_selection("problems-select")'></select><br>
+                <select id='problems-select' onchange='osmly.overview.drop_selection("problems-select")'></select><br>
         </div>
 
         <div id="notify"></div>

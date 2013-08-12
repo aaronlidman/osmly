@@ -299,7 +299,7 @@ a {
     border-bottom: none !important;
 }
 
-#everything_block_bg {
+#overview_bg {
     cursor: pointer;
     z-index: 8000;
     background: rgba(0,0,0,0.5);
@@ -311,7 +311,7 @@ a {
     display: none;
 }
 
-#everything_block {
+#overview_block {
     z-index: 8001;
     position: absolute;
     background-color: white;
@@ -328,7 +328,7 @@ a {
     display: none;
 }
 
-#everything-controls {
+#overview-controls {
     display: none;
     bottom: 0;
     right: 0;

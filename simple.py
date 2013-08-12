@@ -38,7 +38,7 @@ def get():
             out = row[1]
         else:
             out = json.dumps(row)
-    elif 'everything' in request.args:
+    elif 'overview' in request.args:
         query = 'SELECT id, problem, done, user, time FROM osmly ORDER BY id'
         c.execute(query)
         out = json.dumps(c.fetchall());

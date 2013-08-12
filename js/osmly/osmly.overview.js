@@ -1,11 +1,11 @@
-osmly.everything = (function () {
-    var everything = {};
+osmly.overview = (function () {
+    var overview = {};
 
     // todo: dom selections are way too wide right now
 
     function buildTable() {
         // index from simple.py: id, problem, done, user, time
-        items = everything.data;
+        items = overview.data;
 
         if (document.getElementsByTagName('tbody').length) {
             // clear the way
@@ -53,7 +53,7 @@ osmly.everything = (function () {
                 // need to pass the id somehow
                 // need to pass the id
                 column.innerHTML = '<span style="cursor: pointer" ' +
-                'href="" onclick=osmly.everything.done("' + items[a][0] +'")>mark as done?</span>';
+                'href="" onclick=osmly.overview.done("' + items[a][0] +'")>mark as done?</span>';
             }
             tr.appendChild(column);
 
@@ -63,7 +63,7 @@ osmly.everything = (function () {
                 // put a button in there, use modal for notifying it's ready/failed
                 // need to pass the id
                 column.innerHTML = '<span style="cursor: pointer" ' +
-                'href="" onclick=osmly.everything.edit("' + items[a][0] +'")>edit in JOSM</span>';
+                'href="" onclick=osmly.overview.edit("' + items[a][0] +'")>edit in JOSM</span>';
             }
             tr.appendChild(column);
 
@@ -88,15 +88,15 @@ osmly.everything = (function () {
             url: query,
             cache: false
         }).done(function(items){
-            everything.data = JSON.parse(items);
-            everything.rawData = JSON.parse(items);
+            overview.data = JSON.parse(items);
+            overview.rawData = JSON.parse(items);
             if (callback) callback();
         });
     }
 
     function refresh(callback) {
         request(
-            osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&everything',
+            osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&overview',
             callback
         );
     }
@@ -114,7 +114,7 @@ osmly.everything = (function () {
             'time': 4
         };
 
-        var items = everything.rawData,
+        var items = overview.rawData,
             out = [];
 
         for (var a = 0; a < items.length; a++) {
@@ -130,7 +130,7 @@ osmly.everything = (function () {
                 if (keep) out.push(items[a]);
             }
         }
-        everything.data = out;
+        overview.data = out;
     }
 
     function unique(column) {
@@ -143,7 +143,7 @@ osmly.everything = (function () {
             'time': 4
         };
         
-        var items = everything.rawData,
+        var items = overview.rawData,
             vals = [];
 
         for (var a = 0; a < items.length; a++) {
@@ -179,24 +179,24 @@ osmly.everything = (function () {
         select.innerHTML = html;
     }
 
-    everything.click_everything = function() {
-        everything.data = everything.rawData;
+    overview.click_everything = function() {
+        overview.data = overview.rawData;
         buildTable();
     };
 
-    everything.click_red = function() {
+    overview.click_red = function() {
         filter({
             'problem': unique('problem')
         });
         buildTable();
     };
 
-    everything.click_green = function() {
+    overview.click_green = function() {
         filter({'done': 1});
         buildTable();
     };
 
-    everything.drop_selection = function(select) {
+    overview.drop_selection = function(select) {
         // gets the value of the changed dropdown menu and filters based on it
         // also selects the parent radio button
         var selector = document.getElementById(select),
@@ -213,7 +213,7 @@ osmly.everything = (function () {
 
         // select the parent radio button
         var parentRadio = select.split('-')[0],
-            controls = document.getElementById('everything-controls'),
+            controls = document.getElementById('overview-controls'),
             radios = controls.getElementsByTagName('input');
 
         for (var i = 0; i < radios.length; i++) {
@@ -230,16 +230,16 @@ osmly.everything = (function () {
     function count_current_rows() {
         var count = document.getElementById('count');
 
-        if (everything.data.length === everything.rawData.length) {
-            count.innerHTML = everything.data.length;
+        if (overview.data.length === overview.rawData.length) {
+            count.innerHTML = overview.data.length;
         } else {
-            count.innerHTML = everything.data.length.toString() + '<span>/' + everything.rawData.length + '</span>';
+            count.innerHTML = overview.data.length.toString() + '<span>/' + overview.rawData.length + '</span>';
         }
     }
 
-    everything.close = function() {
-        everything.data = false;
-        everything.rawData = false;
+    overview.close = function() {
+        overview.data = false;
+        overview.rawData = false;
 
         // trash the tbody
         if (document.getElementsByTagName('tbody').length) {
@@ -248,7 +248,7 @@ osmly.everything = (function () {
         }
 
         // reset the radio button to 'everything'
-        var controls = document.getElementById('everything-controls'),
+        var controls = document.getElementById('overview-controls'),
             radios = controls.getElementsByTagName('input');
         for (var i = 0; i < radios.length; i++) {
             if (radios[i].type === 'radio') {
@@ -265,13 +265,13 @@ osmly.everything = (function () {
         count.innerHTML = '';
     };
 
-    everything.done = function(id) {
+    overview.done = function(id) {
         // a special new modal w/ confirm/deny
         // update the item as done with the user
         console.log(id);
     };
 
-    everything.edit = function(id) {
+    overview.edit = function(id) {
         // I'm in a hurry, this is a mess, mostly redundant (copy/paste from elsewhere in osmly)
         var request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=' + id;
 
@@ -342,7 +342,7 @@ osmly.everything = (function () {
         });
     };
 
-    everything.go = function() {
+    overview.go = function() {
         refresh(function() {
             buildTable();
             problem_selection();
@@ -350,5 +350,5 @@ osmly.everything = (function () {
         });
     };
 
-    return everything;
+    return overview;
 }());

@@ -4,7 +4,7 @@ OSMLY_JS = \
 	js/osmly/osmly.ui.js \
 	js/osmly/osmly.connect.js \
 	js/osmly/osmly.item.js \
-	js/osmly/osmly.everything.js
+	js/osmly/osmly.overview.js
 
 CSS = \
 	js/lib/leaflet-0.6.4/leaflet.css \
