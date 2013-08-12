@@ -14,14 +14,12 @@ osmly.ui = (function() {
                 $('#login').fadeIn(500);
             }
         }
-
         bind();
     };
 
     function bind() {
         $('#login').click(function() {
             ui.notify('');
-
             if (osmly.settings.demo) {
                 $('#login').fadeOut(500);
                 osmly.item.next();
@@ -49,17 +47,17 @@ osmly.ui = (function() {
             });
         });
 
-        $('#go_everything').click(function(){
-            $('#everything_block_bg').fadeIn(100);
-            $('#everything-controls').fadeIn(100);
-            $('#everything_block').fadeIn(100, osmly.everything.go);
+        $('#go_overview').click(function(){
+            $('#overview_bg').fadeIn(100);
+            $('#overview-controls').fadeIn(100);
+            $('#overview_block').fadeIn(100, osmly.overview.go);
         });
 
-        $('#everything_block_bg').click(function(){
-            $('#everything_block_bg').fadeOut(100);
-            $('#everything-controls').fadeOut(100);
-            $('#everything_block').fadeOut(100, function(){
-                osmly.everything.close();
+        $('#overview_bg').click(function(){
+            $('#overview_bg').fadeOut(100);
+            $('#overview-controls').fadeOut(100);
+            $('#overview_block').fadeOut(100, function(){
+                osmly.overview.close();
             });
         });
 
@@ -128,7 +126,6 @@ osmly.ui = (function() {
             osmly.item.setItemLayer(osmly.item.data);
             ui.setupItem(osmly.item.data.properties);
             ui.displayItem();
-            // true, just implying if they can click it, it was editable to begin with
         });
 
         $('#tags').on('click', '.minus', function() {
@@ -160,7 +157,6 @@ osmly.ui = (function() {
         $('#notify')
             .html(string)
             .show();
-
         // don't forget to hide #notify later
         // $('#notify').fadeOut(250);
     };
@@ -190,11 +186,11 @@ osmly.ui = (function() {
                 'This feature is too complex. <a>Edit it in JOSM?</a>');
             // put an 'Edit in JOSM' button right there, when clicked close the modal and let the other modal open
             // literally bind, $('#josm').click()
-                $('#reusable-modal').reveal({
-                    animation: 'fade',
-                    animationspeed: 200,
-                    closeonbackgroundclick: true
-                });
+            $('#reusable-modal').reveal({
+                animation: 'fade',
+                animationspeed: 200,
+                closeonbackgroundclick: true
+            });
         }
     };
 
@@ -238,7 +234,6 @@ osmly.ui = (function() {
     }
 
     ui.teardown = function() {
-        // $("#problem, #submit").removeAttr('style');
         $('#tags li').remove();
     };
 
@@ -258,12 +253,6 @@ osmly.ui = (function() {
 
         if (osmly.settings.demo) {
             osmly.ui.teardown();
-            console.log(osmly.item.layer.toGeoJSON());
-            if (result === 'submit') {
-                var geojson = osmly.item.layer.toGeoJSON();
-                // console.log(toOsm(geojson));
-                // console.log(toOsmChange(geojson));
-            }
             osmly.item.next();
         } else {
             if (result === 'submit') {

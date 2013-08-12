@@ -1,44 +1,36 @@
 osmly.overview = (function () {
     var overview = {};
 
-    // todo: dom selections are way too wide right now
-
     function buildTable() {
         // index from simple.py: id, problem, done, user, time
         items = overview.data;
+        var table = document.getElementById('main_table');
 
-        if (document.getElementsByTagName('tbody').length) {
-            // clear the way
-            var table = document.getElementById('main_table');
-            table.removeChild(document.getElementsByTagName('tbody')[0]);
+        if (table.getElementsByTagName('tbody').length) {
+            table.removeChild(table.getElementsByTagName('tbody')[0]);
         }
 
-        var table = document.createElement('tbody');
+        var tbody = document.createElement('tbody');
 
         for (var a = 0; a < items.length; a++) {
-            // rows
             var tr = document.createElement('tr');
             for (var b = 0; b < items[a].length; b++) {
-                // columns
-                var column = document.createElement('td');
+                var column = document.createElement('td'),
+                    text = items[a][b];
 
                 if (b == 2) {
                     // checkmark for done items
                     if (items[a][b] === 1) {
-                        var text = '&#x2713;';
+                        text = '&#x2713;';
                     } else {
-                        var text = '';
+                        text = '';
                     }
-                } else {
-                    var text = items[a][b];
-                }
-
-                if (b == 4) {
+                } else if (b == 4) {
                     if (items[a][b]) {
                         var date = new Date(items[a][b]*1000),
-                            months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-                            text = months[date.getMonth()] + ' ' + date.getDate() + ' ' + date.getFullYear() + ' ' + 
-                                date.getHours() + ':' + date.getMinutes();
+                            months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                        text = months[date.getMonth()] + ' ' + date.getDate() + ' ' + date.getFullYear() + ' ' +
+                            date.getHours() + ':' + date.getMinutes();
                     }
                 }
 
@@ -46,41 +38,29 @@ osmly.overview = (function () {
                 tr.appendChild(column);
             }
 
-            // mark as done
-            var column = document.createElement('td');
+            var markdone = document.createElement('td');
             if (items[a][2] === 0) {
-                // put a button in there, alert for confirmation
-                // need to pass the id somehow
-                // need to pass the id
-                column.innerHTML = '<span style="cursor: pointer" ' +
-                'href="" onclick=osmly.overview.done("' + items[a][0] +'")>mark as done?</span>';
+                markdone.innerHTML = '<span class="markdone">mark as done?</span>';
             }
-            tr.appendChild(column);
+            tr.appendChild(markdone);
 
-            // edit in josm
-            var column = document.createElement('td');
+            var editjosm = document.createElement('td');
             if (items[a][2] === 0) {
-                // put a button in there, use modal for notifying it's ready/failed
-                // need to pass the id
-                column.innerHTML = '<span style="cursor: pointer" ' +
-                'href="" onclick=osmly.overview.edit("' + items[a][0] +'")>edit in JOSM</span>';
+                editjosm.innerHTML = '<span class="editjosm">edit in JOSM</span>';
             }
-            tr.appendChild(column);
+            tr.appendChild(editjosm);
 
-            // background-colors
-            // careful with the order here, it's not obvious
-            // some problems might have been fixed manually yet still have 'problem' in db
             if (items[a][2] === 1) {
                 tr.setAttribute('class', 'success');
-            } else if (items[a][1] != '') {
+            } else if (items[a][1] !== '') {
                 tr.setAttribute('class', 'error');
             }
 
-            table.appendChild(tr);
-            document.getElementById('main_table').appendChild(table);
+            tbody.appendChild(tr);
+            table.appendChild(tbody);
         }
 
-        count_current_rows();
+        update_row_count();
     }
 
     function request(query, callback) {
@@ -227,7 +207,7 @@ osmly.overview = (function () {
         }
     };
 
-    function count_current_rows() {
+    function update_row_count() {
         var count = document.getElementById('count');
 
         if (overview.data.length === overview.rawData.length) {
@@ -301,14 +281,12 @@ osmly.overview = (function () {
                 data.properties[change] = data.properties[prop];
             }
 
-
             // from osmly.item.js, usePropertiesAsTag()
             for (var prop in data.properties) {
                 if (osmly.settings.usePropertyAsTag.indexOf(prop) === -1) {
                     data.properties[prop] = null;
                 }
             }
-
 
             // from osmly.item.js, append()
             for (var append in osmly.settings.appendTag) {
@@ -317,7 +295,6 @@ osmly.overview = (function () {
 
             var osm = osmly.item.toOsm(data);
             osmly.connect.updateItem('remote', {remote: osm}, callback, id);
-
 
             function callback() {
                 $.ajax('http://127.0.0.1:8111/load_and_zoom?left=' + bbox[0] +
