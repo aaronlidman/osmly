@@ -172,6 +172,21 @@ osmly.overview = (function () {
         select.innerHTML = html;
     }
 
+    function changeRadio(value) {
+        var controls = document.getElementById('overview-controls'),
+            inputs = controls.getElementsByTagName('input');
+
+        for (var i = 0; i < inputs.length; i++) {
+            if (inputs[i].type === 'radio') {
+                if (inputs[i].value == value) {
+                    inputs[i].checked = true;
+                } else {
+                    inputs[i].checked = false;
+                }
+            }
+        }
+    }
+
     overview.click_everything = function() {
         overview.data = overview.rawData;
         buildTable();
@@ -182,11 +197,13 @@ osmly.overview = (function () {
             'problem': unique('problem'),
             'done': 0
         });
+        changeRadio('red');
         buildTable();
     };
 
     overview.click_green = function() {
         filter({'done': [1, 2]});
+        changeRadio('green');
         buildTable();
     };
 
@@ -205,21 +222,7 @@ osmly.overview = (function () {
 
         filter(dict);
         buildTable();
-
-        // select the parent radio button
-        var parentRadio = select.split('-')[0],
-            controls = document.getElementById('overview-controls'),
-            radios = controls.getElementsByTagName('input');
-
-        for (var i = 0; i < radios.length; i++) {
-            if (radios[i].type === 'radio') {
-                if (radios[i].value == parentRadio) {
-                    radios[i].checked = true;
-                } else {
-                    radios[i].checked = false;
-                }
-            }
-        }
+        changeRadio(select.split('-')[0]);
     };
 
     function update_row_count() {
@@ -236,34 +239,20 @@ osmly.overview = (function () {
         overview.data = false;
         overview.rawData = false;
 
-        // trash the tbody
         if (document.getElementsByTagName('tbody').length) {
             var table = document.getElementById('main_table');
             table.removeChild(table.getElementsByTagName('tbody')[0]);
         }
 
-        // reset the radio button to 'everything'
-        var controls = document.getElementById('overview-controls'),
-            radios = controls.getElementsByTagName('input');
-        for (var i = 0; i < radios.length; i++) {
-            if (radios[i].type === 'radio') {
-                if (radios[i].value == 'everything') {
-                    radios[i].checked = true;
-                } else {
-                    radios[i].checked = false;
-                }
-            }
-        }
+        changeRadio('everything');
 
-        // remove the count
         var count = document.getElementById('count');
         count.innerHTML = '';
     };
 
     overview.modalDone = function() {
+        changeRadio('everything');
         osmly.overview.refresh();
-            // need to move radio button back to everything
-            // just .click()?
         $('#markdone-modal').trigger('reveal:close');
     };
 
