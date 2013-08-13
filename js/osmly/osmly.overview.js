@@ -224,7 +224,7 @@ osmly.overview = (function () {
         // trash the tbody
         if (document.getElementsByTagName('tbody').length) {
             var table = document.getElementById('main_table');
-            table.removeChild(document.getElementsByTagName('tbody')[0]);
+            table.removeChild(table.getElementsByTagName('tbody')[0]);
         }
 
         // reset the radio button to 'everything'

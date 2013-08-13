@@ -17,6 +17,7 @@ hr {
 * {
     margin: 0;
     padding: 0;
+    outline: none;
 }
 
 body, html {
@@ -184,7 +185,7 @@ a {
     font-size: 16px;
     font-weight: bold;
     background-color: white;
-    padding: 5px 11px;
+    padding: 5px 25px;
     left: 0px;
     top: -25px;
     position: absolute;
@@ -194,33 +195,18 @@ a {
     font-family: Arial;
 }
 
-#tags ul {
-    list-style-type: none;
-    border: 1px solid #ccc;
+#tags table {
+    border-collapse: collapse;
 }
 
-#tags li {
-    border-bottom: 1px solid #ccc;
-    cursor: text;
-}
-
-#tags li:last-child {
-    border-bottom: 0;
-}
-
-#tags li span {
-    display: inline-block;
-    color: #222;
+#tags td {
+    border: 1px solid #ddd;
     padding: 5px 7px;
+    min-width: 25px;
 }
 
 .k {
     font-weight: bold;
-}
-
-.k, .v {
-    border-right: 1px solid #ccc;
-    min-width: 25px;
 }
 
 .minus {
@@ -228,6 +214,7 @@ a {
     cursor: pointer;
     font-weight: bold;
     font-size: 18px;
+    min-width: 0 !important;
 }
 
 .display {

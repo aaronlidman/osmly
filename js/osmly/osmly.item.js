@@ -3,7 +3,7 @@ osmly.item = (function () {
 
     item.next = function() {
         osmly.ui.notify('getting next item');
-        $('#tags li').remove();
+        $('#tags tr').remove();
 
         var request = osmly.settings.featuresApi + 'db=' + osmly.settings.db;
             // id = 942 doesn't show context correctly
@@ -175,16 +175,18 @@ osmly.item = (function () {
     }
 
     item.getTags = function () {
-        var $tags = $('#tags li'),
+        var tgs = document.getElementById('tags'),
+            trs = tgs.getElementsByTagName('tr'),
             tags = {};
 
-        $tags.each(function(i,ele) {
-            var k = $(ele).children('.k').text(),
-                v = $(ele).children('.v').text();
-            if (k !== '' && v !== '') {
-                tags[k] = v;
+        for (var a = 0; a < trs.length; a++) {
+            // 0 = key, 1 = value, 2 = minus
+            var tds = trs[a].getElementsByTagName('td');
+            if (tds[0].innerHTML !== '' && tds[1].innerHTML !== '') {
+                tags[tds[0].innerHTML] = tds[1].innerHTML;
             }
-        });
+        }
+
         return tags;
     };
 
@@ -193,8 +195,7 @@ osmly.item = (function () {
     };
 
     item.toOsmChange = function(geojson, changesetId) {
-        var geo = geo2osm(geojson, changesetId, true);
-        return geo;
+        return geo2osm(geojson, changesetId, true);
     };
 
     return item;

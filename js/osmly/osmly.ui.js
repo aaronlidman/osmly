@@ -129,24 +129,18 @@ osmly.ui = (function() {
         });
 
         $('#tags').on('click', '.minus', function() {
-            if ($('#tags li').length > 1) {
+            if ($('#tags tr').length > 1) {
                 $(this).parent().remove();
-                equalizeTags();
             }
         });
 
-        $('#tags').on('keypress', '.k, .v', function(){
-            equalizeTags();
-        });
-
         $('#add-new-tag').click(function() {
-            $('#tags ul').append(
-                '<li>' +
-                '<span class="k" spellcheck="false" contenteditable="true"></span>' +
-                '<span class="v" spellcheck="false" contenteditable="true"></span>' +
-                '<span class="minus">-</span>' +
-                '</li>');
-            equalizeTags();
+            $('#tags tbody').append(
+                '<tr>' +
+                '<td class="k" spellcheck="false" contenteditable="true"></td>' +
+                '<td class="v" spellcheck="false" contenteditable="true"></td>' +
+                '<td class="minus">-</td>' +
+                '</tr>');
         });
     }
 
@@ -179,7 +173,6 @@ osmly.ui = (function() {
 
         if (isEditable) {
             $('#tags').fadeIn(250);
-            equalizeTags();
         } else {
             $('#problem, #submit').hide();
             $('#reusable-modal span').html(
@@ -198,32 +191,16 @@ osmly.ui = (function() {
         for (var tag in properties) {
             if (properties[tag] !== null &&
                 properties[tag] !== 'null') {
-                $('#tags ul').append(
-                    '<li>' +
-                    '<span class="k" spellcheck="false" contenteditable="true">' +
-                    tag + '</span>' +
-                    '<span class="v" spellcheck="false" contenteditable="true">' +
-                    properties[tag] + '</span>' +
-                    '<span class="minus">-</span>' +
-                    '</li>');
+                $('#tags tbody').append(
+                    '<tr>' +
+                    '<td class="k" spellcheck="false" contenteditable="true">' +
+                    tag + '</td>' +
+                    '<td class="v" spellcheck="false" contenteditable="true">' +
+                    properties[tag] + '</td>' +
+                    '<td class="minus">-</td>' +
+                    '</tr>');
             }
         }
-    }
-
-    function equalizeTags() {
-        // doesn't work until the selectors are visibile?
-        // janky & inefficient, need to look into how the plugin works
-        $('ul').equalize({
-            children: '.k',
-            equalize: 'width',
-            reset: true});
-        $('.k').width( $('.k').width() + 13);
-
-        $('ul').equalize({
-            children: '.v',
-            equalize: 'width',
-            reset: true});
-        $('.v').width( $('.v').width() + 13);
     }
 
     function hide() {
@@ -234,7 +211,7 @@ osmly.ui = (function() {
     }
 
     ui.teardown = function() {
-        $('#tags li').remove();
+        $('#tags tr').remove();
     };
 
     function skip() {
