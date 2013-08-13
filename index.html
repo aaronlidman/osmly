@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>rawr</title>
+        <title>OSMLY</title>
         <meta charset='utf-8'> 
 
         <link rel="stylesheet" href="js/lib/leaflet-0.6.4/leaflet.css" />
@@ -76,10 +76,20 @@
             <h2 style="margin: 50px 0; text-align: center;">Loading in JOSM...</h2>
             <hr/>
             <h4 style="margin-top: 25px;">When you're done:</h4>
-            <h2 style="text-align: center; margin: 20px 0;">Did you upload the item to OSM via JOSM?</h2>
+            <h2 style="text-align: center; margin: 20px 0;">Did you upload the feature via JOSM?</h2>
             <div style="text-align: center; margin-bottom: 25px;">
-                <button style="margin-left: 0;">No, not uploaded to OSM</button>
-                <button>Yes, uploaded</button>
+                <button data-type="no" style="margin-left: 0;">No, not uploaded to OSM</button>
+                <button data-type="yes">Yes, uploaded</button>
+            </div>
+            <a class="close-reveal-modal">&#215;</a>
+        </div>
+
+        <div id="markdone-modal" class="reveal-modal xlarge">
+            <h2 style="margin: 20px 0; text-align: center;">Are you sure?</h2>
+            <h2 style="margin: 20px 0; text-align: center;"> This will prevent other users from editing this feature.</h2>
+            <div style="text-align: center; margin-bottom: 25px;">
+                <button data-type="no" style="margin-left: 0;">No, don't mark it as done</button>
+                <button data-type="yes">Yes, mark it as done</button>
             </div>
             <a class="close-reveal-modal">&#215;</a>
         </div>

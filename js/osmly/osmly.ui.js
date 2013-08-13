@@ -114,7 +114,41 @@ osmly.ui = (function() {
         });
 
         $('#main_table').on('click', '.editjosm', function(){
+            // conditioned on login state
+            // osmly.token('user') !== 'demo'
             osmly.connect.editInJosm(this.getAttribute('data-id'));
+        });
+
+        $('#main_table').on('click', '.markdone', function(){
+            // conditional on login
+            // osmly.token('user') !== 'demo'
+            $('#markdone-modal button').
+            $('#markdone-modal').reveal({
+                animation: 'fade',
+                animationspeed: 100
+            });
+        });
+
+        $('#markdone-modal').on('click', 'button', function(){
+            var result = this.getAttribute('data-type'),
+                id = this.getAttribute('data-id');
+                    // how the hell
+
+            function callback() {
+                // need some kind of feedback that it was successful
+                    // flash checkmark?
+                    // probably same for edit JOSM
+                        // this callback could be the same for editJOSM
+                osmly.overview.buildTable();
+                $('#markdone-modal').trigger('reveal:close');
+            }
+
+            if (result == 'no') {
+                $('#markdone-modal').trigger('reveal:close');
+            } else if (result == 'yes') {
+                console.log(id);
+                osmly.connect.updateItem('submit', {done: 2}, callback, id);
+            }
         });
     }
 

@@ -1,7 +1,10 @@
 osmly.overview = (function () {
     var overview = {};
 
-    function buildTable() {
+    overview.buildTable = function() {
+        // will probably need to paginate over ~1000 items
+            // right now it's pretty quick w/ 1200 on chrome
+            // firefox is a bit slow
         // index from simple.py: id, problem, done, user, time
         items = overview.data;
         var table = document.getElementById('main_table');
@@ -61,7 +64,7 @@ osmly.overview = (function () {
         }
 
         update_row_count();
-    }
+    };
 
     function request(query, callback) {
         $.ajax({
@@ -161,19 +164,19 @@ osmly.overview = (function () {
 
     overview.click_everything = function() {
         overview.data = overview.rawData;
-        buildTable();
+        osmly.overview.buildTable();
     };
 
     overview.click_red = function() {
         filter({
             'problem': unique('problem')
         });
-        buildTable();
+        osmly.overview.buildTable();
     };
 
     overview.click_green = function() {
         filter({'done': 1});
-        buildTable();
+        osmly.overview.buildTable();
     };
 
     overview.drop_selection = function(select) {
@@ -189,7 +192,7 @@ osmly.overview = (function () {
 
         // filter the items, rebuild the table w/ filtered items
         filter(dict);
-        buildTable();
+        osmly.overview.buildTable();
 
         // select the parent radio button
         var parentRadio = select.split('-')[0],
@@ -253,7 +256,7 @@ osmly.overview = (function () {
 
     overview.go = function() {
         refresh(function() {
-            buildTable();
+            osmly.overview.buildTable();
             problem_selection();
             user_selection();
         });
