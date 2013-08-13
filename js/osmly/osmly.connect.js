@@ -161,9 +161,7 @@ osmly.connect = (function(){
                 url: osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=' + id,
                 cache: false
             }).done(function(geo){
-                geo = JSON.parse(geo)[0];
                 geo = JSON.parse(geo);
-                    // todo
 
                 bbox = geo.properties.bounds;
 

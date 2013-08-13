@@ -37,7 +37,7 @@ def get():
         if 'action' in request.args and request.args['action'] == 'remote':
             out = row[1]
         else:
-            out = json.dumps(row)
+            out = row[0]
     elif 'overview' in request.args:
         query = 'SELECT id, problem, done, user, time FROM osmly ORDER BY id'
         c.execute(query)
