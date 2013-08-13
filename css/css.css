@@ -32,8 +32,8 @@ a {
 
 #top-bar {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 10px;
+    right: 10px;
     z-index: 10;
     list-style-type: none;
 }
@@ -52,10 +52,13 @@ a {
     background-color: white;
     font-weight: bold;
     font-size: 26px;
-    padding: 7px 10px !important;
+    padding: 0px 15px;
+    line-height: 61px;
+    box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
 }
 
 #top-bar li, #bottom-right li {
+    box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
     text-align: center;
     margin-bottom: 2px;
     background-color: white;
@@ -115,6 +118,7 @@ a {
     margin-left: 20px;
     font-weight: bold;
     cursor: pointer;
+    box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
 }
 
 #submit, #skip, #problem {
@@ -161,6 +165,7 @@ a {
     bottom: 65px;
     font-size: 16px;
     padding: 7px;
+    box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
 }
 
 #add-new-tag {
@@ -437,6 +442,8 @@ button:hover {
 .leaflet-control-zoom-in {
     font: bold 21px/30px Arial, Helvetica, sans-serif !important;
 }
+
+.leaflet-bar {box-shadow: 0px 0px 5px rgba(0,0,0,0.5) !important;}
 
 .leaflet-bar a:last-child {border-radius: 0 !important;}
 
