@@ -146,5 +146,80 @@ osmly.connect = (function(){
         osmly.item.next();
     }
 
+    connect.editInJosm = function(id) {
+        var osm,
+            bbox,
+            request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=' + id + '&action=remote';
+
+        if (id === osmly.item.id) {
+            osm = osmly.item.toOsm(osmly.item.layer.toGeoJSON());
+            bbox = osmly.item.bbox;
+            osmly.connect.updateItem('remote', {remote: osm}, callback, id);
+        } else {
+            // need to fetch geometry of the given id
+            $.ajax({
+                url: osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=' + id,
+                cache: false
+            }).done(function(geo){
+                geo = JSON.parse(geo)[0];
+                geo = JSON.parse(geo);
+                    // todo
+
+                bbox = geo.properties.bounds;
+
+                // buffer the bounds
+                bbox = [
+                    bbox[0] - 0.001,
+                    bbox[1] - 0.001,
+                    bbox[2] + 0.001,
+                    bbox[3] + 0.001
+                ];
+
+                // from osmly.item.js, renameProperties()
+                for (var prop in osmly.settings.renameProperty) {
+                    var change = osmly.settings.renameProperty[prop];
+                    geo.properties[change] = geo.properties[prop];
+                }
+
+                // from osmly.item.js, usePropertiesAsTag()
+                for (var prop in geo.properties) {
+                    if (osmly.settings.usePropertyAsTag.indexOf(prop) === -1) {
+                        geo.properties[prop] = null;
+                    }
+                }
+
+                // from osmly.item.js, append()
+                for (var append in osmly.settings.appendTag) {
+                    geo.properties[append] = osmly.settings.appendTag[append];
+                }
+
+                osm = osmly.item.toOsm(geo);
+                osmly.connect.updateItem('remote', {remote: osm}, callback, id);
+            });
+        }
+
+        function callback() {
+            // there's no way to both load data from the api and import a file
+            // so we do them seperately with two requests
+            $.ajax('http://127.0.0.1:8111/load_and_zoom?left=' + bbox[0] +
+                '&right=' + bbox[2] + '&top=' + bbox[3] + '&bottom=' + bbox[1]
+            ).done(function() {
+                $.ajax('http://127.0.0.1:8111/import?url=' + request)
+                .done(function() {
+                    $('#remote-edit-modal').reveal({
+                        animation: 'fade',
+                        animationspeed: 100
+                    });
+                });
+            }).fail(function() {
+                $('#reusable-modal span').text('JOSM doesn\'t seem to be running. Start JOSM and try again.');
+                $('#reusable-modal').reveal({
+                    animation: 'fade',
+                    animationspeed: 100
+                });
+            });
+        }
+    };
+
     return connect;
 }());

@@ -384,6 +384,10 @@ button:hover {
     background-color: #333;
 }
 
+.markdone, .editjosm {
+    cursor: pointer;
+}
+
 /* just spammed !important, which isn't nice */
 .leaflet-control-attribution {
     font-size: 12px !important;

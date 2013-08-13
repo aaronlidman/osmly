@@ -70,38 +70,8 @@ osmly.ui = (function() {
         });
 
         $('#josm').click(function() {
-            // update the same db, could send it to gist instead
             $('#reset').click();
-
-            var id = osmly.item.id,
-                geojson = osmly.item.layer.toGeoJSON(),
-                osm = osmly.item.toOsm(geojson),
-                request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=' + id + '&action=remote',
-                bbox = osmly.item.bbox;
-
-            function callback() {
-                // there's no way to both load data from the api and import a file
-                // so we do them seperately with two requests
-                $.ajax('http://127.0.0.1:8111/load_and_zoom?left=' + bbox[0] +
-                    '&right=' + bbox[2] + '&top=' + bbox[3] + '&bottom=' + bbox[1]
-                ).done(function() {
-                    $.ajax('http://127.0.0.1:8111/import?url=' + request)
-                    .done(function() {
-                        $('#remote-edit-modal').reveal({
-                            animation: 'fade',
-                            animationspeed: 100
-                        });
-                    });
-                }).fail(function() {
-                    $('#reusable-modal span').text('JOSM doesn\'t seem to be running. Start JOSM and try again.');
-                    $('#reusable-modal').reveal({
-                        animation: 'fade',
-                        animationspeed: 100
-                    });
-                });
-            }
-
-            osmly.connect.updateItem('remote', {remote: osm}, callback);
+            osmly.connect.editInJosm(osmly.item.id);
         });
 
         $('#osmlink').click(function() {
@@ -141,6 +111,10 @@ osmly.ui = (function() {
                 '<td class="v" spellcheck="false" contenteditable="true"></td>' +
                 '<td class="minus">-</td>' +
                 '</tr>');
+        });
+
+        $('#main_table').on('click', '.editjosm', function(){
+            osmly.connect.editInJosm(this.getAttribute('data-id'));
         });
     }
 

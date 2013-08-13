@@ -40,13 +40,13 @@ osmly.overview = (function () {
 
             var markdone = document.createElement('td');
             if (items[a][2] === 0) {
-                markdone.innerHTML = '<span class="markdone">mark as done?</span>';
+                markdone.innerHTML = '<span data-id="' + items[a][0] + '" class="markdone">mark as done?</span>';
             }
             tr.appendChild(markdone);
 
             var editjosm = document.createElement('td');
             if (items[a][2] === 0) {
-                editjosm.innerHTML = '<span class="editjosm">edit in JOSM</span>';
+                editjosm.innerHTML = '<span data-id="' + items[a][0] + '" class="editjosm">edit in JOSM</span>';
             }
             tr.appendChild(editjosm);
 
@@ -185,7 +185,7 @@ osmly.overview = (function () {
         value = value.split(':');
         dict[value[0]] = value[1];
             // dict is necessary because value = {value[0]: value[1]} didn't work
-                // seems like it should?
+                // why doesn't that work?
 
         // filter the items, rebuild the table w/ filtered items
         filter(dict);
@@ -249,74 +249,6 @@ osmly.overview = (function () {
         // a special new modal w/ confirm/deny
         // update the item as done with the user
         console.log(id);
-    };
-
-    overview.edit = function(id) {
-        // I'm in a hurry, this is a mess, mostly redundant (copy/paste from elsewhere in osmly)
-        var request = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=' + id;
-
-        $.ajax({
-            url: request,
-            cache: false
-        }).done(function(data){
-            data = JSON.parse(data)[0];
-            data = JSON.parse(data);
-
-            console.log(data);
-
-            var id = data.properties.id,
-                bbox = data.properties.bounds;
-
-            // buffer the bounds
-            bbox = [
-                bbox[0] - 0.001,
-                bbox[1] - 0.001,
-                bbox[2] + 0.001,
-                bbox[3] + 0.001
-            ];
-
-            // from osmly.item.js, renameProperties()
-            for (var prop in osmly.settings.renameProperty) {
-                var change = osmly.settings.renameProperty[prop];
-                data.properties[change] = data.properties[prop];
-            }
-
-            // from osmly.item.js, usePropertiesAsTag()
-            for (var prop in data.properties) {
-                if (osmly.settings.usePropertyAsTag.indexOf(prop) === -1) {
-                    data.properties[prop] = null;
-                }
-            }
-
-            // from osmly.item.js, append()
-            for (var append in osmly.settings.appendTag) {
-                data.properties[append] = osmly.settings.appendTag[append];
-            }
-
-            var osm = osmly.item.toOsm(data);
-            osmly.connect.updateItem('remote', {remote: osm}, callback, id);
-
-            function callback() {
-                $.ajax('http://127.0.0.1:8111/load_and_zoom?left=' + bbox[0] +
-                    '&right=' + bbox[2] + '&top=' + bbox[3] + '&bottom=' + bbox[1]
-                ).done(function() {
-                    console.log('http://127.0.0.1:8111/import?url=' + request + '&action=remote');
-                    $.ajax('http://127.0.0.1:8111/import?url=' + request + '&action=remote')
-                    .done(function() {
-                        $('#remote-edit-modal').reveal({
-                            animation: 'fade',
-                            animationspeed: 100
-                        });
-                    });
-                }).fail(function() {
-                    $('#reusable-modal span').text('JOSM doesn\'t seem to be running. Start JOSM and try again.');
-                    $('#reusable-modal').reveal({
-                        animation: 'fade',
-                        animationspeed: 100
-                    });
-                });
-            }
-        });
     };
 
     overview.go = function() {
