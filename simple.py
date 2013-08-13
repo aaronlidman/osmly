@@ -74,11 +74,16 @@ def post():
 
 
 def done():
+    if request.form['done']:
+        done = request.form['done']
+    else:
+        done = 1
+
     conn = sqlite3.connect(request.args['db'] + '.sqlite')
     c = conn.cursor()
     c.execute(
         'UPDATE osmly SET done = ?, user = ?, time = ? WHERE id = ?',
-        (1, request.form['user'], int(time.time()), request.args['id'])
+        (done, request.form['user'], int(time.time()), request.args['id'])
     )
     conn.commit()
     conn.close()
