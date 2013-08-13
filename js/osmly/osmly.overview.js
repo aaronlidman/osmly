@@ -96,7 +96,7 @@ osmly.overview = (function () {
             // {'problem': ['no_park', 'bad_imagery', 'you_ugly']}
             // or even better: {'problem': unique('problem')}
         // index from simple.py: id, problem, done, user, time
-        // a value from each key must hit
+        // if multiple keys are provided a value from each key must be true
         var ndx = {
             'problem': 1,
             'done': 2,
@@ -105,19 +105,22 @@ osmly.overview = (function () {
         };
 
         var items = overview.rawData,
+            optionslength = Object.keys(options).length,
             out = [];
 
         for (var a = 0; a < items.length; a++) {
-            var keep = false;
+            var keep = [];
             for (var option in options) {
                 if (typeof options[option] == 'object') {
                     if (options[option].indexOf(items[a][ndx[option]]) !== -1) {
-                        keep = true;
+                        keep.push(true);
                     }
                 } else if (items[a][ndx[option]] == options[option]) {
-                    keep = true;
+                    keep.push(true);
                 }
-                if (keep) out.push(items[a]);
+            }
+            if (keep.length === optionslength) {
+                out.push(items[a]);
             }
         }
         overview.data = out;
@@ -197,8 +200,9 @@ osmly.overview = (function () {
         dict[value[0]] = value[1];
             // dict is necessary because value = {value[0]: value[1]} didn't work
                 // why doesn't that work?
+        if (value[0] == 'problem') dict['done'] = 0;
+            // only want un-done problems, not strictly honest but more useful
 
-        // filter the items, rebuild the table w/ filtered items
         filter(dict);
         buildTable();
 
@@ -258,6 +262,8 @@ osmly.overview = (function () {
 
     overview.modalDone = function() {
         osmly.overview.refresh();
+            // need to move radio button back to everything
+            // just .click()?
         $('#markdone-modal').trigger('reveal:close');
     };
 
