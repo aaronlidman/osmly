@@ -131,7 +131,7 @@ osmly.item = (function () {
                     }
 
                     while (t < tagKeys.length) {
-                        popup += '<li><span class="b">' + tagKeys[t] +
+                        popup += '<li><span class="k">' + tagKeys[t] +
                         '</span>: ' + feature.properties[tagKeys[t]] + '</li>';
                         t++;
                     }
