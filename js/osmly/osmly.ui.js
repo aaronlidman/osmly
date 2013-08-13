@@ -169,7 +169,7 @@ osmly.ui = (function() {
         }
 
         $('#notify, #login').fadeOut(250);
-        $('#top-right, #bottom-right, #action-block').fadeIn(250);
+        $('#title, #top-bar, #bottom-right, #action-block').fadeIn(250);
 
         if (isEditable) {
             $('#tags').fadeIn(250);
@@ -221,11 +221,9 @@ osmly.ui = (function() {
             .show()
             .fadeOut(750);
         osmly.item.next();
-        console.log('skipped');
     }
 
     function submit(result) {
-        // should really split submit from problem
         hide();
 
         if (osmly.settings.demo) {

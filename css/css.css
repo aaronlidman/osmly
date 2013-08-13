@@ -39,36 +39,32 @@ a {
     height: 100%;
 }
 
-#top-right {
-    display: none;
+#top-bar {
     position: absolute;
     top: 0;
     right: 0;
     z-index: 10;
-    overflow: visible;
-}
-
-#top-right li {
-    float: right;
-    margin-left: 2px;
-}
-
-#top-right ul {
-    max-width: 320px;
     list-style-type: none;
+}
+
+#top-bar li {
+    margin-left: 2px;
     float: right;
 }
 
 #title {
-    display: block;
+    z-index: 10;
+    display: none;
+    position: absolute;
+    top: 10px;
+    left: 50px;
     background-color: white;
     font-weight: bold;
     font-size: 26px;
     padding: 7px 10px !important;
-    margin-bottom: 2px;
 }
 
-#top-right li, #bottom-right li {
+#top-bar li, #bottom-right li {
     text-align: center;
     margin-bottom: 2px;
     background-color: white;
@@ -200,9 +196,9 @@ a {
 }
 
 #tags td {
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
     padding: 5px 7px;
-    min-width: 25px;
+    min-width: 50px;
 }
 
 .k {
