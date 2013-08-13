@@ -50,7 +50,7 @@ osmly.ui = (function() {
         $('#go_overview').click(function(){
             $('#overview_bg').fadeIn(100);
             $('#overview-controls').fadeIn(100);
-            $('#overview_block').fadeIn(100, osmly.overview.go);
+            $('#overview_block').fadeIn(100, osmly.overview.refresh);
         });
 
         $('#overview_bg').click(function(){
@@ -122,7 +122,8 @@ osmly.ui = (function() {
         $('#main_table').on('click', '.markdone', function(){
             // conditional on login
             // osmly.token('user') !== 'demo'
-            $('#markdone-modal button').
+            $('#markdone-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
+                // not ideal
             $('#markdone-modal').reveal({
                 animation: 'fade',
                 animationspeed: 100
@@ -132,22 +133,11 @@ osmly.ui = (function() {
         $('#markdone-modal').on('click', 'button', function(){
             var result = this.getAttribute('data-type'),
                 id = this.getAttribute('data-id');
-                    // how the hell
-
-            function callback() {
-                // need some kind of feedback that it was successful
-                    // flash checkmark?
-                    // probably same for edit JOSM
-                        // this callback could be the same for editJOSM
-                osmly.overview.buildTable();
-                $('#markdone-modal').trigger('reveal:close');
-            }
 
             if (result == 'no') {
                 $('#markdone-modal').trigger('reveal:close');
             } else if (result == 'yes') {
-                console.log(id);
-                osmly.connect.updateItem('submit', {done: 2}, callback, id);
+                osmly.connect.updateItem('submit', {done: 2}, osmly.overview.modalDone, id);
             }
         });
     }

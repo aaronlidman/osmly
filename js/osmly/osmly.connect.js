@@ -2,11 +2,12 @@ osmly.connect = (function(){
     var connect = {};
 
     connect.updateItem = function(action, data, callback, id) {
+        if (typeof data != 'object') data = {};
         id = id || osmly.item.id;
+
         var url = osmly.settings.featuresApi + 'db=' + osmly.settings.db +
             '&id=' + id + '&action=' + action;
 
-        if (typeof data != 'object') data = {};
         data['user'] = osmly.token('user');
 
         $.ajax({

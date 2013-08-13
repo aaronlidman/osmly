@@ -1,7 +1,7 @@
 osmly.overview = (function () {
     var overview = {};
 
-    overview.buildTable = function() {
+    function buildTable() {
         // will probably need to paginate over ~1000 items
             // right now it's pretty quick w/ 1200 on chrome
             // firefox is a bit slow
@@ -25,6 +25,8 @@ osmly.overview = (function () {
                     // checkmark for done items
                     if (items[a][b] === 1) {
                         text = '&#x2713;';
+                    } else if (items[a][b] === 2) {
+                        text = 'marked';
                     } else {
                         text = '';
                     }
@@ -53,7 +55,7 @@ osmly.overview = (function () {
             }
             tr.appendChild(editjosm);
 
-            if (items[a][2] === 1) {
+            if (items[a][2] > 0) {
                 tr.setAttribute('class', 'success');
             } else if (items[a][1] !== '') {
                 tr.setAttribute('class', 'error');
@@ -64,7 +66,7 @@ osmly.overview = (function () {
         }
 
         update_row_count();
-    };
+    }
 
     function request(query, callback) {
         $.ajax({
@@ -77,12 +79,16 @@ osmly.overview = (function () {
         });
     }
 
-    function refresh(callback) {
+    overview.refresh = function() {
         request(
             osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&overview',
-            callback
+            function() {
+                buildTable();
+                problem_selection();
+                user_selection();
+            }
         );
-    }
+    };
 
     function filter(options){
         // {'problem': 1, 'user': 'Joe Fake Name'}
@@ -90,6 +96,7 @@ osmly.overview = (function () {
             // {'problem': ['no_park', 'bad_imagery', 'you_ugly']}
             // or even better: {'problem': unique('problem')}
         // index from simple.py: id, problem, done, user, time
+        // a value from each key must hit
         var ndx = {
             'problem': 1,
             'done': 2,
@@ -164,19 +171,20 @@ osmly.overview = (function () {
 
     overview.click_everything = function() {
         overview.data = overview.rawData;
-        osmly.overview.buildTable();
+        buildTable();
     };
 
     overview.click_red = function() {
         filter({
-            'problem': unique('problem')
+            'problem': unique('problem'),
+            'done': 0
         });
-        osmly.overview.buildTable();
+        buildTable();
     };
 
     overview.click_green = function() {
-        filter({'done': 1});
-        osmly.overview.buildTable();
+        filter({'done': [1, 2]});
+        buildTable();
     };
 
     overview.drop_selection = function(select) {
@@ -192,7 +200,7 @@ osmly.overview = (function () {
 
         // filter the items, rebuild the table w/ filtered items
         filter(dict);
-        osmly.overview.buildTable();
+        buildTable();
 
         // select the parent radio button
         var parentRadio = select.split('-')[0],
@@ -248,18 +256,9 @@ osmly.overview = (function () {
         count.innerHTML = '';
     };
 
-    overview.done = function(id) {
-        // a special new modal w/ confirm/deny
-        // update the item as done with the user
-        console.log(id);
-    };
-
-    overview.go = function() {
-        refresh(function() {
-            osmly.overview.buildTable();
-            problem_selection();
-            user_selection();
-        });
+    overview.modalDone = function() {
+        osmly.overview.refresh();
+        $('#markdone-modal').trigger('reveal:close');
     };
 
     return overview;
