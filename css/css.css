@@ -1,18 +1,9 @@
-/*
-    this is probably the ugliest part of this project, very much needs
-    some serious refactoring
-*/
-
 input:focus,
 select:focus,
 textarea:focus,
-button:focus {
-    outline: none;
-}
+button:focus {outline: none;}
 
-hr {
-    border: 1px solid black;
-}
+hr {border: 1px solid black;}
 
 * {
     margin: 0;
@@ -82,13 +73,9 @@ a {
     overflow: visible;
 }
 
-#user, #changeset {
-    display: none;
-}
+#user, #changeset {display: none;}
 
-#changeset-modal {
-    padding: 10px 15px;
-}
+#changeset-modal {padding: 10px 15px;}
 
 #changeset-form {
     border: 1px solid #ccc;
@@ -191,9 +178,7 @@ a {
     font-family: Arial;
 }
 
-#tags table {
-    border-collapse: collapse;
-}
+#tags table {border-collapse: collapse;}
 
 #tags td {
     border: 1px solid #ccc;
@@ -201,9 +186,7 @@ a {
     min-width: 50px;
 }
 
-.k {
-    font-weight: bold;
-}
+.k {font-weight: bold;}
 
 .minus {
     padding: 0 10px !important;
@@ -265,22 +248,14 @@ a {
     padding: 0 10px;
 }
 
-.b {
-    font-weight: bold;
-}
-
-#reusable-modal {
-    text-align: center;
-}
+#reusable-modal {text-align: center;}
 
 .reveal-modal a {
     cursor: pointer;
     border-bottom: 1px solid #666;
 }
 
-.close-reveal-modal {
-    border-bottom: none !important;
-}
+.close-reveal-modal {border-bottom: none !important;}
 
 #overview_bg {
     cursor: pointer;
@@ -321,9 +296,8 @@ a {
     line-height: 1.5em;
     z-index: 8002;
 }
-input[type='radio'] {
-    margin-right: 5px;
-}
+
+input[type='radio'] {margin-right: 5px;}
 
 #count {
     right: 20px;
@@ -333,10 +307,8 @@ input[type='radio'] {
     font-size: 48px;
     top: -28px;
 }
-#count span {
-    font-size: 24px;
-}
 
+#count span {font-size: 24px;}
 
 #main_table {
     width: 100%;
@@ -407,7 +379,6 @@ button:hover {
     background-color: #333;
 }
 
-
 /* just spammed !important, which isn't nice */
 .leaflet-control-attribution {
     font-size: 12px !important;
@@ -446,13 +417,9 @@ button:hover {
     margin-top: -7px !important;
 }
 
-.leaflet-div-icon {
-    border: 2px solid black;
-}
+.leaflet-div-icon {border: 2px solid black;}
 
-.leaflet-bar-part {
-    background-color: white !important;
-}
+.leaflet-bar-part {background-color: white !important;}
 
 .leaflet-bar-part-top, .leaflet-bar-part-bottom {
     border-radius: 0 !important;
@@ -471,10 +438,6 @@ button:hover {
     font: bold 21px/30px Arial, Helvetica, sans-serif !important;
 }
 
-.leaflet-bar a:last-child {
-    border-radius: 0 !important;
-}
+.leaflet-bar a:last-child {border-radius: 0 !important;}
 
-.leaflet-bar a:first-child {
-    border-radius: 0 !important;
-}
+.leaflet-bar a:first-child {border-radius: 0 !important;}
