@@ -117,7 +117,23 @@ osmly.ui = (function() {
             if (osmly.token('user') == 'demo') {
                 pleaseLogin();
             } else {
+                $('#remote-edit-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
                 osmly.connect.editInJosm(this.getAttribute('data-id'));
+            }
+        });
+
+        $('#remote-edit-modal').on('click', 'button', function(){
+            var result = this.getAttribute('data-type'),
+                id = this.getAttribute('data-id');
+
+            if (result == 'no') {
+                $('#remote-edit-modal').trigger('reveal:close');
+            } else if (result == 'yes') {
+                osmly.connect.updateItem('submit', {done: 3}, function(){
+                    osmly.overview.modalDone(function(){
+                        $('#remote-edit-modal').trigger('reveal:close');
+                    });
+                }, id);
             }
         });
 
@@ -126,7 +142,6 @@ osmly.ui = (function() {
                 pleaseLogin();
             } else {
                 $('#markdone-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
-                    // not ideal
                 $('#markdone-modal').reveal({
                     animation: 'fade',
                     animationspeed: 100
@@ -141,7 +156,11 @@ osmly.ui = (function() {
             if (result == 'no') {
                 $('#markdone-modal').trigger('reveal:close');
             } else if (result == 'yes') {
-                osmly.connect.updateItem('submit', {done: 2}, osmly.overview.modalDone, id);
+                osmly.connect.updateItem('submit', {done: 2}, function(){
+                    osmly.overview.modalDone(function(){
+                        $('#markdone-modal').trigger('reveal:close');
+                    });
+                }, id);
             }
         });
     }
@@ -271,11 +290,6 @@ osmly.ui = (function() {
                 osmly.token('user') + '/edits" target="_blank">' +
                 osmly.token('user') + '</a>')
             .fadeIn(500);
-    };
-
-    ui.josmResults = function(id) {
-        // clicking the results buttons from the #remote-edit-modal
-
     };
 
     return ui;

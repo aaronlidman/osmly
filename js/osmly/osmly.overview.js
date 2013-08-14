@@ -1,7 +1,7 @@
 osmly.overview = (function () {
     var overview = {};
 
-    function buildTable() {
+    function buildTable(callback) {
         // will probably need to paginate over ~1000 items
             // right now it's pretty quick w/ 1200 on chrome
             // firefox is a bit slow
@@ -27,6 +27,8 @@ osmly.overview = (function () {
                         text = '&#x2713;';
                     } else if (items[a][b] === 2) {
                         text = 'marked';
+                    } else if (items[a][b] === 3) {
+                        text = 'via JOSM';
                     } else {
                         text = '';
                     }
@@ -66,6 +68,7 @@ osmly.overview = (function () {
         }
         $('#notify').fadeOut(250);
         update_row_count();
+        if (callback) callback();
     }
 
     function request(query, callback) {
@@ -79,12 +82,12 @@ osmly.overview = (function () {
         });
     }
 
-    overview.refresh = function() {
+    overview.refresh = function(callback) {
         osmly.ui.notify('Loading...');
         request(
             osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&overview',
             function() {
-                buildTable();
+                buildTable(callback);
                 problem_selection();
                 user_selection();
             }
@@ -203,7 +206,8 @@ osmly.overview = (function () {
     };
 
     overview.click_green = function() {
-        filter({'done': [1, 2]});
+        filter({'done': [1, 2, 3]});
+            // filter needs an inverse
         changeRadio('green');
         buildTable();
     };
@@ -251,10 +255,9 @@ osmly.overview = (function () {
         count.innerHTML = '';
     };
 
-    overview.modalDone = function() {
+    overview.modalDone = function(callback) {
         changeRadio('everything');
-        osmly.overview.refresh();
-        $('#markdone-modal').trigger('reveal:close');
+        osmly.overview.refresh(callback);
     };
 
     return overview;
