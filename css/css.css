@@ -212,21 +212,24 @@ a {
     min-width: 0 !important;
 }
 
+#flash {
+    z-index: 999;
+    pointer-events: none;
+    width: 50%;
+    height: 850px;
+    overflow: auto;
+    margin: auto;
+    position: fixed;
+    top: 0; left: 0; bottom: 0; right: 0;
+}
+
 .display {
+    z-index: 10;
     color: white;
     display: none;
     pointer-events: none;
     font-size: 640px;
-    position: absolute;
-    overflow: visible;
-    z-index: 10;
-    width: 640px;
-    height: 640px;
-    left: 50%;
-    top: 50%; 
-    margin-left: -320px;
-    margin-top: -420px;
-    text-shadow: 0px 0px 10px black;
+    text-shadow: 0px 0px 5px black;
 }
 
 #login {
