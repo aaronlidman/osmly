@@ -31,7 +31,7 @@
         <script src="js/osmly/osmly.overview.js"></script>
     </head>
     <body>
-        <span id="title">Outline the park</span>
+        <span id="title"></span>
         <ul id="top-bar">
             <li id="instruction" style="border-left: none;">Instructions</li>
             <li id="go_overview">Overview</li>
@@ -57,18 +57,20 @@
 
         <div id="instruction-modal" class="reveal-modal xlarge">
             <h3>Instructions</h3>
-            <li>Make a more accurate outline of the nearby park.</li>
-            <li>It's possible the data is out of date or just wrong; report problems accordingly.</li>
-            <li>Be careful to not include nearby schools, golf courses, or residential yards; just the park.</li>
-            <li>Do include small bodies of water, parking lots, and sidewalks that are obviously part of the park.</li>
-            <li>The park should be fairly obvious, if you're struggling to find anything nearby that looks like a public park it probably isn't right.</li>
+            <ul>
+                <li>Outline the nearby park.</li>
+                <li>It's possible the data is out of date or just wrong; report problems accordingly.</li>
+                <li>Be careful to not include nearby schools, golf courses, or residential yards; just the park.</li>
+            </ul>
 
             <h3 style="margin-top: 15px;">Tips</h3>
-            <li>Click on the nodes (white dots) to delete them</li>
-            <li>Drag a transparent middle node to add a new node</li>
-            <li>Yellow features are other OSM references there to help you. You can't edit them here but clicking them provides more information. Use this info to help make your features more accurate</li>
-            <li>If you want to edit from another editor, click the coordinates in the bottom right corner which will take you to osm.org</li>
-
+            <ul>
+                <li>Click on the nodes (white dots) to delete them</li>
+                <li>Drag a transparent middle node to add a new node</li>
+                <li>Yellow features are other OSM references there to help you. You can't edit them here but clicking them provides more information. Use this info to help make your features more accurate</li>
+                <li>If you want to edit from another editor, click the coordinates in the bottom right corner which will take you to osm.org</li>
+            </ul>
+            
             <a class="close-reveal-modal">&#215;</a>
         </div>
 
@@ -94,7 +96,7 @@
             <a class="close-reveal-modal">&#215;</a>
         </div>
 
-        <div id="reusable-modal" class="reveal-modal large">
+        <div id="reusable-modal" class="reveal-modal xlarge">
             <span></span>
             <a class="close-reveal-modal">&#215;</a>
         </div>
@@ -114,9 +116,10 @@
             <li style="margin-left: 0;">
                 <select name="problem" id="problem">
                     <option value="problem" disabled selected>Problem</option>
-                    <option value="no_park">No Park Here</option>
-                    <option value="poor_imagery">Poor Imagery</option>
-                    <option value="too_diff">Too Difficult</option>
+                    <option value="no_park_here">no park here</option>
+                    <option value="already_mapped">already mapped</option>
+                    <option value="poor_imagery">poor imagery</option>
+                    <option value="too_difficult">too difficult</option>
                 </select>
             </li>
             <li id="skip">Skip</li>
@@ -169,6 +172,7 @@
         <div id="map"></div>
         <script type="text/javascript">
             var CONFIG = {
+                title: 'Outline the park',
                 featuresApi: 'http://127.0.0.1:5000/?',
                 db: 'parks-5',
                 demo: false,

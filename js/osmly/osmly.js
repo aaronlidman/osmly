@@ -1,16 +1,13 @@
 window.osmly = (function () {
     /*
     TODO
-        - success + failure callbacks on every request
-            - replace .success, .error, .complete w/ .done, .fail, .always
-        - crossbrowser test ui
-            - especially modal and tag stuff
         - check if done, again, before submitting to osm
     */
 
     var osmly = {};
 
     osmly.settings = {
+        title: '',
         justMap: false,
         featuresApi: '',
         db: '',
@@ -69,10 +66,8 @@ window.osmly = (function () {
     });
 
     function keyclean(x) { return x.replace(/\W/g, ''); }
-    // from iD
 
     osmly.token = function(k, x) {
-    // from iD
         if (arguments.length === 2) {
             localStorage[keyclean(osmly.settings.writeApi) + k] = x;
         }

@@ -14,6 +14,9 @@ osmly.ui = (function() {
                 $('#login').fadeIn(500);
             }
         }
+
+        document.title = osmly.settings.title;
+        $('#title').text(osmly.settings.title);
         bind();
     };
 
@@ -24,8 +27,8 @@ osmly.ui = (function() {
                 $('#login').fadeOut(500);
                 osmly.item.next();
             } else {
-                $('#login').fadeOut(500);
                 osmly.auth.authenticate(function() {
+                    $('#login').fadeOut(500);
                     osmly.connect.getDetails();
                     osmly.item.next();
                 });

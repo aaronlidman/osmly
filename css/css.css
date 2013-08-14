@@ -114,6 +114,10 @@ a {
     font-size: 14px;
 }
 
+#instruction-modal ul {
+    margin-left: 20px;
+}
+
 #action-block {
     display: none;
     list-style-type: none;
