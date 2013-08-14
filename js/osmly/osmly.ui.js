@@ -114,20 +114,24 @@ osmly.ui = (function() {
         });
 
         $('#main_table').on('click', '.editjosm', function(){
-            // conditioned on login state
-            // osmly.token('user') !== 'demo'
-            osmly.connect.editInJosm(this.getAttribute('data-id'));
+            if (osmly.token('user') == 'demo') {
+                pleaseLogin();
+            } else {
+                osmly.connect.editInJosm(this.getAttribute('data-id'));
+            }
         });
 
         $('#main_table').on('click', '.markdone', function(){
-            // conditional on login
-            // osmly.token('user') !== 'demo'
-            $('#markdone-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
-                // not ideal
-            $('#markdone-modal').reveal({
-                animation: 'fade',
-                animationspeed: 100
-            });
+            if (osmly.token('user') == 'demo') {
+                pleaseLogin();
+            } else {
+                $('#markdone-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
+                    // not ideal
+                $('#markdone-modal').reveal({
+                    animation: 'fade',
+                    animationspeed: 100
+                });
+            }
         });
 
         $('#markdone-modal').on('click', 'button', function(){
@@ -139,6 +143,16 @@ osmly.ui = (function() {
             } else if (result == 'yes') {
                 osmly.connect.updateItem('submit', {done: 2}, osmly.overview.modalDone, id);
             }
+        });
+    }
+
+    function pleaseLogin() {
+        $('#reusable-modal span').text(
+            'Please login. It helps track your changes so other users don\'t edit the same feature.');
+        $('#reusable-modal').reveal({
+            animation: 'fade',
+            animationspeed: 200,
+            closeonbackgroundclick: true
         });
     }
 

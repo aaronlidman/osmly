@@ -64,7 +64,7 @@ osmly.overview = (function () {
             tbody.appendChild(tr);
             table.appendChild(tbody);
         }
-
+        $('#notify').fadeOut(250);
         update_row_count();
     }
 
@@ -80,6 +80,7 @@ osmly.overview = (function () {
     }
 
     overview.refresh = function() {
+        osmly.ui.notify('Loading...');
         request(
             osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&overview',
             function() {
