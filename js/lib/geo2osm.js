@@ -1,258 +1,211 @@
-// THIS IS A MODIFIED VERSION OF GEO2OSM
-    // original here: https://github.com/aaronlidman/osm-and-geojson
-var geo2osm = function(geo, changeset, osmchange) {
-    osmchange = osmchange || false;
+var osm2geo = function(osm, metaProperties) {
 
-    function togeojson(geo, properties) {
-        var nodes = '',
-            ways = '',
-            relations = '';
-        properties = properties || {};
+    function parse(xml) {
+        var string = new XMLSerializer().serializeToString(xml),
+            parser = new DOMParser();
+        return parser.parseFromString(string, 'text/xml');
+    }
 
-        switch (geo.type) {
-            case 'Point':
-                var coord = roundCoords([geo.coordinates]);
-                nodes += '<node id="' + count + '" lat="' + coord[0][1] +
-                '" lon="' + coord[0][0] + '">';
-                nodes += propertiesToTags(properties);
-                nodes += '</node>';
-                count--;
-                break;
+    // set the bounding box [minX,minY,maxX,maxY]; x -> long, y -> lat
+    function getBounds(bounds) {
+        var bbox = [];
+        if (bounds.length) {
+            bbox = [
+                parseFloat(bounds[0].getAttribute('minlon')),
+                parseFloat(bounds[0].getAttribute('minlat')),
+                parseFloat(bounds[0].getAttribute('maxlon')),
+                parseFloat(bounds[0].getAttribute('maxlat'))
+            ];
+        }
+        return bbox;
+    }
 
-            case 'MultiPoint':
-                break;
-            case 'LineString':
-                break;
-            case 'MultiLineString':
-                break;
-            case 'Polygon':
-                append(polygon(geo, properties));
-                break;
+    // http://stackoverflow.com/a/1830844
+    function isNumber(n) {
+        return !isNaN(parseFloat(n)) && isFinite(n);
+    }
 
-            case 'MultiPolygon':
-                relations += '<relation id="' + count + '" changeset="' + changeset + '">';
-                properties['type'] = 'multipolygon';
-                count--;
+    // set tags as properties
+    function setProps(element) {
+        var props = {},
+            tags = element.getElementsByTagName('tag');
 
-                for (var i = 0; i < geo.coordinates.length; i++){
-
-                    poly = polygon({
-                        'coordinates': geo.coordinates[i]
-                    }, undefined, true);
-
-                    nodes += poly['nodes'];
-                    ways += poly['ways'];
-                    relations += poly['relations'];
-                }
-
-                relations += propertiesToTags(properties);
-                relations += '</relation>';
-                break;
+        for (var t = 0; t < tags.length; t++) {
+            if (isNumber(tags[t].getAttribute('v'))) {
+                props[tags[t].getAttribute('k')] = parseFloat(tags[t].getAttribute('v'));
+            } else {
+                props[tags[t].getAttribute('k')] = tags[t].getAttribute('v');
+            }
         }
 
-        function append(obj) {
-            nodes += obj['nodes'];
-            ways += obj['ways'];
-            relations += obj['relations'];
+        // a few extra, possibly useful, properties
+        if (metaProperties) {
+            if (element.getAttribute('id')) props.osm_id = parseFloat(element.getAttribute('id'));
+            if (element.getAttribute('user')) props.osm_lastEditor = element.getAttribute('user');
+            if (element.getAttribute('version')) props.osm_version = parseFloat(element.getAttribute('version'));
+            if (element.getAttribute('changeset')) props.osm_lastChangeset = parseFloat(element.getAttribute('changeset'));
+            if (element.getAttribute('timestamp')) props.osm_lastEdited = element.getAttribute('timestamp');
         }
 
-        osm = '<?xml version="1.0" encoding="UTF-8"?><osm version="0.6" generator="geo2osm.js">' +
-        nodes + ways + relations + '</osm>';
+        return sortObject(props);
+    }
 
-        if (osmchange) {
-            osm = '<osmChange version="0.6" generator="geo2osm.js"><create>' +
-            nodes + ways + relations + '</create></osmChange>';
-        }
-
+    // create a feature of given type
+    function getFeature(element, type) {
         return {
-            'nodes': nodes,
-            'ways': ways,
-            'relations': relations,
-            'osm': osm
+            "geometry" : {
+                "type" : type,
+                "coordinates" : []
+            },
+            "type" : "Feature",
+            "properties" : setProps(element)
         };
     }
 
-    function polygon(geo, properties, multipolygon) {
-        var nodes = '',
-            ways = '',
-            relations = '',
-            role = '';
-        properties = properties || {};
-        multipolygon = multipolygon || false;
+    function cacheNodes() {
+        var nodes = xml.getElementsByTagName('node'),
+            coords = {},
+            withTags = [];
 
-        if (geo.coordinates.length > 1) {
-            // polygon with holes -> multipolygon
-            if (!multipolygon) relations += '<relation id="' + count + '" changeset="' + changeset +'">';
-            count--;
-            properties['type'] = 'multipolygon';
+        for (var n = 0; n < nodes.length; n++) {
+            var tags = nodes[n].getElementsByTagName('tag');
 
-            for (var i = 0; i < geo.coordinates.length; i++) {
-                var coords = [];
+            coords[nodes[n].getAttribute('id')] = [
+                parseFloat(nodes[n].getAttribute('lon')),
+                parseFloat(nodes[n].getAttribute('lat'))
+            ];
 
-                role = ((i === 0) ? 'outer' : 'inner');
+            if (tags.length) withTags.push(nodes[n]);
+        }
 
-                relations += '<member type="way" ref="' + count + '" role="' + role + '"/>';
-                ways += '<way id="' + count + '" changeset="' + changeset + '">';
-                count--;
-                for (var a = 0; a < geo.coordinates[i].length-1; a++) {
-                    coords.push([geo.coordinates[i][a][1], geo.coordinates[i][a][0]]);
+        return {
+            coords: coords,
+            withTags: withTags
+        };
+    }
+
+    function buildRelations() {
+        var relations = xml.getElementsByTagName('relation'),
+            features = [],
+            done = {},
+            count = 0;
+
+        for (var r = 0; r < relations.length; r++) {
+            feature = getFeature(relations[r], "MultiPolygon");
+
+            if (feature.properties.type == 'multipolygon') {
+                feature.geometry.coordinates.push([]);
+                var members = relations[r].getElementsByTagName('member');
+
+                for (var m = 0; m < members.length; m++) {
+                    done[members[m].getAttribute('ref')] = count;
+                    // feature.geometry.coordinates[0].push([]);
+
+                    // .getAttribute('role') stuff would go somewhere around here
                 }
-                coords = createNodes(coords, true);
-                nodes += coords['nodes'];
-                ways += coords['nds'];
-                ways += '</way>';
-            }
 
-            if (!multipolygon) {
-                relations += propertiesToTags(properties);
-                relations += '</relation>';
+                delete feature.properties.type;
+                features[count] = feature;
+                count++;
+            } // might get to other types in the future
+        }
+
+        return {
+            features: features,
+            done: done
+        };
+    }
+
+    // http://stackoverflow.com/a/1359808
+    function sortObject(o) {
+        var sorted = {},
+        key, a = [];
+        for (key in o) {
+            if (o.hasOwnProperty(key)) {
+                a.push(key);
+            }
+        }
+        a.sort();
+        for (key = 0; key < a.length; key++) {
+            sorted[a[key]] = o[a[key]];
+        }
+        return sorted;
+    }
+
+    function Points() {
+        var points = nodesCache.withTags;
+
+        for (var p = 0, r = points.length; p < r; p += 1) {
+            var feature = getFeature(points[p], "Point");
+
+            feature.geometry.coordinates = [
+                parseFloat(points[p].getAttribute('lon')),
+                parseFloat(points[p].getAttribute('lat'))
+            ];
+
+            geo.features.push(feature);
+        }
+    }
+
+
+    var xml = parse(osm),
+        geo = {
+            "type" : "FeatureCollection",
+            "features" : []
+        },
+        nodesCache = cacheNodes();
+
+    geo.bbox = getBounds(xml.getElementsByTagName('bounds'));
+
+    Points();
+
+    // MultiPolygons
+    var relational = buildRelations(),
+        ways = xml.getElementsByTagName('way');
+
+    // Polygons/LineStrings
+
+    for (var w = 0, x = ways.length; w < x; w += 1) {
+        var feature = {},
+            nds = ways[w].getElementsByTagName('nd');
+
+        // If first and last nd are the same then its a polygon
+        if (nds[0].getAttribute('ref') === nds[nds.length-1].getAttribute('ref')) {
+            feature = getFeature(ways[w], "Polygon");
+            feature.geometry.coordinates.push([]);
+        } else {
+            feature = getFeature(ways[w], "LineString");
+        }
+
+        for (var n = 0; n < nds.length; n++) {
+            var cords = nodesCache.coords[nds[n].getAttribute('ref')];
+            if (feature.geometry.type === "Polygon") {
+                feature.geometry.coordinates[0].push(cords);
+            } else {
+                feature.geometry.coordinates.push(cords);
+            }
+        }
+
+        if (relational.done[ways[w].getAttribute('id')]) {
+            var relWay = relational.done[ways[w].getAttribute('id')];
+            relational.features[relWay].geometry.coordinates[0].push(feature.geometry.coordinates);
+
+            // transfer the way (polygon) properties over to the relation (multipolygon)
+            // no overwriting, relation tags take precedence
+            for (var wayProp in feature.properties) {
+                if (!relational.features[relWay].properties[wayProp]) {
+                    relational.features[relWay].properties[wayProp] = feature.properties[wayProp];
+                }
             }
         } else {
-            // polygon -> way
-            var coords = [];
-            ways += '<way id="' + count + '" changeset="' + changeset + '">';
-            if (multipolygon) relations += '<member type="way" ref="' + count + '" role="outer"/>';
-            count--;
-            for (var j = 0; j < geo.coordinates[0].length-1; j++) {
-                coords.push([geo.coordinates[0][j][1], geo.coordinates[0][j][0]]);
-            }
-            coords = createNodes(coords, true);
-            nodes += coords['nodes'];
-            ways += coords['nds'];
-            ways += propertiesToTags(properties);
-            ways += '</way>';
+            geo.features.push(feature);
         }
-
-        return {
-            'nodes': nodes,
-            'ways': ways,
-            'relations': relations
-        };
     }
 
-    function propertiesToTags(properties) {
-        var tags = '';
-        for (var tag in properties) {
-            if (properties[tag] != null) {
-                tags += '<tag k="' + tag + '" v="' + properties[tag] + '"/>';
-            }
-        }
-        return tags;
+    for (var r = 0; r < relational.features.length; r++) {
+        geo.features.push(relational.features[r]);
     }
 
-    function roundCoords(coords){
-        for (var a = 0; a < coords.length; a++) {
-            coords[a][0] = Math.round(coords[a][0] * 1000000) / 1000000;
-            coords[a][1] = Math.round(coords[a][1] * 1000000) / 1000000;
-        }
-        return coords;
-    }
-
-    function createNodes(coords, repeatLastND) {
-        var nds = '',
-            nodes = '',
-            length = coords.length;
-        repeatLastND = repeatLastND || false;
-            // for polygons
-
-        coords = roundCoords(coords);
-
-        for (var a = 0; a < length; a++) {
-            if (repeatLastND && a === 0) {
-                repeatLastND = count;
-            }
-
-            nds += '<nd ref="' + count + '"/>';
-            nodes += '<node id="' + count + '" lat="' + coords[a][0] +'" lon="' + coords[a][1] +
-            '" changeset="' + changeset + '"/>';
-
-            if (repeatLastND && a === length-1) {
-                nds += '<nd ref="' + repeatLastND + '"/>';
-            }
-            count--;
-        }
-        return {'nds': nds, 'nodes': nodes};
-    }
-
-    var obj,
-        count = -1;
-    changeset = changeset || false;
-
-    switch (geo.type) {
-        case 'FeatureCollection':
-            if (geo.features) {
-                var temp = {
-                    'nodes': '',
-                    'ways': '',
-                    'relations': ''
-                };
-                obj = [];
-                for (var i = 0; i < geo.features.length; i++){
-                    obj.push(togeojson(geo.features[i].geometry, geo.features[i].properties));
-                }
-
-                temp['osm'] = '<?xml version="1.0" encoding="UTF-8"?><osm version="0.6" generator="geo2osm.js">';
-                if (osmchange) {
-                    temp['osm'] = '<osmChange version="0.6" generator="geo2osm.js"><create>';
-                }
-
-                for (var n = 0; n < obj.length; n++) {
-                    temp['nodes'] += obj[n]['nodes'];
-                    temp['ways'] += obj[n]['ways'];
-                    temp['relations'] += obj[n]['relations'];
-                }
-                temp['osm'] += temp['nodes'] + temp['ways'] + temp['relations'];
-
-                if (osmchange) {
-                    temp['osm'] += '</create></osmChange>';
-                } else {
-                    temp['osm'] += '</osm>';
-                }
-
-                obj = temp['osm'];
-            } else {
-                console.log('Invalid GeoJSON object: FeatureCollection object missing \"features\" member.');
-            }
-            break;
-
-        case 'GeometryCollection':
-            if (geo.geometries) {
-                obj = [];
-                for (var j = 0; j < geo.geometries.length; j++){
-                    obj.push(togeojson(geo.geometries[j]));
-                }
-            } else {
-                console.log('Invalid GeoJSON object: GeometryCollection object missing \"geometries\" member.');
-            }
-            break;
-
-        case 'Feature':
-            if (geo.properties && geo.geometry) {
-                obj = togeojson(geo.geometry, geo.properties);
-                obj = obj['osm'];
-            } else {
-                console.log('Invalid GeoJSON object: Feature object missing \"properties\" or \"geometry\" member.');
-            }
-            break;
-
-        case 'Point':
-        case 'MultiPoint':
-        case 'LineString':
-        case 'MultiLineString':
-        case 'Polygon':
-        case 'MultiPolygon':
-            if (geo.coordinates) {
-                obj = togeojson(geo);
-                obj = obj['osm'];
-            } else {
-                console.log('Invalid GeoJSON object: Geometry object missing \"coordinates\" member.');
-            }
-            break;
-
-        default:
-            console.log('Invalid GeoJSON object: GeoJSON object must be one of \"Point\", \"LineString\",' +
-                '\"Polygon\", \"MultiPolygon\", \"Feature\", \"FeatureCollection\" or \"GeometryCollection\".');
-    }
-
-    return obj;
+    console.log(JSON.stringify(geo));
+    return geo;
 };
