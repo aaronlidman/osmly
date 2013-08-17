@@ -18,11 +18,10 @@ JS_LIBS = \
 	js/lib/jquery-2.0.3.min.js \
 	js/lib/Bing.js \
 	js/lib/equalize.js \
-	js/lib/geo2osm.js \
 	js/lib/jquery.reveal.js \
 	js/lib/leaflet.draw.js \
 	js/lib/leaflet.label.js \
-	js/lib/osm2geo.js \
+	js/lib/osm_geojson.js \
 	js/lib/osmauth.min.js \
 	js/lib/sha.js
 

@@ -6,8 +6,6 @@ osmly.item = (function () {
         $('#tags tr').remove();
 
         var request = osmly.settings.featuresApi + 'db=' + osmly.settings.db;
-            // id = 942 doesn't show context correctly
-                // context park is a relation w/ tags, need to pass tags to children
 
         $.ajax(request).done(function(data) {
             item.data = JSON.parse(data);
@@ -109,7 +107,7 @@ osmly.item = (function () {
 
         $.ajax(request).done(function(xml) {
             osmly.ui.notify('rendering OSM data');
-            item.osmContext = osm2geo(xml);
+            item.osmContext = osm_geojson.osm2geojson(xml);
             item.filteredContext = filterContext(item.osmContext);
             setContext(item.filteredContext);
             callback();
@@ -191,11 +189,11 @@ osmly.item = (function () {
     };
 
     item.toOsm = function(geojson) {
-        return geo2osm(geojson);
+        return osm_geojson.geojson2osm(geojson);
     };
 
     item.toOsmChange = function(geojson, changesetId) {
-        return geo2osm(geojson, changesetId, true);
+        return osm_geojson.geojson2osm(geojson, changesetId);
     };
 
     return item;
