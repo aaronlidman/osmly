@@ -203,7 +203,7 @@ osmly.ui = (function() {
         }
 
         $('#notify, #login').fadeOut(250);
-        $('#title, #top-bar, #bottom-right, #action-block').fadeIn(250);
+        $('#problem, #submit, #title, #top-bar, #bottom-right, #action-block').fadeIn(250);
 
         if (isEditable) {
             $('#tags').fadeIn(250);

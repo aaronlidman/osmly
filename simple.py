@@ -74,10 +74,10 @@ def post():
 
 
 def done():
-    if request.form['done']:
+    done = 1
+
+    if request.form and 'done' in request.form:
         done = request.form['done']
-    else:
-        done = 1
 
     conn = sqlite3.connect(request.args['db'] + '.sqlite')
     c = conn.cursor()
@@ -87,7 +87,7 @@ def done():
     )
     conn.commit()
     conn.close()
-    return 'ok'
+    return json.dumps({'status': 'ok'})
 
 
 def problem():

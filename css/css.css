@@ -221,7 +221,7 @@ a {
     pointer-events: none;
     width: 50%;
     height: 850px;
-    overflow: auto;
+    overflow: visible;
     margin: auto;
     position: fixed;
     top: 0; left: 0; bottom: 0; right: 0;
@@ -233,7 +233,7 @@ a {
     display: none;
     pointer-events: none;
     font-size: 640px;
-    text-shadow: 0px 0px 5px black;
+    text-shadow: 0px 0px 10px black;
 }
 
 #login {
