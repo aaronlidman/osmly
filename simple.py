@@ -27,23 +27,30 @@ def get():
     c = conn.cursor()
     if 'id' in request.args:
         row = c.execute(
-            'SELECT geo, remote FROM osmly WHERE id = ? LIMIT 1',
+            'SELECT geo, remote, done FROM osmly WHERE id = ? LIMIT 1',
             [request.args['id']]
         )
         row = row.fetchone()
         conn.commit()
         conn.close()
 
-        if 'action' in request.args and request.args['action'] == 'remote':
-            out = row[1]
-        else:
-            out = row[0]
+        out = row[0]
+
+        if 'action' in request.args:
+            if request.args['action'] == 'remote':
+                out = row[1]
+            elif request.args['action'] == 'status':
+                out = {'status': 'ok'}
+                if row[2] == 0:
+                    out = {'status': 'no_go'}
+                out = json.dumps(out)
+
     elif 'overview' in request.args:
         query = 'SELECT id, problem, done, user, time FROM osmly ORDER BY id'
         c.execute(query)
         out = json.dumps(c.fetchall());
-        # it got too complicated, filter/sort clientside
     else:
+        # random selection
         row = c.execute(
             'SELECT geo FROM osmly WHERE problem = "" AND done = 0 ORDER BY RANDOM() LIMIT 1')
         row = row.fetchone()
@@ -68,9 +75,6 @@ def post():
             return post_remote()
         elif request.args['action'] == 'submit':
             return done()
-    else:
-        a = 1
-        # idk
 
 
 def done():

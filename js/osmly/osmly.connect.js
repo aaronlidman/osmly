@@ -10,6 +10,13 @@ osmly.connect = (function(){
 
         data['user'] = osmly.token('user');
 
+        if (action == 'submit') {
+            if (!checkItem(id)) {
+                if (callback) callback();
+                return false;
+            }
+        }
+
         $.ajax({
             type: 'POST',
             url: url,
@@ -19,6 +26,22 @@ osmly.connect = (function(){
             if (callback) callback();
         });
     };
+
+    function checkItem(id) {
+        var url = osmly.settings.featuresApi + 'db=' + osmly.settings.db +
+            '&id=' + id + '&action=status';
+
+        $.ajax({
+            url: url,
+            crossDomain: true
+        }).done(function(status){
+            status = JSON.parse(status).status;
+            if (status == 'no_go') {
+                return false;
+            }
+            return true;
+        });
+    }
 
     connect.openChangeset = function(callback) {
         if (!osmly.token('changeset_id')){

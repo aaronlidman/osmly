@@ -1,9 +1,4 @@
 window.osmly = (function () {
-    /*
-    TODO
-        - check if done, again, before submitting to osm
-    */
-
     var osmly = {};
 
     osmly.settings = {
