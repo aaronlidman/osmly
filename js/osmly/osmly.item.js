@@ -193,7 +193,7 @@ osmly.item = (function () {
     };
 
     item.toOsmChange = function(geojson, changesetId) {
-        return osm_geojson.geojson2osm(geojson, changesetId);
+        return osm_geojson.geojson2osm(geojson, changesetId, true);
     };
 
     return item;

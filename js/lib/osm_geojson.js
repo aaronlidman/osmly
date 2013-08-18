@@ -1,6 +1,8 @@
 var osm_geojson = {};
 
-osm_geojson.geojson2osm = function(geo, changeset) {
+osm_geojson.geojson2osm = function(geo, changeset, osmchange) {
+    osmchange = osmchange || false;
+
     function togeojson(geo, properties) {
         var nodes = '',
             ways = '',
@@ -56,6 +58,11 @@ osm_geojson.geojson2osm = function(geo, changeset) {
 
         osm = '<?xml version="1.0" encoding="UTF-8"?><osm version="0.6" generator="geo2osm.js">' +
         nodes + ways + relations + '</osm>';
+
+        if (osmchange) {
+            osm = '<osmChange version="0.6" generator="geo2osm.js"><create>' +
+            nodes + ways + relations + '</create></osmChange>';
+        }
 
         return {
             nodes: nodes,
@@ -178,13 +185,18 @@ osm_geojson.geojson2osm = function(geo, changeset) {
                 obj.push(togeojson(geo.features[i].geometry, geo.features[i].properties));
             }
             temp.osm = '<?xml version="1.0" encoding="UTF-8"?><osm version="0.6" generator="geo2osm.js">';
+            if (osmchange) temp.osm = '<osmChange version="0.6" generator="geo2osm.js"><create>';
             for (var n = 0; n < obj.length; n++) {
                 temp.nodes += obj[n].nodes;
                 temp.ways += obj[n].ways;
                 temp.relations += obj[n].relations;
             }
             temp.osm += temp.nodes + temp.ways + temp.relations;
-            temp.osm += '</osm>';
+            if (osmchange) {
+                temp.osm += '</create></osmChange>';
+            } else {
+                temp.osm += '</osm>';
+            }
             obj = temp.osm;
             break;
 
