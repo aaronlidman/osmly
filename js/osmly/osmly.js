@@ -2,16 +2,14 @@ window.osmly = (function () {
     var osmly = {};
 
     osmly.settings = {
+        // refer to settings_documentation.md for details
         title: '',
-        justMap: false,
-        featuresApi: '',
         db: '',
         writeApi: 'http://api06.dev.openstreetmap.org',
         oauth_secret: 'Mon0UoBHaO3qvfgwWrMkf4QAPM0O4lITd3JRK4ff',
         consumerKey: 'yx996mtweTxLsaxWNc96R7vpfZHKQdoI9hzJRFwg',
         readApi: 'http://www.overpass-api.de/api/xapi?map?',
-        context: {}, // {key: ['some', 'tags'], otherkey: ['more', 'tags']}
-        div: 'map',
+        context: {},
         origin: [0,0],
         zoom: 2,
         demo: false,
@@ -20,11 +18,10 @@ window.osmly = (function () {
             'osmly:version': '0',
             'imagery_used': 'Bing'
         },
-        renameProperty: {}, // {'MEssy55': 'clean'}, only converts key not value
-        usePropertyAsTag: [], // just keys
-        appendTag: {}, // {'key': 'value'}, will overwrite existing tags
+        renameProperty: {},
+        usePropertyAsTag: [],
+        appendTag: {},
         featureStyle: {
-            // http://leafletjs.com/reference.html#path-options
             color: '#00FF00',
             weight: 3,
             opacity: 1,
@@ -44,13 +41,11 @@ window.osmly = (function () {
                 osmly.settings[obj] = settings[obj];
             }
         } else {
-            console.log('missing settings, see documentation');
-            return;
+            alert('need some settings');
         }
-
         osmly.map = osmly.map();
-
-        if (!osmly.settings.justMap) osmly.ui.initialize();
+        if (!settings.db) osmly.ui.initialize();
+            // allows for lazy no UI mode used on dist/index.html
     };
 
     osmly.auth = osmAuth({

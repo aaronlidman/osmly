@@ -71,9 +71,9 @@ osmly.overview = (function () {
         if (callback) callback();
     }
 
-    function request(query, callback) {
+    function request(callback) {
         $.ajax({
-            url: query,
+            url: osmly.settings.db + '&overview',
             cache: false
         }).done(function(items){
             overview.data = JSON.parse(items);
@@ -84,12 +84,10 @@ osmly.overview = (function () {
 
     overview.refresh = function(callback) {
         osmly.ui.notify('Loading...');
-        request(
-            osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&overview',
-            function() {
-                buildTable(callback);
-                problem_selection();
-                user_selection();
+        request(function() {
+            buildTable(callback);
+            problem_selection();
+            user_selection();
             }
         );
     };

@@ -5,8 +5,7 @@ osmly.connect = (function(){
         if (typeof data != 'object') data = {};
         id = id || osmly.item.id;
 
-        var url = osmly.settings.featuresApi + 'db=' + osmly.settings.db +
-            '&id=' + id + '&action=' + action;
+        var url = osmly.settings.db + '&id=' + id + '&action=' + action;
 
         data['user'] = osmly.token('user');
 
@@ -28,8 +27,7 @@ osmly.connect = (function(){
     };
 
     function checkItem(id) {
-        var url = osmly.settings.featuresApi + 'db=' + osmly.settings.db +
-            '&id=' + id + '&action=status';
+        var url = osmly.settings.db + '&id=' + id + '&action=status';
 
         $.ajax({
             url: url,
@@ -172,7 +170,7 @@ osmly.connect = (function(){
 
     connect.editInJosm = function(id) {
         var osm,
-            url = osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=' + id + '&action=remote';
+            url = osmly.settings.db + '&id=' + id + '&action=remote';
 
         if (id === osmly.item.id) {
             osm = osmly.item.toOsm(osmly.item.layer.toGeoJSON());
@@ -180,7 +178,7 @@ osmly.connect = (function(){
         } else {
             // need to fetch geometry of the given id
             $.ajax({
-                url: osmly.settings.featuresApi + 'db=' + osmly.settings.db + '&id=' + id,
+                url: osmly.settings.db + '&id=' + id,
                 cache: false
             }).done(function(geo){
                 geo = JSON.parse(geo);

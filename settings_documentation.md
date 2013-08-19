@@ -5,27 +5,14 @@ types and uses of osmly.settings properties
 - very basic description of what needs to be done
 - eg. 'Outline the park', 'Locate the library'
 
-### justMap
-- bool
-- prevents any UI from loading, probably only useful on the osmly index
-- default: `false`
-
-### featuresApi (required)
-- string
-- the url to the root feature server
-    - db, id, action queries get appended as needed
-- probably going to simplify and include as part of 'db'
-- eg. `'http://127.0.0.1:5000/?'`
-
 ### db (required)
 - string
-- simply the db name on the feature server
-- gets appended to featuresApi for making various requests
-- eg. `'parks-5'`
+- full url of the database location
+- eg. `'http://127.0.0.1:5000/?db=parks-5'`
 
 ### writeApi
 - string
-- the OSM API endpoint to use
+- the OSM API endpoint to write data
 - http://wiki.openstreetmap.org/wiki/API_v0.6
 - default: `'http://api06.dev.openstreetmap.org'`
     - dev server
@@ -62,13 +49,6 @@ but other key/values should also be included for items that are often near schoo
         leisure: ['park']
     }
     ```
-- default: `{}`
-    - everything, which is overwhelming, don't do it
-
-### div
-- string
-- the div to put the map on
-- default: `'map'`
 
 ### origin
 - array

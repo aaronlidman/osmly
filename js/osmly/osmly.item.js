@@ -5,9 +5,7 @@ osmly.item = (function () {
         osmly.ui.notify('getting next item');
         $('#tags tr').remove();
 
-        var request = osmly.settings.featuresApi + 'db=' + osmly.settings.db;
-
-        $.ajax(request).done(function(data) {
+        $.ajax(osmly.settings.db).done(function(data) {
             item.data = JSON.parse(data);
             item.id = item.data.properties.id;
             item.bbox = item.data.properties.bounds;
