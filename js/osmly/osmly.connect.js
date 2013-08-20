@@ -10,34 +10,41 @@ osmly.connect = (function(){
         data['user'] = osmly.token('user');
 
         if (action == 'submit') {
-            if (!checkItem(id)) {
-                if (callback) callback();
-                return false;
-            }
+            checkItem(id, makeRequest);
+        } else {
+            makeRequest();
         }
 
-        $.ajax({
-            type: 'POST',
-            url: url,
-            crossDomain: true,
-            data: data
-        }).done(function(){
-            if (callback) callback();
-        });
+        function makeRequest(skip) {
+            if (skip && callback) {
+                callback();
+            } else {
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    crossDomain: true,
+                    data: data
+                }).done(function(){
+                    if (callback) callback();
+                });
+            }
+        }
     };
 
-    function checkItem(id) {
+    function checkItem(id, callback) {
         var url = osmly.settings.db + '&id=' + id + '&action=status';
 
         $.ajax({
             url: url,
-            crossDomain: true
+            crossDomain: true,
+            async: false
         }).done(function(status){
             status = JSON.parse(status).status;
-            if (status == 'no_go') {
-                return false;
+            if (status == 'ok') {
+                callback();
+            } else {
+                callback('skip');
             }
-            return true;
         });
     }
 

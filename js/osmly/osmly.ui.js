@@ -111,8 +111,7 @@ osmly.ui = (function() {
         });
 
         $('#remote-edit-modal').on('click', 'button', function(){
-            var result = this.getAttribute('data-type'),
-                id = this.getAttribute('data-id');
+            var result = this.getAttribute('data-type');
 
             if (result == 'no') {
                 CSSModal.close();
@@ -121,7 +120,7 @@ osmly.ui = (function() {
                     osmly.overview.modalDone(function(){
                         CSSModal.close();
                     });
-                }, id);
+                }, this.getAttribute('data-id'));
             }
         });
 
@@ -130,13 +129,12 @@ osmly.ui = (function() {
                 pleaseLogin();
             } else {
                 $('#markdone-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
-                CSSModal.close();
+                CSSModal.open('markdone-modal');
             }
         });
 
         $('#markdone-modal').on('click', 'button', function(){
-            var result = this.getAttribute('data-type'),
-                id = this.getAttribute('data-id');
+            var result = this.getAttribute('data-type');
 
             if (result == 'no') {
                 CSSModal.close();
@@ -145,7 +143,7 @@ osmly.ui = (function() {
                     osmly.overview.modalDone(function(){
                         CSSModal.close();
                     });
-                }, id);
+                }, this.getAttribute('data-id'));
             }
         });
     }

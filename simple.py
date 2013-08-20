@@ -41,7 +41,7 @@ def get():
                 out = row[1]
             elif request.args['action'] == 'status':
                 out = {'status': 'ok'}
-                if row[2] == 0:
+                if row[2] != 0:
                     out = {'status': 'no_go'}
                 out = json.dumps(out)
 
