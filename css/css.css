@@ -1,16 +1,10 @@
-input:focus,
-select:focus,
-textarea:focus,
-button:focus {outline: none;}
-
-hr {border: 1px solid black;}
-
+input:focus, select:focus, textarea:focus, button:focus {    outline: none }
+hr {    border: 1px solid black }
 * {
     margin: 0;
     padding: 0;
     outline: none;
 }
-
 body, html {
     overflow-y: hidden;
     color: #222;
@@ -19,17 +13,20 @@ body, html {
     min-width: 640px;
     font-family: Helvetica, Arial, sans-serif;
 }
-
+.hidden {
+    display: none;
+}
+.block {
+    display: block;
+}
 a {
     text-decoration: none;
     color: #222;
 }
-
 #map {
     min-height: 500px;
     height: 100%;
 }
-
 #top-bar {
     position: absolute;
     top: 10px;
@@ -40,12 +37,10 @@ a {
     background: white;
     box-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
-
 #top-bar li {
     margin-left: 2px;
     float: left;
 }
-
 #title {
     z-index: 10;
     display: none;
@@ -59,21 +54,18 @@ a {
     line-height: 61px;
     box-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
-
 #top-bar li {
     text-align: center;
     padding: 7px 10px;
     cursor: pointer;
     border-left: 1px solid #ccc;
 }
-
 #bottom-right li {
     text-align: center;
     padding: 7px 10px;
     cursor: pointer;
     border-bottom: 1px solid #ccc;
 }
-
 #bottom-right {
     display: none;
     list-style-type: none;
@@ -86,11 +78,8 @@ a {
     padding: 5px;
     box-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
-
-#user, #changeset {display: none;}
-
-#changeset-modal {padding: 10px 15px;}
-
+#user, #changeset {    display: none }
+#changeset-modal {    padding: 10px 15px }
 #changeset-form {
     border: 1px solid #ccc;
     border-radius: 3px;
@@ -100,7 +89,6 @@ a {
     font-size: 14px;
     margin-bottom: 5px;
 }
-
 #update-change {
     border-radius: 3px;
     border: 1px solid #ccc;
@@ -108,16 +96,12 @@ a {
     float: right;
     cursor: pointer;
 }
-
 #changeset-link a {
     border: 0 !important;
     font-size: 14px;
 }
-
-#instruction-modal ul {
-    margin-left: 20px;
-}
-
+#instruction-modal { z-index: 7500; }
+#instruction-modal ul {    margin-left: 20px }
 #action-block {
     display: none;
     list-style-type: none;
@@ -127,7 +111,6 @@ a {
     bottom: 10px;
     left: 10px;
 }
-
 #action-block li {
     float: left;
     margin-left: 20px;
@@ -135,7 +118,6 @@ a {
     cursor: pointer;
     box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
 }
-
 #submit, #skip, #problem {
     -webkit-transition: background-color 100ms linear;
     -moz-transition: background-color 100ms linear;
@@ -143,13 +125,11 @@ a {
     -ms-transition: background-color 100ms linear;
     transition: background-color 100ms linear;
 }
-
 #submit, #skip {
     border: 1px solid rgba(255,255,255,0.25);
     color: rgba(255,255,255,1);
     padding: 8px 15px;
 }
-
 #problem {
     font-weight: bold;
     background-color: black;
@@ -160,15 +140,13 @@ a {
     padding: 8px 15px;
     cursor: pointer;
 }
-
-#submit {background-color: rgba(0, 144, 0, 1);}
-#submit:hover {background-color: rgba(0, 179, 0, 1);}
-#submit:active {background-color: rgba(0, 109, 0, 1);}
-#skip {background-color: rgba(0, 69, 144, 1);}
-#skip:hover {background-color: rgba(0, 78, 179, 1);}
-#skip:active {background-color: rgba(0, 49, 109, 1);}
-#problem:hover {background-color: #333;}
-
+#submit {    background-color: rgba(0, 144, 0, 1) }
+#submit:hover {    background-color: rgba(0, 179, 0, 1) }
+#submit:active {    background-color: rgba(0, 109, 0, 1) }
+#skip {    background-color: rgba(0, 69, 144, 1) }
+#skip:hover {    background-color: rgba(0, 78, 179, 1) }
+#skip:active {    background-color: rgba(0, 49, 109, 1) }
+#problem:hover {    background-color: #333 }
 #tags {
     display: none;
     color: black;
@@ -182,7 +160,6 @@ a {
     padding: 7px;
     box-shadow: 0px 0px 5px rgba(0,0,0,0.5);
 }
-
 #add-new-tag {
     cursor: pointer;
     font-size: 16px;
@@ -197,17 +174,13 @@ a {
     border-right: none !important;
     font-family: Arial;
 }
-
-#tags table {border-collapse: collapse;}
-
+#tags table {    border-collapse: collapse }
 #tags td {
     border: 1px solid #ccc;
     padding: 5px 7px;
     min-width: 50px;
 }
-
-.k {font-weight: bold;}
-
+.k {    font-weight: bold }
 .minus {
     padding: 0 10px !important;
     cursor: pointer;
@@ -215,7 +188,6 @@ a {
     font-size: 18px;
     min-width: 0 !important;
 }
-
 #flash {
     z-index: 999;
     pointer-events: none;
@@ -224,9 +196,11 @@ a {
     overflow: visible;
     margin: auto;
     position: fixed;
-    top: 0; left: 0; bottom: 0; right: 0;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
 }
-
 .display {
     z-index: 10;
     color: white;
@@ -235,7 +209,6 @@ a {
     font-size: 640px;
     text-shadow: 0px 0px 10px black;
 }
-
 #login {
     bottom: 20px;
     left: 20px;
@@ -251,7 +224,6 @@ a {
     display: none;
     box-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
-
 #notify {
     display: none;
     z-index: 9999;
@@ -263,23 +235,18 @@ a {
     height: 40px;
     box-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
-
 #notify span {
     font-size: 14px;
     position: relative;
     top: -15px;
     padding: 0 10px;
 }
-
-#reusable-modal {text-align: center;}
-
+#reusable-modal {    text-align: center }
 .reveal-modal a {
     cursor: pointer;
     border-bottom: 1px solid #666;
 }
-
-.close-reveal-modal {border-bottom: none !important;}
-
+.close-reveal-modal {    border-bottom: none !important }
 #overview_bg {
     cursor: pointer;
     z-index: 8000;
@@ -291,7 +258,6 @@ a {
     left: 0;
     display: none;
 }
-
 #overview_block {
     z-index: 8001;
     position: absolute;
@@ -308,7 +274,6 @@ a {
     line-height: 1.5em;
     display: none;
 }
-
 #overview-controls {
     display: none;
     bottom: 0;
@@ -319,9 +284,7 @@ a {
     line-height: 1.5em;
     z-index: 8002;
 }
-
-input[type='radio'] {margin-right: 5px;}
-
+input[type='radio'] {    margin-right: 5px }
 #count {
     right: 20px;
     position: absolute;
@@ -330,17 +293,13 @@ input[type='radio'] {margin-right: 5px;}
     font-size: 48px;
     top: -28px;
 }
-
-#count span {font-size: 24px;}
-
+#count span {    font-size: 24px }
 #main_table {
     width: 100%;
     border-collapse: collapse;
     text-align: center;
 }
-#main_table tr {
-    border-top: 1px solid #eee;
-}
+#main_table tr {    border-top: 1px solid #eee }
 #main_table td a {
     text-decoration: none;
     color: black;
@@ -354,40 +313,36 @@ input[type='radio'] {margin-right: 5px;}
     line-height: 36px;
 }
 #main_table table {
-  max-width: 100%;
-  background-color: transparent;
-  border-collapse: collapse;
-  border-spacing: 0;
+    max-width: 100%;
+    background-color: transparent;
+    border-collapse: collapse;
+    border-spacing: 0;
 }
 #main_table .table {
-  width: 100%;
-  margin-bottom: 20px;
+    width: 100%;
+    margin-bottom: 20px;
 }
-#main_table .table th,
-#main_table .table td {
-  padding: 5px;
-  line-height: 15px;
-  text-align: left;
-  vertical-align: top;
+#main_table .table th, #main_table .table td {
+    padding: 5px;
+    line-height: 15px;
+    text-align: left;
+    vertical-align: top;
 }
 #main_table .table th {
-  font-weight: bold;
-  line-height: 30px;
+    font-weight: bold;
+    line-height: 30px;
 }
-#main_table .table thead th {
-  vertical-align: bottom;
-}
+#main_table .table thead th {    vertical-align: bottom }
 .table tbody tr.success {
-  background-color: #ceffce;
-  border-top: 1px solid #b4e2b4 !important;
-  border-bottom: 1px solid #b4e2b4;
+    background-color: #ceffce;
+    border-top: 1px solid #b4e2b4 !important;
+    border-bottom: 1px solid #b4e2b4;
 }
 .table tbody tr.error {
-  background-color: #f7c8c8;
-  border-top: 1px solid #e9aeae !important;
-  border-bottom: 1px solid #e9aeae;
+    background-color: #f7c8c8;
+    border-top: 1px solid #e9aeae !important;
+    border-bottom: 1px solid #e9aeae;
 }
-
 button {
     color: white;
     border: none;
@@ -397,77 +352,8 @@ button {
     margin-left: 20px;
     cursor: pointer;
 }
-
 button:hover {
     transition: all 200ms ease;
     background-color: #333;
 }
-
-.markdone, .editjosm {
-    cursor: pointer;
-}
-
-/* just spammed !important, which isn't nice */
-.leaflet-control-attribution {
-    font-size: 12px !important;
-    background: none !important;
-    color: white !important;
-    text-shadow: 0px 0px 3px black, 1px 1px 10px black !important;
-    font-weight: bold !important;
-    box-shadow: none !important;
-    -webkit-font-smoothing: antialiased;
-}
-.leaflet-control-attribution a {
-    color: white !important;
-}
-
-.leaflet-popup-content-wrapper, .leaflet-popup-tip {
-    -moz-border-radius: 0px !important;
-    -webkit-border-radius: 0px !important;
-    border-radius: 0px !important;
-    -moz-box-shadow: 0 0 5px black !important;
-    -webkit-box-shadow: 0 0 5px black !important;
-    box-shadow: 0 0 5px black !important;
-}
-
-.leaflet-popup-content {
-    overflow: auto;
-    margin: 12px !important;
-    list-style-type: none;
-}
-
-.leaflet-editing-icon {
-    -webkit-border-radius: 10px;
-    border-radius: 10px;
-    width: 10px !important;
-    height: 10px !important;
-    margin-left: -7px !important;
-    margin-top: -7px !important;
-}
-
-.leaflet-div-icon {border: 2px solid black;}
-
-.leaflet-bar-part {background-color: white !important;}
-
-.leaflet-bar-part-top, .leaflet-bar-part-bottom {
-    border-radius: 0 !important;
-}
-
-.leaflet-control-zoom a {
-    height: 30px !important;
-    width: 30px !important;
-}
-
-.leaflet-control-zoom-out {
-    font: bold 30px/27px Tahoma, Verdana, sans-serif !important;
-}
-
-.leaflet-control-zoom-in {
-    font: bold 21px/30px Arial, Helvetica, sans-serif !important;
-}
-
-.leaflet-bar {box-shadow: 0px 0px 5px rgba(0,0,0,0.5) !important;}
-
-.leaflet-bar a:last-child {border-radius: 0 !important;}
-
-.leaflet-bar a:first-child {border-radius: 0 !important;}
+.markdone, .editjosm {    cursor: pointer }
