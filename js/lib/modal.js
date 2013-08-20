@@ -1,3 +1,4 @@
+// MODIFIED FOR OSMLY
 /*!
  * CSS Modal
  * http://drublic.github.com/css-modal
@@ -26,28 +27,6 @@
 		}
 	};
 
-	// Hide overlay when ESC is pressed
-	modal._addEventListener(document, 'keyup', function (event) {
-		var hash = window.location.hash.replace('#', '');
-
-		// If hash is not set
-		if (hash === '' || hash === '!') {
-			return;
-		}
-
-		// If key ESC is pressed
-		if (event.keyCode === 27) {
-			window.location.hash = '!';
-
-			if (modal.lastActive) {
-				return false;
-			}
-
-			// Unfocus
-			modal.removeFocus();
-		}
-	}, false);
-
 	// Convenience function to trigger event
 	modal._dispatchEvent = function (event, modal) {
 		var eventTigger;
@@ -57,10 +36,8 @@
 		}
 
 		eventTigger = document.createEvent('Event');
-
 		eventTigger.initEvent(event, true, true);
 		eventTigger.customData = { 'modal': modal };
-
 		document.dispatchEvent(eventTigger);
 	};
 
@@ -124,7 +101,12 @@
 	};
 
 	modal._addEventListener(window, 'hashchange', modal.mainHandler);
-	modal._addEventListener(window, 'load', modal.mainHandler);
+	modal._addEventListener(window, 'load', function(){
+		// prevents linking others to pages with open modals
+		// not great but better than nothing...
+		window.location.hash = '#!';
+		modal.mainHandler();
+	});
 
 	/*
 	 * Accessibility
@@ -147,6 +129,17 @@
 		if (modal.lastActive) {
 			modal.lastActive.focus();
 		}
+	};
+
+	modal.open = function(id) {
+		if (modal.activeElement) {
+			modal.close();
+		}
+		window.location.hash = '#' + id;
+	};
+
+	modal.close = function() {
+		window.location.hash = '#!';
 	};
 
 	// Export CSSModal into global space

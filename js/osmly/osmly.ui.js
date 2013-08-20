@@ -52,7 +52,7 @@ osmly.ui = (function() {
         $('#update-change').click(function() {
             osmly.settings.changesetTags['comment'] = $('#changeset-form').text();
             osmly.connect.updateComment(function() {
-                // trigger close #changeset-modal
+                CSSModal.close();
                 $('#notify').fadeOut(250);
             });
         });
@@ -115,11 +115,11 @@ osmly.ui = (function() {
                 id = this.getAttribute('data-id');
 
             if (result == 'no') {
-                // trigger close #remote-edit-modal
+                CSSModal.close();
             } else if (result == 'yes') {
                 osmly.connect.updateItem('submit', {done: 3}, function(){
                     osmly.overview.modalDone(function(){
-                        // trigger close #remote-edit-modal
+                        CSSModal.close();
                     });
                 }, id);
             }
@@ -130,7 +130,7 @@ osmly.ui = (function() {
                 pleaseLogin();
             } else {
                 $('#markdone-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
-                // need to trigger #markdone-modal
+                CSSModal.close();
             }
         });
 
@@ -139,11 +139,11 @@ osmly.ui = (function() {
                 id = this.getAttribute('data-id');
 
             if (result == 'no') {
-                // trigger close #markdone-modal
+                CSSModal.close();
             } else if (result == 'yes') {
                 osmly.connect.updateItem('submit', {done: 2}, function(){
                     osmly.overview.modalDone(function(){
-                        // trigger close #markdone-modal
+                        CSSModal.close();
                     });
                 }, id);
             }
@@ -154,7 +154,7 @@ osmly.ui = (function() {
         $('#reusable-modal h3').text(
             'Please login. It helps track your changes so other users don\'t edit the same feature.');
         // login button/link?
-        // activate #reusable-modal
+        CSSModal.open('reusable-modal');
     }
 
     ui.notify = function(string) {
@@ -192,7 +192,7 @@ osmly.ui = (function() {
                 'This feature is too complex. <a>Edit it in JOSM?</a>');
             // put an 'Edit in JOSM' button right there, when clicked close the modal and let the other modal open
             // literally bind, $('#josm').click()
-            // activate reusable modal
+            CSSModal.open('reusable-modal');
         }
     };
 
