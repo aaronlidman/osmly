@@ -100,7 +100,6 @@ a {
     border: 0 !important;
     font-size: 14px;
 }
-#instruction-modal { z-index: 7500; }
 #instruction-modal ul {    margin-left: 20px }
 #action-block {
     display: none;
@@ -242,11 +241,6 @@ a {
     padding: 0 10px;
 }
 #reusable-modal {    text-align: center }
-.reveal-modal a {
-    cursor: pointer;
-    border-bottom: 1px solid #666;
-}
-.close-reveal-modal {    border-bottom: none !important }
 #overview_bg {
     cursor: pointer;
     z-index: 8000;

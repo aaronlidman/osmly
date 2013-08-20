@@ -7,7 +7,9 @@
         <link rel="stylesheet" href="js/lib/leaflet-0.6.4/leaflet.css" />
         <link rel="stylesheet" href="css/leaflet.label.css" />
         <link rel="stylesheet" href="css/css.css" />
-        <link rel="stylesheet" href="css/reveal.css" />
+        <link rel="stylesheet" href="css/animations.css" />
+        <link rel="stylesheet" href="css/modal.css" />
+        <link rel="stylesheet" href="css/leaflet-overwrite.css" />
         <link rel="stylesheet" href="css/general_foundicons.css">
         <!--[if lte IE 8]>
             <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.6.3/leaflet.ie.css" />
@@ -19,8 +21,8 @@
         <script src="js/lib/sha.js"></script>
         <script src="js/lib/osmauth.min.js"></script>
         <script src="js/lib/Bing.js"></script>
-        <script src="js/lib/jquery.reveal.js"></script>
         <script src="js/lib/osm_geojson.js"></script>
+        <script src="js/lib/modal.js"></script>
 
         <script src="js/osmly/osmly.js"></script>
         <script src="js/osmly/osmly.map.js"></script>
@@ -32,10 +34,14 @@
     <body>
         <span id="title"></span>
         <ul id="top-bar">
-            <li id="instruction" style="border-left: none;">Instructions</li>
+            <a href="#instruction-modal">
+                <li id="instruction" style="border-left: none;">Instructions</li>
+            </a>
             <li id="go_overview">Overview</li>
             <li id="user"></li>
-            <li id="changeset">Changeset</li>
+            <a href="#changeset-modal">
+                <li id="changeset">Changeset</li>
+            </a>
         </ul>
 
         <ul id="bottom-right">
@@ -45,59 +51,75 @@
         </ul>
 
     <!-- modals -->
-        <div id="changeset-modal" class="reveal-modal medium">
+        <div class="semantic-content" id="changeset-modal">
             <!-- eventually, prefill comment with existing comment -->
-            <span>Changeset comment:</span>
-            <div id="changeset-form" contenteditable="true"></div>
-            <span id="changeset-link"></span>
-            <span id="update-change">update</span>
-            <a class="close-reveal-modal">&#215;</a>
-        </div>
-
-        <div id="instruction-modal" class="reveal-modal xlarge">
-            <h3>Instructions</h3>
-            <ul>
-                <li>Outline the nearby park.</li>
-                <li>It's possible the data is out of date or just wrong; report problems accordingly.</li>
-                <li>Be careful to not include nearby schools, golf courses, or residential yards; just the park.</li>
-            </ul>
-
-            <h3 style="margin-top: 15px;">Tips</h3>
-            <ul>
-                <li>Click on the nodes (white dots) to delete them</li>
-                <li>Drag a transparent middle node to add a new node</li>
-                <li>Yellow features are other OSM references there to help you. You can't edit them here but clicking them provides more information. Use this info to help make your features more accurate</li>
-                <li>If you want to edit from another editor, click the coordinates in the bottom right corner which will take you to osm.org</li>
-            </ul>
-            
-            <a class="close-reveal-modal">&#215;</a>
-        </div>
-
-        <div id="remote-edit-modal" class="reveal-modal large">
-            <h2 style="margin: 50px 0; text-align: center;">Loading in JOSM...</h2>
-            <hr/>
-            <h4 style="margin-top: 25px;">When you're done:</h4>
-            <h2 style="text-align: center; margin: 20px 0;">Did you upload the feature via JOSM?</h2>
-            <div style="text-align: center; margin-bottom: 25px;">
-                <button data-type="no" style="margin-left: 0;">No, not uploaded to OSM</button>
-                <button data-type="yes">Yes, uploaded</button>
+            <div class="modal-inner">
+                <header id="modal-label"><h2>Changeset</h2></header>
+                <div class="modal-content">
+                    <div id="changeset-form" contenteditable="true"></div>
+                    <span id="changeset-link"></span>
+                    <span id="update-change">update</span>
+                </div>
             </div>
-            <a class="close-reveal-modal">&#215;</a>
+            <a href="#!" class="modal-close" title="Close this modal" data-close="Close" data-dismiss="modal">×</a>
         </div>
 
-        <div id="markdone-modal" class="reveal-modal xlarge">
-            <h2 style="margin: 20px 0; text-align: center;">Are you sure?</h2>
-            <h2 style="margin: 20px 0; text-align: center;"> This will prevent other users from editing this feature.</h2>
-            <div style="text-align: center; margin-bottom: 25px;">
-                <button data-type="no" style="margin-left: 0;">No, don't mark it as done</button>
-                <button data-type="yes">Yes, mark it as done</button>
+        <div class="semantic-content" id="instruction-modal">
+            <div class="modal-inner">
+                <header id="modal-label"><h2>Instructions</h2></header>
+                <div class="modal-content">
+                    <ul>
+                        <li>Outline the nearby park.</li>
+                        <li>It's possible the data is out of date or just wrong; report problems accordingly.</li>
+                        <li>Be careful to not include nearby schools, golf courses, or residential yards; just the park.</li>
+                    </ul>
+                    <h3 style="margin-top: 15px;">Tips</h3>
+                    <ul>
+                        <li>Click on the nodes (white dots) to delete them</li>
+                        <li>Drag a transparent middle node to add a new node</li>
+                        <li>Yellow features are other OSM references there to help you. You can't edit them here but clicking them provides more information. Use this info to help make your features more accurate</li>
+                        <li>If you want to edit from another editor, click the coordinates in the bottom right corner which will take you to osm.org</li>
+                    </ul>
+                </div>
             </div>
-            <a class="close-reveal-modal">&#215;</a>
+            <a href="#!" class="modal-close" title="Close this modal" data-close="Close" data-dismiss="modal">×</a>
         </div>
 
-        <div id="reusable-modal" class="reveal-modal xlarge">
-            <span></span>
-            <a class="close-reveal-modal">&#215;</a>
+        <div class="semantic-content" id="remote-edit-modal">
+            <div class="modal-inner">
+                <div class="modal-content">
+                    <h2 style="margin: 50px 0; text-align: center;">Loading in JOSM...</h2>
+                    <hr/>
+                    <h4 style="margin-top: 25px;">When you're done:</h4>
+                    <h2 style="text-align: center; margin: 20px 0;">Did you upload the feature via JOSM?</h2>
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <button data-type="no" style="margin-left: 0;">No, not uploaded to OSM</button>
+                        <button data-type="yes">Yes, uploaded</button>
+                    </div>
+                </div>
+            </div>
+            <a href="#!" class="modal-close" title="Close this modal" data-close="Close" data-dismiss="modal">×</a>
+        </div>
+
+        <div class="semantic-content" id="markdone-modal">
+            <div class="modal-inner">
+                <div class="modal-content">
+                    <h2 style="margin: 20px 0; text-align: center;">Are you sure?</h2>
+                    <h2 style="margin: 20px 0; text-align: center;"> This will prevent other users from editing this feature.</h2>
+                    <button data-type="no" style="margin-left: 0;">No, don't mark it as done</button>
+                    <button data-type="yes">Yes, mark it as done</button>
+                </div>
+            </div>
+            <a href="#!" class="modal-close" title="Close this modal" data-close="Close" data-dismiss="modal">×</a>
+        </div>
+
+        <div class="semantic-content" id="reusable-modal">
+            <div class="modal-inner">
+                <div class="modal-content">
+                    <h3></h3>
+                </div>
+            </div>
+            <a href="#!" class="modal-close" title="Close this modal" data-close="Close" data-dismiss="modal">×</a>
         </div>
     <!-- end modals -->
 
@@ -134,8 +156,6 @@
         </div>
 
         <div id="overview_bg"></div>
-            <!-- reveal can't handle more than one modal, which causes problems
-             this is a bit of a hack, need a better modal lib -->
         <div id="overview_block">
             <table id='main_table' class='table'>
                 <thead>

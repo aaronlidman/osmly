@@ -209,20 +209,14 @@ osmly.connect = (function(){
         function callback() {
             var request = $.ajax('http://127.0.0.1:8111/import?url=' + url);
 
-            request.done(function() {
-                $('#remote-edit-modal').reveal({
-                    animation: 'fade',
-                    animationspeed: 100
-                });
+            request.done(function(){
+                // activate #remote-edit-modal
             });
 
             request.fail(function() {
-                $('#reusable-modal span').text(
+                $('#reusable-modal h3').text(
                     'JOSM doesn\'t seem to be running. Start JOSM and try again.');
-                $('#reusable-modal').reveal({
-                    animation: 'fade',
-                    animationspeed: 100
-                });
+                // activate #reusable-modal
             });
         }
     };

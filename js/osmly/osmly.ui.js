@@ -35,21 +35,6 @@ osmly.ui = (function() {
             }
         });
 
-        $('#instruction').click(function() {
-            $('#instruction-modal').reveal({
-                animation: 'fade',
-                animationspeed: 100
-            });
-        });
-
-        $('#changeset').click(function(e) {
-            e.preventDefault();
-            $('#changeset-modal').reveal({
-                animation: 'fade',
-                animationspeed: 100
-            });
-        });
-
         $('#go_overview').click(function(){
             $('#overview_bg').fadeIn(100);
             $('#overview-controls').fadeIn(100);
@@ -67,7 +52,7 @@ osmly.ui = (function() {
         $('#update-change').click(function() {
             osmly.settings.changesetTags['comment'] = $('#changeset-form').text();
             osmly.connect.updateComment(function() {
-                $('#changeset-modal').trigger('reveal:close');
+                // trigger close #changeset-modal
                 $('#notify').fadeOut(250);
             });
         });
@@ -130,11 +115,11 @@ osmly.ui = (function() {
                 id = this.getAttribute('data-id');
 
             if (result == 'no') {
-                $('#remote-edit-modal').trigger('reveal:close');
+                // trigger close #remote-edit-modal
             } else if (result == 'yes') {
                 osmly.connect.updateItem('submit', {done: 3}, function(){
                     osmly.overview.modalDone(function(){
-                        $('#remote-edit-modal').trigger('reveal:close');
+                        // trigger close #remote-edit-modal
                     });
                 }, id);
             }
@@ -145,10 +130,7 @@ osmly.ui = (function() {
                 pleaseLogin();
             } else {
                 $('#markdone-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
-                $('#markdone-modal').reveal({
-                    animation: 'fade',
-                    animationspeed: 100
-                });
+                // need to trigger #markdone-modal
             }
         });
 
@@ -157,11 +139,11 @@ osmly.ui = (function() {
                 id = this.getAttribute('data-id');
 
             if (result == 'no') {
-                $('#markdone-modal').trigger('reveal:close');
+                // trigger close #markdone-modal
             } else if (result == 'yes') {
                 osmly.connect.updateItem('submit', {done: 2}, function(){
                     osmly.overview.modalDone(function(){
-                        $('#markdone-modal').trigger('reveal:close');
+                        // trigger close #markdone-modal
                     });
                 }, id);
             }
@@ -169,13 +151,10 @@ osmly.ui = (function() {
     }
 
     function pleaseLogin() {
-        $('#reusable-modal span').text(
+        $('#reusable-modal h3').text(
             'Please login. It helps track your changes so other users don\'t edit the same feature.');
-        $('#reusable-modal').reveal({
-            animation: 'fade',
-            animationspeed: 200,
-            closeonbackgroundclick: true
-        });
+        // login button/link?
+        // activate #reusable-modal
     }
 
     ui.notify = function(string) {
@@ -209,15 +188,11 @@ osmly.ui = (function() {
             $('#tags').fadeIn(250);
         } else {
             $('#problem, #submit').hide();
-            $('#reusable-modal span').html(
+            $('#reusable-modal h3').html(
                 'This feature is too complex. <a>Edit it in JOSM?</a>');
             // put an 'Edit in JOSM' button right there, when clicked close the modal and let the other modal open
             // literally bind, $('#josm').click()
-            $('#reusable-modal').reveal({
-                animation: 'fade',
-                animationspeed: 200,
-                closeonbackgroundclick: true
-            });
+            // activate reusable modal
         }
     };
 

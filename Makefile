@@ -10,20 +10,21 @@ CSS = \
 	js/lib/leaflet-0.6.4/leaflet.css \
 	css/leaflet.label.css \
 	css/general_foundicons.css \
-	css/reveal.css \
-	css/css.css
+	css/css.css \
+	css/leaflet-overwrite.css \
+	css/animations.css \
+	css/modal.css
 
 JS_LIBS = \
 	js/lib/leaflet-0.6.4/leaflet.js \
 	js/lib/jquery-2.0.3.min.js \
 	js/lib/Bing.js \
-	js/lib/equalize.js \
-	js/lib/jquery.reveal.js \
 	js/lib/leaflet.draw.js \
 	js/lib/leaflet.label.js \
 	js/lib/osm_geojson.js \
 	js/lib/osmauth.min.js \
-	js/lib/sha.js
+	js/lib/sha.js \
+	js/lib/modal.js
 
 JS_FILES = \
 	$(JS_LIBS) \
