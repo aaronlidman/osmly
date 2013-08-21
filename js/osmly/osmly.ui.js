@@ -1,52 +1,60 @@
 osmly.ui = (function() {
     var ui = {};
-
+// selectors are still very mixed
+// $, select, qwery
+// working on events first
     ui.initialize = function() {
+        var login = qwery('#login')[0];
         if (osmly.settings.demo) {
-            if (osmly.settings.demo) $('#login').text('Demonstration »');
-            $('#login').fadeIn(500);
+            if (osmly.settings.demo) login.innerText = 'Demonstration »';
+            login.classList.remove('hide');
+            login.classList.add('fadeIn');
         } else {
             if (osmly.auth.authenticated()) {
                 osmly.ui.setUserDetails();
                 osmly.item.next();
             } else {
                 osmly.token('user', 'demo');
-                $('#login').fadeIn(500);
+                login.classList.add('show','fadeIn');
             }
         }
 
         document.title = osmly.settings.title;
-        $('#title').text(osmly.settings.title);
+        qwery('#title')[0].innerText = osmly.settings.title;
         bind();
     };
 
     function bind() {
-        $('#login').click(function() {
+        bean.on(qwery('#login'), 'click', function() {
             ui.notify('');
             if (osmly.settings.demo) {
-                $('#login').fadeOut(500);
+                qwery('#login')[0].classList.add('fadeOut');
                 osmly.item.next();
             } else {
                 osmly.auth.authenticate(function() {
-                    $('#login').fadeOut(500);
+                    qwery('#login')[0].classList.add('fadeOut');
                     osmly.connect.getDetails();
                     osmly.item.next();
                 });
             }
         });
 
-        $('#go_overview').click(function(){
-            $('#overview_bg').fadeIn(100);
-            $('#overview-controls').fadeIn(100);
-            $('#overview_block').fadeIn(100, osmly.overview.refresh);
+        bean.on(qwery('#go_overview')[0], 'click', function(){
+            qwery('#overview_bg')[0].classList.add('fadeIn');
+            qwery('#overview-controls')[0].classList.add('fadeIn');
+            qwery('#overview_block')[0].classList.add('fadeIn');
+            osmly.overview.refresh();
         });
 
-        $('#overview_bg').click(function(){
+        bean.on(qwery('#overview_bg')[0],'click', function(){
             $('#overview_bg, #overview-controls, #overview_block').hide();
+            // qwery('#overview_bg')[0].classList.add('hide');
+            // qwery('#overview-controls')[0].classList.add('hide');
+            // qwery('#overview_block')[0].classList.add('hide');
             osmly.overview.close();
         });
 
-        $('#update-change').click(function() {
+        bean.on(qwery('#update-change')[0], 'click', function() {
             osmly.settings.changesetTags['comment'] = $('#changeset-form').text();
             osmly.connect.updateComment(function() {
                 CSSModal.close();
@@ -54,28 +62,22 @@ osmly.ui = (function() {
             });
         });
 
-        $('#josm').click(function() {
+        bean.on(qwery('#josm')[0], 'click', function() {
             $('#reset').click();
             osmly.connect.editInJosm(osmly.item.id);
         });
 
-        $('#osmlink').click(function() {
-            window.open(osmly.osmlink);
-        });
+        bean.on(qwery('#osmlink'), 'click', window.open(osmly.osmlink));
+        bean.on(qwery('#skip')[0], 'click', skip);
+        bean.on(qwery('#submit')[0], 'click', submit(event.target.id));
 
-        $('#skip').click(skip);
-
-        $('#submit').click(function() {
-            submit(event.target.id);
-        });
-
-        $('#problem').change(function() {
+        bean.on(qwery('#problem')[0], 'click', function() {
             submit($('#problem').val());
             $('#problem').val('problem');
                 // resets problem menu
         });
 
-        $('#reset').click(function() {
+        bean.on('#reset'[0], 'click', function() {
             hide();
             osmly.ui.teardown();
             osmly.item.setItemLayer(osmly.item.data);
@@ -83,13 +85,13 @@ osmly.ui = (function() {
             ui.displayItem();
         });
 
-        $('#tags').on('click', '.minus', function() {
+        bean.on('#tags'[0], 'click', '.minus', function() {
             if ($('#tags tr').length > 1) {
                 $(this).parent().remove();
             }
         });
 
-        $('#add-new-tag').click(function() {
+        bean.on('#add-new-tag'[0], 'click', function() {
             $('#tags tbody').append(
                 '<tr>' +
                 '<td class="k" spellcheck="false" contenteditable="true"></td>' +
@@ -98,7 +100,7 @@ osmly.ui = (function() {
                 '</tr>');
         });
 
-        $('#main_table').on('click', '.editjosm', function(){
+        bean.on('#main_table'[0], 'click', '.editjosm', function(){
             if (osmly.token('user') == 'demo') {
                 pleaseLogin();
             } else {
@@ -107,7 +109,7 @@ osmly.ui = (function() {
             }
         });
 
-        $('#remote-edit-modal').on('click', 'button', function(){
+        bean.on('#remote-edit-modal', 'click', 'button', function(){
             var result = this.getAttribute('data-type');
 
             if (result == 'no') {
@@ -121,7 +123,7 @@ osmly.ui = (function() {
             }
         });
 
-        $('#main_table').on('click', '.markdone', function(){
+        bean.on('#main_table', 'click', '.markdone', function(){
             if (osmly.token('user') == 'demo') {
                 pleaseLogin();
             } else {
@@ -130,7 +132,7 @@ osmly.ui = (function() {
             }
         });
 
-        $('#markdone-modal').on('click', 'button', function(){
+        bean.on('#markdone-modal', 'click', 'button', function(){
             var result = this.getAttribute('data-type');
 
             if (result == 'no') {
