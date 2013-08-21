@@ -25,22 +25,28 @@ JS_LIBS = \
 	js/lib/osmauth.min.js \
 	js/lib/sha.js \
 	js/lib/modal.js \
-	js/lib/reqwest.js
+	js/lib/reqwest.js \
+	js/lib/bean.js
 
-JS_FILES = \
-	$(JS_LIBS) \
-	$(OSMLY_JS)
+all: dist/osmly.min.js  dist/libs.min.js dist/osmly.min.css
 
-all: dist/osmly.min.js dist/osmly.min.css
-
-dist/osmly.js: $(JS_FILES) Makefile
+dist/osmly.js: $(OSMLY_JS) Makefile
 	@rm -f $@
-	cat $(JS_FILES) >> $@
+	cat $(OSMLY_JS) >> $@
 
 dist/osmly.min.js: dist/osmly.js Makefile
 	@rm -f $@
 	node_modules/.bin/uglifyjs2 $< -c -m -o $@
 	rm -f dist/osmly.js
+
+dist/libs.js: $(JS_LIBS) Makefile
+	@rm -f $@
+	cat $(JS_LIBS) >> $@
+
+dist/libs.min.js: dist/libs.js Makefile
+	@rm -f $@
+	node_modules/.bin/uglifyjs2 $< -c -m -o $@
+	rm -f dist/libs.js
 
 dist/osmly.css: $(CSS) Makefile
 	@rm -f $@
@@ -50,3 +56,7 @@ dist/osmly.min.css: dist/osmly.css Makefile
 	@rm -f $@
 	node_modules/.bin/uglifycss $< > $@
 	rm -f dist/osmly.css
+
+clean:
+	rm -f dist/osmly*
+	rm -f dist/libs*
