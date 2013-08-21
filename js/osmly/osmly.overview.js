@@ -72,13 +72,17 @@ osmly.overview = (function () {
     }
 
     function request(callback) {
-        $.ajax({
+        reqwest({
             url: osmly.settings.db + '&overview',
-            cache: false
-        }).done(function(items){
-            overview.data = JSON.parse(items);
-            overview.rawData = JSON.parse(items);
-            if (callback) callback();
+            cache: false,
+            crossOrigin: true,
+            type: 'json',
+            success: function(items){
+                overview.data = items;
+                overview.rawData = items;
+                // they both start this way, .data get modified
+                if (callback) callback();
+            }
         });
     }
 
@@ -248,7 +252,6 @@ osmly.overview = (function () {
         }
 
         changeRadio('everything');
-
         var count = document.getElementById('count');
         count.innerHTML = '';
     };

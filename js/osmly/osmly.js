@@ -44,7 +44,7 @@ window.osmly = (function () {
             alert('need some settings');
         }
         osmly.map = osmly.map();
-        if (!settings.db) osmly.ui.initialize();
+        if (settings.db) osmly.ui.initialize();
             // allows for lazy no UI mode used on dist/index.html
     };
 

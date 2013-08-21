@@ -19,13 +19,15 @@ osmly.connect = (function(){
             if (skip && callback) {
                 callback();
             } else {
-                $.ajax({
-                    type: 'POST',
+                reqwest({
                     url: url,
-                    crossDomain: true,
-                    data: data
-                }).done(function(){
-                    if (callback) callback();
+                    method: 'POST',
+                    crossOrigin: true,
+                    data: data,
+                    type: 'json',
+                    success: function() {
+                        if (callback) callback();
+                    }
                 });
             }
         }
@@ -34,16 +36,16 @@ osmly.connect = (function(){
     function checkItem(id, callback) {
         var url = osmly.settings.db + '&id=' + id + '&action=status';
 
-        $.ajax({
+        reqwest({
             url: url,
-            crossDomain: true,
-            async: false
-        }).done(function(status){
-            status = JSON.parse(status).status;
-            if (status == 'ok') {
-                callback();
-            } else {
-                callback('skip');
+            crossOrigin: true,
+            type: 'json',
+            success: function(status) {
+                if (status.status == 'ok') {
+                    callback();
+                } else {
+                    callback('skip');
+                }
             }
         });
     }
@@ -54,15 +56,17 @@ osmly.connect = (function(){
         } else {
             osmly.ui.notify('checking changeset status');
 
-            $.ajax({
+            reqwest({
                 url: osmly.settings.writeApi + '/api/0.6/changeset/' + osmly.token('changeset_id'),
-                cache: false
-            }).done(function(xml) {
-                var cs = xml.getElementsByTagName('changeset');
-                if (cs[0].getAttribute('open') === 'true') {
-                    callback();
-                } else {
-                    createChangeset(callback);
+                crossOrigin: true,
+                type: 'xml',
+                success: function(xml) {
+                    var cs = xml.getElementsByTagName('changeset');
+                    if (cs[0].getAttribute('open') === 'true') {
+                        callback();
+                    } else {
+                        createChangeset(callback);
+                    }
                 }
             });
         }
@@ -183,45 +187,46 @@ osmly.connect = (function(){
             osm = osmly.item.toOsm(osmly.item.layer.toGeoJSON());
             osmly.connect.updateItem('remote', {remote: osm}, callback, id);
         } else {
-            // need to fetch geometry of the given id
-            $.ajax({
+            reqwest({
                 url: osmly.settings.db + '&id=' + id,
-                cache: false
-            }).done(function(geo){
-                geo = JSON.parse(geo);
-
-                // from osmly.item.js, renameProperties()
-                for (var prop in osmly.settings.renameProperty) {
-                    var change = osmly.settings.renameProperty[prop];
-                    geo.properties[change] = geo.properties[prop];
-                }
-
-                // from osmly.item.js, usePropertiesAsTag()
-                for (var prop in geo.properties) {
-                    if (osmly.settings.usePropertyAsTag.indexOf(prop) === -1) {
-                        geo.properties[prop] = null;
+                crossOrigin: true,
+                type: 'json',
+                success: function(geo) {
+                    // from osmly.item.js, renameProperties()
+                    for (var prop in osmly.settings.renameProperty) {
+                        var change = osmly.settings.renameProperty[prop];
+                        geo.properties[change] = geo.properties[prop];
                     }
-                }
 
-                // from osmly.item.js, append()
-                for (var append in osmly.settings.appendTag) {
-                    geo.properties[append] = osmly.settings.appendTag[append];
-                }
+                    // from osmly.item.js, usePropertiesAsTag()
+                    for (var poop in geo.properties) {
+                        if (osmly.settings.usePropertyAsTag.indexOf(poop) === -1) {
+                            geo.properties[poop] = null;
+                        }
+                    }
 
-                osm = osmly.item.toOsm(geo);
-                osmly.connect.updateItem('remote', {remote: osm}, callback, id);
+                    // from osmly.item.js, append()
+                    for (var append in osmly.settings.appendTag) {
+                        geo.properties[append] = osmly.settings.appendTag[append];
+                    }
+
+                    osm = osmly.item.toOsm(geo);
+                    osmly.connect.updateItem('remote', {remote: osm}, callback, id);
+                }
             });
         }
 
         function callback() {
-            var request = $.ajax('http://127.0.0.1:8111/import?url=' + url);
-
-            request.done(CSSModal.open('remote-edit-modal'));
-
-            request.fail(function() {
-                $('#reusable-modal h3').text(
-                    'JOSM doesn\'t seem to be running. Start JOSM and try again.');
-                CSSModal.open('reusable-modal');
+            reqwest({
+                url: 'http://127.0.0.1:8111/import?url=' + url,
+                crossOrigin: true,
+                type: 'xml',
+                error: function() {
+                    $('#reusable-modal h3').text(
+                        'JOSM doesn\'t seem to be running. Start JOSM and try again.');
+                    CSSModal.open('reusable-modal');
+                },
+                success: CSSModal.open('remote-edit-modal')
             });
         }
     };

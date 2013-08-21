@@ -42,11 +42,8 @@ osmly.ui = (function() {
         });
 
         $('#overview_bg').click(function(){
-            $('#overview_bg').fadeOut(100);
-            $('#overview-controls').fadeOut(100);
-            $('#overview_block').fadeOut(100, function(){
-                osmly.overview.close();
-            });
+            $('#overview_bg, #overview-controls, #overview_block').hide();
+            osmly.overview.close();
         });
 
         $('#update-change').click(function() {

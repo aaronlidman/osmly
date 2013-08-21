@@ -24,7 +24,8 @@ JS_LIBS = \
 	js/lib/osm_geojson.js \
 	js/lib/osmauth.min.js \
 	js/lib/sha.js \
-	js/lib/modal.js
+	js/lib/modal.js \
+	js/lib/reqwest.js
 
 JS_FILES = \
 	$(JS_LIBS) \

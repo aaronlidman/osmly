@@ -5,35 +5,40 @@ osmly.item = (function () {
         osmly.ui.notify('getting next item');
         $('#tags tr').remove();
 
-        $.ajax(osmly.settings.db).done(function(data) {
-            item.data = JSON.parse(data);
-            item.id = item.data.properties.id;
-            item.bbox = item.data.properties.bounds;
-            item.isEditable = isEditable(item.data.geometry);
+        reqwest({
+            url: osmly.settings.db,
+            crossOrigin: true,
+            type: 'json',
+            success: function(data) {
+                item.data = data;
+                item.id = item.data.properties.id;
+                item.bbox = item.data.properties.bounds;
+                item.isEditable = isEditable(item.data.geometry);
 
-            // buffer the bounds
-            item.bbox = [
-                item.bbox[0] - 0.001,
-                item.bbox[1] - 0.001,
-                item.bbox[2] + 0.001,
-                item.bbox[3] + 0.001
-            ];
+                // buffer the bounds
+                item.bbox = [
+                    item.bbox[0] - 0.001,
+                    item.bbox[1] - 0.001,
+                    item.bbox[2] + 0.001,
+                    item.bbox[3] + 0.001
+                ];
 
-            // this is here and not elsewhere because of timing issues
-            item.setItemLayer(item.data);
+                // this is here and not elsewhere because of timing issues
+                item.setItemLayer(item.data);
 
-            renameProperties();
-            usePropertiesAsTag();
-            appendTags();
+                renameProperties();
+                usePropertiesAsTag();
+                appendTags();
 
-            if (item.isEditable) {
-                getOsm(function() {
+                if (item.isEditable) {
+                    getOsm(function() {
+                        osmly.ui.setupItem(item.data.properties);
+                        osmly.ui.displayItem();
+                    });
+                } else {
                     osmly.ui.setupItem(item.data.properties);
                     osmly.ui.displayItem();
-                });
-            } else {
-                osmly.ui.setupItem(item.data.properties);
-                osmly.ui.displayItem();
+                }
             }
         });
     };
@@ -103,12 +108,17 @@ osmly.item = (function () {
         var bbox = 'bbox=' + item.bbox.join(','),
             request = osmly.settings.readApi + bbox;
 
-        $.ajax(request).done(function(xml) {
-            osmly.ui.notify('rendering OSM data');
-            item.osmContext = osm_geojson.osm2geojson(xml);
-            item.filteredContext = filterContext(item.osmContext);
-            setContext(item.filteredContext);
-            callback();
+        reqwest({
+            url: request,
+            type: 'xml',
+            crossOrigin: true,
+            success: function(xml) {
+                osmly.ui.notify('rendering OSM data');
+                item.osmContext = osm_geojson.osm2geojson(xml);
+                item.filteredContext = filterContext(item.osmContext);
+                setContext(item.filteredContext);
+                callback();
+            }
         });
     }
 
