@@ -1,83 +1,76 @@
 osmly.ui = (function() {
     var ui = {};
-// selectors are still very mixed
-// $, select, qwery
-// working on events first
+
     ui.initialize = function() {
-        var login = qwery('#login')[0];
+        var login = $('#login');
         if (osmly.settings.demo) {
-            if (osmly.settings.demo) login.innerText = 'Demonstration »';
-            login.classList.remove('hide');
-            login.classList.add('fadeIn');
+            if (osmly.settings.demo) login.text = 'Demonstration »';
+            login.show('block');
         } else {
             if (osmly.auth.authenticated()) {
                 osmly.ui.setUserDetails();
                 osmly.item.next();
             } else {
                 osmly.token('user', 'demo');
-                login.classList.add('show','fadeIn');
+                login.show('block');
             }
         }
 
         document.title = osmly.settings.title;
-        qwery('#title')[0].innerText = osmly.settings.title;
+        $('#title').text(osmly.settings.title);
         bind();
     };
 
     function bind() {
-        bean.on(qwery('#login'), 'click', function() {
+        bean.on($('#login')[0], 'click', function() {
             ui.notify('');
             if (osmly.settings.demo) {
-                qwery('#login')[0].classList.add('fadeOut');
+                $('#login').hide();
                 osmly.item.next();
             } else {
                 osmly.auth.authenticate(function() {
-                    qwery('#login')[0].classList.add('fadeOut');
+                    $('#login').hide();
                     osmly.connect.getDetails();
                     osmly.item.next();
                 });
             }
         });
 
-        bean.on(qwery('#go_overview')[0], 'click', function(){
-            qwery('#overview_bg')[0].classList.add('fadeIn');
-            qwery('#overview-controls')[0].classList.add('fadeIn');
-            qwery('#overview_block')[0].classList.add('fadeIn');
+        bean.on($('#go_overview')[0], 'click', function(){
+            console.log('go overview');
+            $('#overview_bg, #overview-controls, #overview_block').show('block');
             osmly.overview.refresh();
         });
 
-        bean.on(qwery('#overview_bg')[0],'click', function(){
+        bean.on($('#overview_bg')[0],'click', function(){
             $('#overview_bg, #overview-controls, #overview_block').hide();
-            // qwery('#overview_bg')[0].classList.add('hide');
-            // qwery('#overview-controls')[0].classList.add('hide');
-            // qwery('#overview_block')[0].classList.add('hide');
             osmly.overview.close();
         });
 
-        bean.on(qwery('#update-change')[0], 'click', function() {
+        bean.on($('#update-change')[0], 'click', function() {
             osmly.settings.changesetTags['comment'] = $('#changeset-form').text();
             osmly.connect.updateComment(function() {
                 CSSModal.close();
-                $('#notify').fadeOut(250);
+                $('#notify').hide();
             });
         });
 
-        bean.on(qwery('#josm')[0], 'click', function() {
+        bean.on($('#josm')[0], 'click', function() {
             $('#reset').click();
             osmly.connect.editInJosm(osmly.item.id);
         });
 
-        bean.on(qwery('#osmlink'), 'click', window.open(osmly.osmlink));
-        bean.on(qwery('#skip')[0], 'click', skip);
-        bean.on(qwery('#submit')[0], 'click', submit(event.target.id));
+        bean.on($('#osmlink')[0], 'click', function() {window.open(osmly.osmlink);});
+        bean.on($('#skip')[0], 'click', function() {skip();});
+        bean.on($('#submit')[0], 'click', function() {submit('submit');});
 
-        bean.on(qwery('#problem')[0], 'click', function() {
+        bean.on($('#problem')[0], 'change', function() {
             submit($('#problem').val());
             $('#problem').val('problem');
                 // resets problem menu
         });
 
-        bean.on('#reset'[0], 'click', function() {
+        bean.on($('#reset')[0], 'click', function() {
             hide();
             osmly.ui.teardown();
             osmly.item.setItemLayer(osmly.item.data);
@@ -85,13 +78,13 @@ osmly.ui = (function() {
             ui.displayItem();
         });
 
-        bean.on('#tags'[0], 'click', '.minus', function() {
+        bean.on($('#tags')[0], 'click', '.minus', function() {
             if ($('#tags tr').length > 1) {
-                $(this).parent().remove();
+                select(this).parent().remove();
             }
         });
 
-        bean.on('#add-new-tag'[0], 'click', function() {
+        bean.on($('#add-new-tag')[0], 'click', function() {
             $('#tags tbody').append(
                 '<tr>' +
                 '<td class="k" spellcheck="false" contenteditable="true"></td>' +
@@ -100,7 +93,7 @@ osmly.ui = (function() {
                 '</tr>');
         });
 
-        bean.on('#main_table'[0], 'click', '.editjosm', function(){
+        bean.on($('#main_table')[0], 'click', '.editjosm', function(){
             if (osmly.token('user') == 'demo') {
                 pleaseLogin();
             } else {
@@ -109,7 +102,7 @@ osmly.ui = (function() {
             }
         });
 
-        bean.on('#remote-edit-modal', 'click', 'button', function(){
+        bean.on($('#remote-edit-modal')[0], 'click', 'button', function(){
             var result = this.getAttribute('data-type');
 
             if (result == 'no') {
@@ -123,7 +116,7 @@ osmly.ui = (function() {
             }
         });
 
-        bean.on('#main_table', 'click', '.markdone', function(){
+        bean.on($('#main_table')[0], 'click', '.markdone', function(){
             if (osmly.token('user') == 'demo') {
                 pleaseLogin();
             } else {
@@ -132,7 +125,7 @@ osmly.ui = (function() {
             }
         });
 
-        bean.on('#markdone-modal', 'click', 'button', function(){
+        bean.on($('#markdone-modal')[0], 'click', 'button', function(){
             var result = this.getAttribute('data-type');
 
             if (result == 'no') {
@@ -160,9 +153,9 @@ osmly.ui = (function() {
 
         $('#notify')
             .html(string)
-            .show();
+            .show('block');
         // don't forget to hide #notify later
-        // $('#notify').fadeOut(250);
+        // $('#notify').hide();
     };
 
     ui.setupItem = function(properties) {
@@ -178,11 +171,11 @@ osmly.ui = (function() {
             osmly.item.contextLayer.bringToFront();
         }
 
-        $('#notify, #login').fadeOut(250);
-        $('#problem, #submit, #title, #top-bar, #bottom-right, #action-block').fadeIn(250);
+        $('#notify, #login').hide();
+        $('#problem, #submit, #title, #top-bar, #bottom-right, #action-block').show('block');
 
         if (isEditable) {
-            $('#tags').fadeIn(250);
+            $('#tags').show('block');
         } else {
             $('#problem, #submit').hide();
             $('#reusable-modal h3').html(
@@ -223,9 +216,8 @@ osmly.ui = (function() {
     function skip() {
         hide();
         osmly.ui.teardown();
-        $('.foundicon-right-arrow')
-            .show()
-            .fadeOut(750);
+        $('.foundicon-right-arrow').show('block');
+        setTimeout(function(){$('.foundicon-right-arrow').hide();}, 300);
         osmly.item.next();
     }
 
@@ -249,13 +241,11 @@ osmly.ui = (function() {
         if (result !== 'submit') result = 'problem';
 
         if (result == 'submit') {
-           $('.foundicon-up-arrow')
-               .show()
-               .fadeOut(750);
+            $('.foundicon-up-arrow').show('block');
+            setTimeout(function(){$('.foundicon-up-arrow').hide();}, 300);
         } else if (result == 'problem') {
-            $('.foundicon-remove')
-                .show()
-                .fadeOut(750);
+            $('.foundicon-remove').show('block');
+            setTimeout(function(){$('.foundicon-remove').hide();}, 300);
         }
     }
 
@@ -264,7 +254,7 @@ osmly.ui = (function() {
             .html('<a href="' + osmly.settings.writeApi + '/user/' +
                 osmly.token('user') + '/edits" target="_blank">' +
                 osmly.token('user') + '</a>')
-            .fadeIn(500);
+            .show('block');
     };
 
     return ui;

@@ -4,7 +4,8 @@ OSMLY_JS = \
 	js/osmly/osmly.ui.js \
 	js/osmly/osmly.connect.js \
 	js/osmly/osmly.item.js \
-	js/osmly/osmly.overview.js
+	js/osmly/osmly.overview.js \
+	js/osmly/common.js
 
 CSS = \
 	js/lib/leaflet-0.6.4/leaflet.css \
@@ -17,7 +18,6 @@ CSS = \
 
 JS_LIBS = \
 	js/lib/leaflet-0.6.4/leaflet.js \
-	js/lib/jquery-2.0.3.min.js \
 	js/lib/Bing.js \
 	js/lib/leaflet.draw.js \
 	js/lib/leaflet.label.js \
@@ -26,7 +26,8 @@ JS_LIBS = \
 	js/lib/sha.js \
 	js/lib/modal.js \
 	js/lib/reqwest.js \
-	js/lib/bean.js
+	js/lib/bean.js \
+	js/lib/bonzo.js
 
 all: dist/osmly.min.js  dist/libs.min.js dist/osmly.min.css
 

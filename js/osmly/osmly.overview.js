@@ -66,7 +66,7 @@ osmly.overview = (function () {
             tbody.appendChild(tr);
             table.appendChild(tbody);
         }
-        $('#notify').fadeOut(250);
+        $('#notify').hide();
         update_row_count();
         if (callback) callback();
     }
