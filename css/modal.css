@@ -14,16 +14,12 @@
 /*
  * Configuration
  */
-html {
-  overflow-y: scroll;
-}
-
 .has-overlay {
   overflow: hidden;
 }
 .has-overlay > body {
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: hidden;
 }
 
 .semantic-content {
