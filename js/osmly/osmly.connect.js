@@ -1,4 +1,4 @@
-osmly.connect = (function(){
+osmly.connect = (function() {
     var connect = {};
 
     connect.updateItem = function(action, data, callback, id) {
@@ -51,7 +51,7 @@ osmly.connect = (function(){
     }
 
     connect.openChangeset = function(callback) {
-        if (!osmly.token('changeset_id')){
+        if (!osmly.token('changeset_id')) {
             createChangeset(callback);
         } else {
             osmly.ui.notify('checking changeset status');
@@ -147,7 +147,7 @@ osmly.connect = (function(){
 
     connect.submitToOSM = function() {
         var id = osmly.token('changeset_id');
-        $('#changeset').show();
+        fade('in', $('#changeset'));
         $('#changeset-link')
             .html('<a href="' + osmly.settings.writeApi + '/browse/changeset/' +
                 id + '" target="_blank">Details on osm.org »</a>');

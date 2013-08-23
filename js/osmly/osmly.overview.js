@@ -66,7 +66,7 @@ osmly.overview = (function () {
             tbody.appendChild(tr);
             table.appendChild(tbody);
         }
-        $('#notify').hide();
+        fade('out', $('#notify'));
         update_row_count();
         if (callback) callback();
     }
@@ -96,7 +96,7 @@ osmly.overview = (function () {
         );
     };
 
-    function filter(options){
+    function filter(options) {
         // {'problem': 1, 'user': 'Joe Fake Name'}
         // also takes values as a list of multiple possible values
             // {'problem': ['no_park', 'bad_imagery', 'you_ugly']}
