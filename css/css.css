@@ -201,6 +201,7 @@ a {
     right: 0;
 }
 .display {
+    position: absolute;
     z-index: 10;
     color: white;
     display: none;

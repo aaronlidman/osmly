@@ -147,7 +147,7 @@ osmly.connect = (function() {
 
     connect.submitToOSM = function() {
         var id = osmly.token('changeset_id');
-        fade('in', $('#changeset'));
+        fadeIn($('#changeset'));
         $('#changeset-link')
             .html('<a href="' + osmly.settings.writeApi + '/browse/changeset/' +
                 id + '" target="_blank">Details on osm.org »</a>');

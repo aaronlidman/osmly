@@ -33,6 +33,7 @@
         <script src="js/osmly/osmly.item.js"></script>
         <script src="js/osmly/osmly.overview.js"></script>
         <script src="js/osmly/common.js"></script>
+        <script src="js/osmly/animations.js"></script>
     </head>
     <body>
         <span id="title"></span>
@@ -52,6 +53,28 @@
             <li id="josm">edit in JOSM</li>
             <li id="osmlink" style="border-bottom: none;">open at osm.org</li>
         </ul>
+
+        <div id="action-block">
+            <li id="hold-problem" style="margin-left: 0;">
+                <select name="problem" id="problem">
+                    <option value="problem" disabled selected>Problem</option>
+                    <option value="no_park_here">no park here</option>
+                    <option value="already_mapped">already mapped</option>
+                    <option value="poor_imagery">poor imagery</option>
+                    <option value="too_difficult">too difficult</option>
+                </select>
+            </li>
+            <li id="skip">Skip</li>
+            <li id="submit">Submit</li>
+        </div>
+
+        <div id="tags">
+            <table>
+                <tbody>
+                </tbody>
+            </table>
+            <span class="k" id="add-new-tag" alt="Add a new tag">+</span>
+        </div>
 
     <!-- modals -->
         <div class="semantic-content" id="changeset-modal">
@@ -137,28 +160,6 @@
         </div>
 
         <div id="login">Login with your OSM account »</div>
-
-        <div id="action-block">
-            <li style="margin-left: 0;">
-                <select name="problem" id="problem">
-                    <option value="problem" disabled selected>Problem</option>
-                    <option value="no_park_here">no park here</option>
-                    <option value="already_mapped">already mapped</option>
-                    <option value="poor_imagery">poor imagery</option>
-                    <option value="too_difficult">too difficult</option>
-                </select>
-            </li>
-            <li id="skip">Skip</li>
-            <li id="submit">Submit</li>
-        </div>
-
-        <div id="tags">
-            <table>
-                <tbody>
-                </tbody>
-            </table>
-            <span class="k" id="add-new-tag" alt="Add a new tag">+</span>
-        </div>
 
         <div id="overview_bg"></div>
         <div id="overview_block">

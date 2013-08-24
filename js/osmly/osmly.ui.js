@@ -5,18 +5,19 @@ osmly.ui = (function() {
         var login = $('#login');
         if (osmly.settings.demo) {
             if (osmly.settings.demo) login.text = 'Demonstration »';
-            fade('in', login);
+            fadeIn(login);
         } else {
             if (osmly.auth.authenticated()) {
                 osmly.ui.setUserDetails();
                 osmly.item.next();
             } else {
                 osmly.token('user', 'demo');
-                fade('in', login);
+                fadeIn(login);
             }
         }
         document.title = osmly.settings.title;
         $('#title').text(osmly.settings.title);
+        fadeIn($('#title, #top-bar'));
         bind();
     };
 
@@ -24,11 +25,11 @@ osmly.ui = (function() {
         bean.on($('#login')[0], 'click', function(){
             ui.notify('');
             if (osmly.settings.demo) {
-                fade('in', $('#login'));
+                fadeIn($('#login'));
                 osmly.item.next();
             } else {
                 osmly.auth.authenticate(function(){
-                    fade('out', $('#login'));
+                    fadeOut($('#login'));
                     osmly.connect.getDetails();
                     osmly.item.next();
                 });
@@ -36,7 +37,7 @@ osmly.ui = (function() {
         });
 
         bean.on($('#go_overview')[0], 'click', function(){
-            fade('in', $('#overview_bg, #overview-controls, #overview_block'));
+            fadeIn($('#overview_bg, #overview-controls, #overview_block'));
             osmly.overview.refresh();
         });
 
@@ -73,8 +74,8 @@ osmly.ui = (function() {
             hide();
             osmly.ui.teardown();
             osmly.item.setItemLayer(osmly.item.data);
-            ui.setupItem(osmly.item.data.properties);
-            ui.displayItem();
+            osmly.ui.setupItem(osmly.item.data.properties);
+            osmly.ui.displayItem();
         });
 
         bean.on($('#tags')[0], 'click', '.minus', function(){
@@ -167,14 +168,14 @@ osmly.ui = (function() {
             osmly.item.contextLayer.bringToFront();
         }
 
-        fade('out', $('#login'));
+        fadeOut($('#login'));
         $('#notify').hide();
-        fade('in', $('#problem, #submit, #title, #top-bar, #bottom-right, #action-block'));
+        fadeIn($('#hold-problem, #submit, #bottom-right, #action-block'));
 
         if (isEditable) {
-            fade('in', $('#tags'));
+            fadeIn($('#tags'));
         } else {
-            fade('out', $('#problem, #submit'));
+            fadeOut($('#hold-problem, #submit'));
             $('#reusable-modal h3').html(
                 'This feature is too complex. <a>Edit it in JOSM?</a>');
             // put an 'Edit in JOSM' button right there, when clicked close the modal and let the other modal open
@@ -200,22 +201,21 @@ osmly.ui = (function() {
     }
 
     function hide() {
-        fade('out', $('#action-block, #tags, #bottom-right'));
+        fadeOut($('#hold-problem, #submit, #bottom-right, #action-block, #tags'));
         osmly.map.closePopup();
         osmly.map.removeLayer(osmly.item.layer);
         if (osmly.item.contextLayer) osmly.map.removeLayer(osmly.item.contextLayer);
     }
 
     ui.teardown = function() {
-        fade('out', $('#tags'), function(){$('#tags tr').remove();});
+        fadeOut($('#tags'));
+        $('#tags tr').remove();
     };
 
     function skip() {
         hide();
         osmly.ui.teardown();
-        fade('fadeOutLefttoRight', $('.foundicon-right-arrow'), function(){
-            $('.foundicon-right-arrow').hide();
-        });
+        leftToRight($('.foundicon-right-arrow'));
         osmly.item.next();
     }
 
@@ -239,18 +239,16 @@ osmly.ui = (function() {
         if (result !== 'submit') result = 'problem';
 
         if (result == 'submit') {
-            fade('fadeInUpBig', $('.foundicon-up-arrow'), function(){
-                $('.foundicon-up-arrow').hide();
-            });
+            bigUp($('.foundicon-up-arrow'));
         } else if (result == 'problem') {
-            fade('in', $('.foundicon-remove'), function(){
-                fade('out', $('.foundicon-remove'));
+            fadeIn($('.foundicon-remove'), function(){
+                fadeOut($('.foundicon-remove'));
             });
         }
     }
 
     ui.setUserDetails = function() {
-        fade('in', $('#user')
+        fadeIn($('#user')
             .html('<a href="' + osmly.settings.writeApi + '/user/' +
                 osmly.token('user') + '/edits" target="_blank">' +
                 osmly.token('user') + '</a>')
