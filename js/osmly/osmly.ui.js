@@ -11,8 +11,9 @@ osmly.ui = (function() {
                 osmly.ui.setUserDetails();
                 osmly.item.next();
             } else {
-                osmly.token('user', 'demo');
                 fadeIn(login);
+                // fade in demo too?
+                    // all have demo mode also buy default?
             }
         }
         document.title = osmly.settings.title;
@@ -94,7 +95,7 @@ osmly.ui = (function() {
         });
 
         bean.on($('#main_table')[0], 'click', '.editjosm', function(){
-            if (osmly.token('user') == 'demo') {
+            if (!token('user')) {
                 pleaseLogin();
             } else {
                 $('#remote-edit-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
@@ -117,7 +118,7 @@ osmly.ui = (function() {
         });
 
         bean.on($('#main_table')[0], 'click', '.markdone', function(){
-            if (osmly.token('user') == 'demo') {
+            if (!token('user')) {
                 pleaseLogin();
             } else {
                 $('#markdone-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
@@ -266,8 +267,8 @@ osmly.ui = (function() {
     ui.setUserDetails = function() {
         fadeIn($('#user')
             .html('<a href="' + osmly.settings.writeApi + '/user/' +
-                osmly.token('user') + '/edits" target="_blank">' +
-                osmly.token('user') + '</a>')
+                token('user') + '/edits" target="_blank">' +
+                token('user') + '</a>')
         );
     };
 

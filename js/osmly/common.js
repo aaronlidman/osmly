@@ -10,3 +10,12 @@ window.select = function(query) {
 window.$ = function(selector) {
     return bonzo(select(selector));
 };
+
+function keyclean(x) { return x.replace(/\W/g, ''); }
+// both of these are from iD
+function token(k, x) {
+    if (arguments.length === 2) {
+        localStorage[keyclean(osmly.settings.writeApi) + k] = x;
+    }
+    return localStorage[keyclean(osmly.settings.writeApi) + k];
+}

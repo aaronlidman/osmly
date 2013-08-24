@@ -7,7 +7,7 @@ osmly.connect = (function() {
 
         var url = osmly.settings.db + '&id=' + id + '&action=' + action;
 
-        data['user'] = osmly.token('user');
+        data['user'] = token('user');
 
         if (action == 'submit') {
             checkItem(id, makeRequest);
@@ -51,13 +51,13 @@ osmly.connect = (function() {
     }
 
     connect.openChangeset = function(callback) {
-        if (!osmly.token('changeset_id')) {
+        if (!token('changeset_id')) {
             createChangeset(callback);
         } else {
             osmly.ui.notify('checking changeset status');
 
             reqwest({
-                url: osmly.settings.writeApi + '/api/0.6/changeset/' + osmly.token('changeset_id'),
+                url: osmly.settings.writeApi + '/api/0.6/changeset/' + token('changeset_id'),
                 crossOrigin: true,
                 type: 'xml',
                 success: function(xml) {
@@ -88,7 +88,7 @@ osmly.connect = (function() {
             }
 
             if (response) {
-                osmly.token('changeset_id', response);
+                token('changeset_id', response);
                 callback();
             }
         });
@@ -112,7 +112,7 @@ osmly.connect = (function() {
             osmly.ui.notify('updating changeset');
             osmly.auth.xhr({
                 method: 'PUT',
-                path: '/api/0.6/changeset/' + osmly.token('changeset_id'),
+                path: '/api/0.6/changeset/' + token('changeset_id'),
                 content: newChangesetXml(),
                 options: {header: {'Content-Type': 'text/xml'}}
             }, function(err, response){
@@ -139,14 +139,14 @@ osmly.connect = (function() {
             return;
         }
         var u = res.getElementsByTagName('user')[0];
-        osmly.token('user', u.getAttribute('display_name'));
+        token('user', u.getAttribute('display_name'));
         // there's more if needed
         // http://wiki.openstreetmap.org/wiki/API_v0.6#Details_of_the_logged-in_user
         osmly.ui.setUserDetails();
     }
 
     connect.submitToOSM = function() {
-        var id = osmly.token('changeset_id');
+        var id = token('changeset_id');
         fadeIn($('#changeset'));
         $('#changeset-link')
             .html('<a href="' + osmly.settings.writeApi + '/browse/changeset/' +
@@ -155,7 +155,7 @@ osmly.connect = (function() {
         var geojson = osmly.item.layer.toGeoJSON();
         geojson['features'][0]['properties'] = osmly.item.getTags();
             // this is sketchy but works for single items
-        var osmChange = osmly.item.toOsmChange(geojson, osmly.token('changeset_id'));
+        var osmChange = osmly.item.toOsmChange(geojson, token('changeset_id'));
 
         osmly.ui.notify('uploading to OSM');
 
