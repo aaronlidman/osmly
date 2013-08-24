@@ -138,6 +138,22 @@ osmly.ui = (function() {
                 }, this.getAttribute('data-id'));
             }
         });
+
+        bean.on($('#everything')[0], 'click', osmly.overview.click_everything);
+        bean.on($('#red')[0], 'click', osmly.overview.click_red);
+        bean.on($('#green')[0], 'click', osmly.overview.click_green);
+        bean.on($('#users')[0], 'click', function(){
+            osmly.overview.drop_selection('users-select');
+        });
+        bean.on($('#users-select')[0], 'change', function(){
+            osmly.overview.drop_selection('users-select');
+        });
+        bean.on($('#problems')[0], 'click', function(){
+            osmly.overview.drop_selection('problems-select');
+        });
+        bean.on($('#problems-select')[0], 'change', function(){
+            osmly.overview.drop_selection('problems-select');
+        });
     }
 
     function pleaseLogin() {

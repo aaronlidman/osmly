@@ -179,18 +179,18 @@
         </div>
         <div id="overview-controls">
             <span id='count'></span>
-            <input type='radio' name='filter' value='everything' id='everything' onclick='osmly.overview.click_everything()' checked>
+            <input type='radio' name='filter' value='everything' id='everything' checked>
                 <label for='everything'> everything</label><br>
-            <input type='radio' name='filter' value='red' id='red' onclick='osmly.overview.click_red()'>
+            <input type='radio' name='filter' value='red' id='red'>
                 <label for='red'> problems (red)</label><br>
-            <input type='radio' name='filter' value='green' id='green'onclick='osmly.overview.click_green()'>
+            <input type='radio' name='filter' value='green' id='green'>
                 <label for='green'> done (green)</label><br>
-            <input type='radio' name='filter' value='users' id='users' onclick='osmly.overview.drop_selection("users-select")'>
+            <input type='radio' name='filter' value='users' id='users'>
                 <label for='users'> user: </label>
-                <select id='users-select' onchange='drop_selection("users-select")'></select><br>
-            <input type='radio' name='filter' value='problems' id='problems' onclick='osmly.overview.drop_selection("problems-select")'>
+                <select id='users-select'></select><br>
+            <input type='radio' name='filter' value='problems' id='problems'>
                 <label for='problems'> problem: </label>
-                <select id='problems-select' onchange='osmly.overview.drop_selection("problems-select")'></select><br>
+                <select id='problems-select'></select><br>
         </div>
 
         <div id="notify"></div>
