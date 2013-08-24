@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+    <head>
+        <title>OSMLY</title>
+        <meta charset='utf-8'> 
+        <link rel="stylesheet" href="osmly.min.css" />
+        <script src="libs.min.js"></script>
+        <script src="osmly.min.js"></script>
+    </head>
+    <body>
+        <span id="title"></span>
+        <ul id="top-bar">
+            <a href="#instruction-modal">
+                <li id="instruction" style="border-left: none;">Instructions</li>
+            </a>
+            <li id="go_overview">Overview</li>
+            <li id="user"></li>
+            <a href="#changeset-modal">
+                <li id="changeset">Changeset</li>
+            </a>
+        </ul>
+
+        <ul id="bottom-right">
+            <li id="reset">reset</li>
+            <li id="josm">edit in JOSM</li>
+            <li id="osmlink" style="border-bottom: none;">open at osm.org</li>
+        </ul>
+
+        <div id="action-block">
+            <li id="hold-problem" style="margin-left: 0;">
+                <select name="problem" id="problem">
+                    <option value="problem" disabled selected>Problem</option>
+                    <option value="no_park_here">no park here</option>
+                    <option value="already_mapped">already mapped</option>
+                    <option value="poor_imagery">poor imagery</option>
+                    <option value="too_difficult">too difficult</option>
+                </select>
+            </li>
+            <li id="skip">Skip</li>
+            <li id="submit">Submit</li>
+        </div>
+
+        <div id="tags">
+            <table>
+                <tbody>
+                </tbody>
+            </table>
+            <span class="k" id="add-new-tag" alt="Add a new tag">+</span>
+        </div>
+
+    <!-- modals -->
+        <div class="semantic-content" id="changeset-modal">
+            <!-- eventually, prefill comment with existing comment -->
+            <div class="modal-inner">
+                <header id="modal-label"><h2>Changeset</h2></header>
+                <div class="modal-content">
+                    <div id="changeset-form" contenteditable="true"></div>
+                    <span id="changeset-link"></span>
+                    <span id="update-change">update</span>
+                </div>
+            </div>
+            <a href="#!" class="modal-close" title="Close this modal" data-close="Close" data-dismiss="modal">×</a>
+        </div>
+
+        <div class="semantic-content" id="instruction-modal">
+            <div class="modal-inner">
+                <header id="modal-label"><h2>Instructions</h2></header>
+                <div class="modal-content">
+                    <ul>
+                        <li>Outline the nearby park.</li>
+                        <li>It's possible the data is out of date or just wrong; report problems accordingly.</li>
+                        <li>Be careful to not include nearby schools, golf courses, or residential yards; just the park.</li>
+                    </ul>
+                    <h3 style="margin-top: 15px;">Tips</h3>
+                    <ul>
+                        <li>Click on the nodes (white dots) to delete them</li>
+                        <li>Drag a transparent middle node to add a new node</li>
+                        <li>Yellow features are other OSM references there to help you. You can't edit them here but clicking them provides more information. Use this info to help make your features more accurate</li>
+                        <li>If you want to edit from another editor, click the coordinates in the bottom right corner which will take you to osm.org</li>
+                    </ul>
+                </div>
+            </div>
+            <a href="#!" class="modal-close" title="Close this modal" data-close="Close" data-dismiss="modal">×</a>
+        </div>
+
+        <div class="semantic-content" id="remote-edit-modal">
+            <div class="modal-inner">
+                <div class="modal-content">
+                    <h2 style="margin: 50px 0; text-align: center;">Loading in JOSM...</h2>
+                    <hr/>
+                    <h4 style="margin-top: 25px;">When you're done:</h4>
+                    <h2 style="text-align: center; margin: 20px 0;">Did you upload the feature via JOSM?</h2>
+                    <div style="text-align: center; margin-bottom: 25px;">
+                        <button data-type="no" style="margin-left: 0;">No, not uploaded to OSM</button>
+                        <button data-type="yes">Yes, uploaded</button>
+                    </div>
+                </div>
+            </div>
+            <a href="#!" class="modal-close" title="Close this modal" data-close="Close" data-dismiss="modal">×</a>
+        </div>
+
+        <div class="semantic-content" id="markdone-modal">
+            <div class="modal-inner">
+                <div class="modal-content">
+                    <h2 style="margin: 20px 0; text-align: center;">Are you sure?</h2>
+                    <h2 style="margin: 20px 0; text-align: center;"> This will prevent other users from editing this feature.</h2>
+                    <div style="width: 100%; text-align: center;">
+                        <button data-type="no" style="margin-left: 0;">No, don't mark it as done</button>
+                        <button data-type="yes">Yes, mark it as done</button>
+                    </div>
+                </div>
+            </div>
+            <a href="#!" class="modal-close" title="Close this modal" data-close="Close" data-dismiss="modal">×</a>
+        </div>
+
+        <div class="semantic-content" id="reusable-modal">
+            <div class="modal-inner">
+                <div class="modal-content">
+                    <h3></h3>
+                </div>
+            </div>
+            <a href="#!" class="modal-close" title="Close this modal" data-close="Close" data-dismiss="modal">×</a>
+        </div>
+    <!-- end modals -->
+
+        <div id="flash">
+            <div style="position: relative">
+                <i class="foundicon-remove hidden display"></i>
+                <i class="foundicon-right-arrow hidden display"></i>
+                <i class="foundicon-up-arrow hidden display"></i>
+            </div>
+        </div>
+
+        <div id="login">Login with your OSM account »</div>
+
+        <div id="overview_bg"></div>
+        <div id="overview_block">
+            <table id='main_table' class='table'>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Problem</th>
+                        <th>Done</th>
+                        <th>User</th>
+                        <th>Time</th>
+                        <th>Mark as done</th>
+                        <th>Edit in JOSM</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        <div id="overview-controls">
+            <span id='count'></span>
+            <input type='radio' name='filter' value='everything' id='everything' onclick='osmly.overview.click_everything()' checked>
+                <label for='everything'> everything</label><br>
+            <input type='radio' name='filter' value='red' id='red' onclick='osmly.overview.click_red()'>
+                <label for='red'> problems (red)</label><br>
+            <input type='radio' name='filter' value='green' id='green'onclick='osmly.overview.click_green()'>
+                <label for='green'> done (green)</label><br>
+            <input type='radio' name='filter' value='users' id='users' onclick='osmly.overview.drop_selection("users-select")'>
+                <label for='users'> user: </label>
+                <select id='users-select' onchange='drop_selection("users-select")'></select><br>
+            <input type='radio' name='filter' value='problems' id='problems' onclick='osmly.overview.drop_selection("problems-select")'>
+                <label for='problems'> problem: </label>
+                <select id='problems-select' onchange='osmly.overview.drop_selection("problems-select")'></select><br>
+        </div>
+
+        <div id="notify"></div>
+        <div id="map"></div>
+        <script type="text/javascript">
+            var CONFIG = {
+                // settings here, see settings_documentation.md
+            };
+
+            osmly.initialize(CONFIG);
+        </script>        
+    </body>
+</html>

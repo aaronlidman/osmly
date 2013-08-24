@@ -15,6 +15,7 @@ OSMLY is a browser based importer for collaborative item-by-item reviewing, edit
 - [bonzo](https://github.com/ded/bonzo) for DOM manipulation
 - [bean](https://github.com/fat/bean) for events
 - [Foundicons](http://zurb.com/playground/foundation-icons) for the icons
+- [Animate.css](https://github.com/daneden/animate.css) for animations
 
 <!--
 ### Current flow
