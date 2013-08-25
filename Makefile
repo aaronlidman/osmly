@@ -29,7 +29,7 @@ JS_LIBS = \
 	js/lib/bean.js \
 	js/lib/bonzo.js
 
-all: dist/osmly.min.js  dist/libs.min.js dist/osmly.min.css
+all: dist/osmly.min.js  dist/libs.min.js dist/osmly.min.css dist/static
 
 dist/osmly.js: $(OSMLY_JS) Makefile
 	@rm -f $@
@@ -58,6 +58,10 @@ dist/osmly.min.css: dist/osmly.css Makefile
 	node_modules/.bin/uglifycss $< > $@
 	rm -f dist/osmly.css
 
+dist/static:
+	cp -R -f static dist/static
+
 clean:
 	rm -f dist/osmly*
 	rm -f dist/libs*
+	rm -f -R dist/static
