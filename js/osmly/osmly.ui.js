@@ -2,13 +2,17 @@ osmly.ui = (function() {
     var ui = {};
 
     ui.initialize = function() {
+        document.title = osmly.settings.title;
+        $('#title').text(osmly.settings.title);
+        fadeIn($('#title, #top-bar'));
+
         if (osmly.auth.authenticated() && token('user')) {
             osmly.ui.setUserDetails();
             osmly.item.next();
+        } else {
+            fadeIn($('#login, #demo'));
         }
-        document.title = osmly.settings.title;
-        $('#title').text(osmly.settings.title);
-        fadeIn($('#login, #demo, #title, #top-bar'));
+
         if (!osmly.settings.demo) $('#demo').hide();
         bind();
     };
@@ -269,7 +273,9 @@ osmly.ui = (function() {
             bigUp($('.foundicon-up-arrow'));
         } else if (result == 'problem') {
             fadeIn($('.foundicon-remove'), function(){
-                fadeOut($('.foundicon-remove'));
+                setTimeout(function(){
+                    fadeOut($('.foundicon-remove'));
+                }, 250);
             });
         }
     }

@@ -5,7 +5,8 @@ OSMLY_JS = \
 	js/osmly/osmly.connect.js \
 	js/osmly/osmly.item.js \
 	js/osmly/osmly.overview.js \
-	js/osmly/common.js
+	js/osmly/common.js \
+	js/osmly/animations.js
 
 CSS = \
 	js/lib/leaflet-0.6.4/leaflet.css \
@@ -22,7 +23,7 @@ JS_LIBS = \
 	js/lib/leaflet.draw.js \
 	js/lib/leaflet.label.js \
 	js/lib/osm_geojson.js \
-	js/lib/osmauth.min.js \
+	js/lib/osmauth.js \
 	js/lib/sha.js \
 	js/lib/modal.js \
 	js/lib/reqwest.js \

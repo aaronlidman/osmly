@@ -1,0 +1,6 @@
+dist/osmly*
+dist/libs*
+dist/static/
+parks/
+*.geojson
+*.sqlite
