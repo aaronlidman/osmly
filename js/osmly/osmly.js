@@ -54,7 +54,7 @@ window.osmly = (function () {
         oauth_consumer_key: osmly.settings.consumerKey,
         auto: false,
         url: osmly.settings.writeApi,
-        landing: window.location.origin + '/land.html'
+        landing: location.protocol + "//" + location.host + '/land.html'
     });
 
     return osmly;
