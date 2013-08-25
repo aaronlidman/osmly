@@ -209,20 +209,26 @@ a {
     font-size: 640px;
     text-shadow: 0px 0px 10px black;
 }
-#login {
-    bottom: 20px;
-    left: 20px;
-    cursor: pointer;
+#mode {
+    max-width: 400px;
     position: absolute;
+    bottom: 10px;
+    left: 10px;
+    z-index: 900;
+}
+
+#login, #demo {
+    float: left;
+    cursor: pointer;
     display: block;
     background-color: white;
     font-size: 20px;
     font-weight: bold;
     color: black;
     padding: 15px 20px;
-    z-index: 900;
     display: none;
     box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    margin-bottom: 10px;
 }
 #notify {
     display: none;
@@ -277,7 +283,7 @@ a {
     position: fixed;
     padding: 10px 15px;
     line-height: 1.5em;
-    z-index: 8002;
+    z-index: 2010;
 }
 input[type='radio'] {    margin-right: 5px }
 #count {

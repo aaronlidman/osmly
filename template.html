@@ -159,7 +159,10 @@
             </div>
         </div>
 
-        <div id="login">Login with your OSM account »</div>
+        <div id="mode">
+            <div id="demo">Demonstration »</div>
+            <div id="login">Login with your OSM account »</div>
+        </div>
 
         <div id="overview_bg"></div>
         <div id="overview_block">
@@ -196,10 +199,9 @@
         <div id="notify"></div>
         <div id="map"></div>
         <script type="text/javascript">
-            var CONFIG = {
+            var config = {
                 title: 'Outline the park',
                 db: 'http://127.0.0.1:5000/?db=parks-5',
-                demo: false,
                 origin: [34.0577, -118.2409],
                 zoom: 10,
                 usePropertyAsTag: ['name'],
@@ -211,7 +213,7 @@
                 }
             };
 
-            osmly.initialize(CONFIG);
+            osmly.initialize(config);
         </script>        
     </body>
 </html>

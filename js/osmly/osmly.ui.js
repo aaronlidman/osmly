@@ -2,39 +2,30 @@ osmly.ui = (function() {
     var ui = {};
 
     ui.initialize = function() {
-        var login = $('#login');
-        if (osmly.settings.demo) {
-            if (osmly.settings.demo) login.text = 'Demonstration »';
-            fadeIn(login);
-        } else {
-            if (osmly.auth.authenticated()) {
-                osmly.ui.setUserDetails();
-                osmly.item.next();
-            } else {
-                fadeIn(login);
-                // fade in demo too?
-                    // all have demo mode also buy default?
-            }
+        if (osmly.auth.authenticated() && token('user')) {
+            osmly.ui.setUserDetails();
+            osmly.item.next();
         }
         document.title = osmly.settings.title;
         $('#title').text(osmly.settings.title);
-        fadeIn($('#title, #top-bar'));
+        fadeIn($('#login, #demo, #title, #top-bar'));
+        if (!osmly.settings.demo) $('#demo').hide();
         bind();
     };
 
     function bind() {
+        bean.on($('#demo')[0], 'click', function() {
+            fadeOut($('#login, #demo'));
+            osmly.item.next();
+        });
+
         bean.on($('#login')[0], 'click', function(){
             ui.notify('');
-            if (osmly.settings.demo) {
-                fadeIn($('#login'));
+            osmly.auth.authenticate(function(){
+                fadeOut($('#login, #demo'));
+                osmly.connect.getDetails();
                 osmly.item.next();
-            } else {
-                osmly.auth.authenticate(function(){
-                    fadeOut($('#login'));
-                    osmly.connect.getDetails();
-                    osmly.item.next();
-                });
-            }
+            });
         });
 
         bean.on($('#go_overview')[0], 'click', function(){
@@ -57,8 +48,12 @@ osmly.ui = (function() {
         });
 
         bean.on($('#josm')[0], 'click', function(){
-            bean.fire($('#reset'), 'click');
-            osmly.connect.editInJosm(osmly.item.id);
+            if (osmly.auth.authenticated() && token('user')) {
+                bean.fire($('#reset'), 'click');
+                osmly.connect.editInJosm(osmly.item.id);
+            } else {
+                pleaseLogin();
+            }
         });
 
         bean.on($('#osmlink')[0], 'click', function(){window.open(osmly.osmlink);});
@@ -95,48 +90,57 @@ osmly.ui = (function() {
         });
 
         bean.on($('#main_table')[0], 'click', '.editjosm', function(){
-            if (!token('user')) {
-                pleaseLogin();
-            } else {
+            if (osmly.auth.authenticated() && token('user')) {
                 $('#remote-edit-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
                 osmly.connect.editInJosm(this.getAttribute('data-id'));
+            } else {
+                pleaseLogin();
             }
         });
 
         bean.on($('#remote-edit-modal')[0], 'click', 'button', function(){
             var result = this.getAttribute('data-type');
+            if (result == 'yes') {
+                if (osmly.auth.authenticated() && token('user')) {
+                    osmly.connect.updateItem('submit', {done: 3}, function(){
+                        osmly.overview.modalDone(function(){
+                            CSSModal.close();
+                        });
+                    }, this.getAttribute('data-id'));
+                } else {
+                    CSSModal.close();
+                    pleaseLogin();
+                }
 
-            if (result == 'no') {
+            } else {
                 CSSModal.close();
-            } else if (result == 'yes') {
-                osmly.connect.updateItem('submit', {done: 3}, function(){
-                    osmly.overview.modalDone(function(){
-                        CSSModal.close();
-                    });
-                }, this.getAttribute('data-id'));
             }
         });
 
         bean.on($('#main_table')[0], 'click', '.markdone', function(){
-            if (!token('user')) {
-                pleaseLogin();
-            } else {
+            if (osmly.auth.authenticated() && token('user')) {
                 $('#markdone-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
                 CSSModal.open('markdone-modal');
+            } else {
+                pleaseLogin();
             }
         });
 
         bean.on($('#markdone-modal')[0], 'click', 'button', function(){
             var result = this.getAttribute('data-type');
-
-            if (result == 'no') {
+            if (result == 'yes') {
+                if (osmly.auth.authenticated() && token('user')) {
+                    osmly.connect.updateItem('submit', {done: 2}, function(){
+                        osmly.overview.modalDone(function(){
+                            CSSModal.close();
+                        });
+                    }, this.getAttribute('data-id'));
+                } else {
+                    CSSModal.close();
+                    pleaseLogin();
+                }
+            } else {
                 CSSModal.close();
-            } else if (result == 'yes') {
-                osmly.connect.updateItem('submit', {done: 2}, function(){
-                    osmly.overview.modalDone(function(){
-                        CSSModal.close();
-                    });
-                }, this.getAttribute('data-id'));
             }
         });
 
@@ -239,10 +243,7 @@ osmly.ui = (function() {
     function submit(result) {
         hide();
 
-        if (osmly.settings.demo) {
-            osmly.ui.teardown();
-            osmly.item.next();
-        } else {
+        if (osmly.auth.authenticated() && token('user')) {
             if (result === 'submit') {
                 osmly.connect.updateItem('submit');
                 osmly.connect.openChangeset(osmly.connect.submitToOSM);
@@ -251,6 +252,9 @@ osmly.ui = (function() {
                 osmly.ui.teardown();
                 osmly.item.next();
             }
+        } else {
+            osmly.ui.teardown();
+            osmly.item.next();
         }
 
         if (result !== 'submit') result = 'problem';

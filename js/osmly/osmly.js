@@ -12,7 +12,7 @@ window.osmly = (function () {
         context: {},
         origin: [0,0],
         zoom: 2,
-        demo: false,
+        demo: true,
         changesetTags: {
             'created_by': 'osmly',
             'osmly:version': '0',
@@ -43,6 +43,7 @@ window.osmly = (function () {
         } else {
             alert('need some settings');
         }
+
         osmly.map = osmly.map();
         if (settings.db) osmly.ui.initialize();
             // allows for lazy no UI mode used on dist/index.html
