@@ -222,8 +222,8 @@ osmly.connect = (function() {
                 crossOrigin: true,
                 type: 'xml',
                 error: function() {
-                    $('#reusable-modal h3').text(
-                        'JOSM doesn\'t seem to be running. Start JOSM and try again.');
+                    $('#reusable-modal .modal-content').text(
+                        '<h3>JOSM doesn\'t seem to be running. Start JOSM and try again.</h3>');
                     CSSModal.open('reusable-modal');
                 },
                 success: CSSModal.open('remote-edit-modal')

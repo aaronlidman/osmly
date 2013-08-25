@@ -217,6 +217,13 @@ a {
     z-index: 900;
 }
 
+#demo-mode {
+    font-weight: bold;
+    display: none;
+    background-color: black;
+    color: white;
+}
+
 #login, #demo {
     float: left;
     cursor: pointer;

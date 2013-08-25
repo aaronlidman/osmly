@@ -14,8 +14,14 @@ osmly.ui = (function() {
     };
 
     function bind() {
+        bean.on($('#demo-mode')[0], 'click', function(){
+            CSSModal.open('demo-modal');
+        });
+
         bean.on($('#demo')[0], 'click', function() {
             fadeOut($('#login, #demo'));
+            CSSModal.open('demo-modal');
+            $('#demo-mode').show('block');
             osmly.item.next();
         });
 
@@ -23,6 +29,7 @@ osmly.ui = (function() {
             ui.notify('');
             osmly.auth.authenticate(function(){
                 fadeOut($('#login, #demo'));
+                CSSModal.open('instruction-modal');
                 osmly.connect.getDetails();
                 osmly.item.next();
             });
@@ -35,7 +42,6 @@ osmly.ui = (function() {
 
         bean.on($('#overview_bg')[0],'click', function(){
             $('#overview_bg, #overview-controls, #overview_block').hide();
-                // don't fade any modals on close, feels snappier
             osmly.overview.close();
         });
 
@@ -162,8 +168,8 @@ osmly.ui = (function() {
     }
 
     function pleaseLogin() {
-        $('#reusable-modal h3').text(
-            'Please login. It helps track your changes so other users don\'t edit the same feature.');
+        $('#reusable-modal .modal-content').html(
+            '<h3>Please login. It helps track your changes so other users don\'t edit the same feature.</h3>');
         // login button/link?
         CSSModal.open('reusable-modal');
     }
@@ -197,8 +203,8 @@ osmly.ui = (function() {
             fadeIn($('#tags'));
         } else {
             fadeOut($('#hold-problem, #submit'));
-            $('#reusable-modal h3').html(
-                'This feature is too complex. <a>Edit it in JOSM?</a>');
+            $('#reusable-modal .modal-content').html(
+                '<h3>This feature is too complex. <a>Edit it in JOSM?</a></h3>');
             // put an 'Edit in JOSM' button right there, when clicked close the modal and let the other modal open
             // literally bind, $('#josm').click()
             CSSModal.open('reusable-modal');
