@@ -37,7 +37,7 @@ dist/osmly.js: $(OSMLY_JS) Makefile
 
 dist/osmly.min.js: dist/osmly.js Makefile
 	@rm -f $@
-	node_modules/.bin/uglifyjs2 $< -c -m -o $@
+	node_modules/.bin/uglifyjs $< -c -m -o $@
 	rm -f dist/osmly.js
 
 dist/libs.js: $(JS_LIBS) Makefile
@@ -46,7 +46,7 @@ dist/libs.js: $(JS_LIBS) Makefile
 
 dist/libs.min.js: dist/libs.js Makefile
 	@rm -f $@
-	node_modules/.bin/uglifyjs2 $< -c -m -o $@
+	node_modules/.bin/uglifyjs $< -c -m -o $@
 	rm -f dist/libs.js
 
 dist/osmly.css: $(CSS) Makefile

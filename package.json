@@ -1,0 +1,20 @@
+{
+    "name": "OSMLY",
+    "version": "0.0.0",
+    "description": "a simple importer for openstreetmap",
+    "main": "index.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aaronlidman/parks-project.git"
+    },
+    "keywords": ["openstreetmap", "maps"],
+    "author": "Aaron Lidman",
+    "license": "BSD",
+    "bugs": {
+        "url": "https://github.com/aaronlidman/parks-project/issues"
+    },
+    "devDependencies": {
+        "uglify-js": "2.x",
+        "uglifycss": "~0.0.5"
+    }
+}
