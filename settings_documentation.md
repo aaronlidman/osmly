@@ -8,7 +8,8 @@ types and uses of osmly.settings properties
 ### db (required)
 - string
 - full url of the database location
-- eg. `'http://127.0.0.1:5000/?db=parks-5'`
+- eg. `'http://127.0.0.1:5000/?db=parks-5'`, `'http://l33tdomain.com/?db=POIz'`
+    - these resolve to `parks-5.sqlite`, `POIz.sqlite`
 
 ### writeApi
 - string
@@ -36,6 +37,8 @@ types and uses of osmly.settings properties
 - also compatible with the regular OSM API
     - 'http://api.openstreetmap.org/api/0.6/map?'
 - default: `'http://www.overpass-api.de/api/xapi?map?'`
+    - downloads are faster and it allows for larger areas
+    - disadvantage: lags behind the main api up to a couple minutes
 
 ### context (required)
 - object
@@ -43,12 +46,13 @@ types and uses of osmly.settings properties
 - for example: if schools are being edited, a context of other schools should be included. `{amenity: ['school']}`
 but other key/values should also be included for items that are often near schools that might be mistaken or be nearby schools. Things like colleges, universities, libraries, parks. It depends, go nuts.
     - our final object might look something like this:
-    ```
-    {
-        amenity: ['school', 'library', 'college', 'university'],
-        leisure: ['park']
-    }
-    ```
+
+``` js
+{
+    amenity: ['school', 'library', 'college', 'university'],
+    leisure: ['park']
+}
+```
 
 ### origin
 - array
@@ -62,22 +66,28 @@ but other key/values should also be included for items that are often near schoo
 
 ### demo
 - bool
-- allows anyone to see what editing on osmly is like without logging in
-- no significant requests go through, nothing can be uploaded, marked as done, edited in JOSM, etc...
-- basically read-only
-- default: `false`
+- allows a demonstration mode, setting to `false` doesn't allow it
+- default: `true`
 
 ### changesetTags
 - object
 - tags to use for changesets
 - will probably add an additional tag to track particular imports
     - eg. 'osmly:import': 'la-parks'
-- default: `{'created_by': 'osmly', 'osmly:version': '0', 'imagery_used': 'Bing'}`
+- default: 
+
+``` js
+{
+    'created_by': 'osmly',
+    'osmly:version': '0',
+    'imagery_used': 'Bing'
+}
+```
 
 ### renameProperty
 - object
 - renames a property from the original data to a usable key for OSM
-- eg. `{wackyCompany_internal_id_awesome_ftw: 'XYZimport:id'}`
+- eg. `{wackyCompany_internal_id: 'XYZimport:id'}`
 
 ### usePropertyAsTag (required)
 - array
@@ -94,28 +104,41 @@ but other key/values should also be included for items that are often near schoo
 - useful for a 'source' tag or something like it which must be applied to everything
 - or if you're data is already of a common type and just missing the necessary OSM tag
     - for example: you have just parks for a particular county but no leisure=park tag, this can add it to everything
-- eg. `{leisure: 'park', source: 'TIGER 2027'}`
+- eg. 
+
+``` js
+{
+    leisure: 'park',
+    source: 'TIGER 2027'
+}
+```
 
 ### featureStyle
 - object
 - how to feature is styled on the map when being edited
 - maps directly to leaflet, full options here: http://leafletjs.com/reference.html#path-options
 - default:
-        ```{
-            color: '#00FF00',
-            weight: 3,
-            opacity: 1,
-            clickable: false
-        }```
+
+``` js
+{
+    color: '#00FF00',
+    weight: 3,
+    opacity: 1,
+    clickable: false
+}
+```
 
 ### contextStyle
 - object
 - how features from OSM (as defined in the 'context' setting) are styled along side the feature
 - maps directly to leaflet, full options here: http://leafletjs.com/reference.html#path-options
 - default:
-        ```{
-            color: '#FFFF00',
-            fillOpacity: 0.3,
-            weight: 3,
-            opacity: 1
-        }```
+
+``` js
+{
+    color: '#FFFF00',
+    fillOpacity: 0.3,
+    weight: 3,
+    opacity: 1
+}
+```

@@ -283,6 +283,7 @@ a {
     display: none;
 }
 #overview-controls {
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
     display: none;
     bottom: 0;
     right: 0;
