@@ -18,26 +18,18 @@ osmly.ui = (function() {
     };
 
     function bind() {
-        bean.on($('#demo-mode')[0], 'click', function(){
-            CSSModal.open('demo-modal');
-        });
+        bean.on($('#demo')[0], 'click', demo);
+        bean.on($('#login')[0], 'click', login);
+        bean.on($('#josm')[0], 'click', josm);
+        bean.on($('#skip')[0], 'click', skip);
+        bean.on($('#reset')[0], 'click', reset);
+        bean.on($('#update-change')[0], 'click', changeset);
+        bean.on($('#remote-edit-modal')[0], 'click', 'button', remoteEdit);
+        bean.on($('#add-new-tag')[0], 'click', addTag);
+        bean.on($('#markdone-modal')[0], 'click', 'button', markDone);
 
-        bean.on($('#demo')[0], 'click', function() {
-            fadeOut($('#login, #demo'));
-            CSSModal.open('demo-modal');
-            $('#demo-mode').show('block');
-            osmly.item.next();
-        });
-
-        bean.on($('#login')[0], 'click', function(){
-            ui.notify('');
-            osmly.auth.authenticate(function(){
-                fadeOut($('#login, #demo'));
-                CSSModal.open('instruction-modal');
-                osmly.connect.getDetails();
-                osmly.item.next();
-            });
-        });
+        bean.on($('#osmlink')[0], 'click', function(){ window.open(osmly.osmlink);} );
+        bean.on($('#submit')[0], 'click', function(){ submit('submit');} );
 
         bean.on($('#go_overview')[0], 'click', function(){
             fadeIn($('#overview_bg, #overview-controls, #overview_block'));
@@ -49,54 +41,13 @@ osmly.ui = (function() {
             osmly.overview.close();
         });
 
-        bean.on($('#update-change')[0], 'click', function(){
-            osmly.settings.changesetTags['comment'] = $('#changeset-form').text();
-            osmly.connect.updateComment(function(){
-                CSSModal.close();
-                $('#notify').hide();
-            });
-        });
-
-        bean.on($('#josm')[0], 'click', function(){
-            if (osmly.auth.authenticated() && token('user')) {
-                bean.fire($('#reset'), 'click');
-                osmly.connect.editInJosm(osmly.item.id);
-            } else {
-                pleaseLogin();
-            }
-        });
-
-        bean.on($('#osmlink')[0], 'click', function(){window.open(osmly.osmlink);});
-        bean.on($('#skip')[0], 'click', skip);
-        bean.on($('#submit')[0], 'click', function(){submit('submit');});
-
         bean.on($('#problem')[0], 'change', function(){
             submit($('#problem').val());
-            $('#problem').val('problem');
-                // resets problem menu
-        });
-
-        bean.on($('#reset')[0], 'click', function(){
-            hide();
-            osmly.ui.teardown();
-            osmly.item.setItemLayer(osmly.item.data);
-            osmly.ui.setupItem(osmly.item.data.properties);
-            osmly.ui.displayItem();
+            $('#problem').val('problem'); // resets problem menu
         });
 
         bean.on($('#tags')[0], 'click', '.minus', function(){
-            if ($('#tags tr').length > 1) {
-                this.parentNode.remove();
-            }
-        });
-
-        bean.on($('#add-new-tag')[0], 'click', function(){
-            $('#tags tbody').append(
-                '<tr>' +
-                '<td class="k" spellcheck="false" contenteditable="true"></td>' +
-                '<td class="v" spellcheck="false" contenteditable="true"></td>' +
-                '<td class="minus">-</td>' +
-                '</tr>');
+            if ($('#tags tr').length > 1) this.parentNode.remove();
         });
 
         bean.on($('#main_table')[0], 'click', '.editjosm', function(){
@@ -108,49 +59,12 @@ osmly.ui = (function() {
             }
         });
 
-        bean.on($('#remote-edit-modal')[0], 'click', 'button', function(){
-            var result = this.getAttribute('data-type');
-            if (result == 'yes') {
-                if (osmly.auth.authenticated() && token('user')) {
-                    osmly.connect.updateItem('submit', {done: 3}, function(){
-                        osmly.overview.modalDone(function(){
-                            CSSModal.close();
-                        });
-                    }, this.getAttribute('data-id'));
-                } else {
-                    CSSModal.close();
-                    pleaseLogin();
-                }
-
-            } else {
-                CSSModal.close();
-            }
-        });
-
         bean.on($('#main_table')[0], 'click', '.markdone', function(){
             if (osmly.auth.authenticated() && token('user')) {
                 $('#markdone-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
                 CSSModal.open('markdone-modal');
             } else {
                 pleaseLogin();
-            }
-        });
-
-        bean.on($('#markdone-modal')[0], 'click', 'button', function(){
-            var result = this.getAttribute('data-type');
-            if (result == 'yes') {
-                if (osmly.auth.authenticated() && token('user')) {
-                    osmly.connect.updateItem('submit', {done: 2}, function(){
-                        osmly.overview.modalDone(function(){
-                            CSSModal.close();
-                        });
-                    }, this.getAttribute('data-id'));
-                } else {
-                    CSSModal.close();
-                    pleaseLogin();
-                }
-            } else {
-                CSSModal.close();
             }
         });
 
@@ -277,6 +191,94 @@ osmly.ui = (function() {
                     fadeOut($('.foundicon-remove'));
                 }, 250);
             });
+        }
+    }
+
+    function demo() {
+        fadeOut($('#login, #demo'));
+        CSSModal.open('demo-modal');
+        $('#demo-mode').show('block');
+        osmly.item.next();
+    }
+
+    function login() {
+        ui.notify('');
+        osmly.auth.authenticate(function(){
+            fadeOut($('#login, #demo'));
+            CSSModal.open('instruction-modal');
+            osmly.connect.getDetails();
+            osmly.item.next();
+        });
+    }
+
+    function josm() {
+        if (osmly.auth.authenticated() && token('user')) {
+            bean.fire($('#reset'), 'click');
+            osmly.connect.editInJosm(osmly.item.id);
+        } else {
+            pleaseLogin();
+        }
+    }
+
+    function reset() {
+        hide();
+        osmly.ui.teardown();
+        osmly.item.setItemLayer(osmly.item.data);
+        osmly.ui.setupItem(osmly.item.data.properties);
+        osmly.ui.displayItem();
+    }
+
+    function changeset() {
+        osmly.settings.changesetTags['comment'] = $('#changeset-form').text();
+        osmly.connect.updateComment(function(){
+            CSSModal.close();
+            $('#notify').hide();
+        });
+    }
+
+    function remoteEdit() {
+        var result = this.getAttribute('data-type');
+        if (result == 'yes') {
+            if (osmly.auth.authenticated() && token('user')) {
+                osmly.connect.updateItem('submit', {done: 3}, function(){
+                    osmly.overview.modalDone(function(){
+                        CSSModal.close();
+                    });
+                }, this.getAttribute('data-id'));
+            } else {
+                CSSModal.close();
+                pleaseLogin();
+            }
+
+        } else {
+            CSSModal.close();
+        }
+    }
+
+    function addTag() {
+        $('#tags tbody').append(
+            '<tr>' +
+            '<td class="k" spellcheck="false" contenteditable="true"></td>' +
+            '<td class="v" spellcheck="false" contenteditable="true"></td>' +
+            '<td class="minus">-</td>' +
+            '</tr>');
+    }
+
+    function markDone() {
+        var result = this.getAttribute('data-type');
+        if (result == 'yes') {
+            if (osmly.auth.authenticated() && token('user')) {
+                osmly.connect.updateItem('submit', {done: 2}, function(){
+                    osmly.overview.modalDone(function(){
+                        CSSModal.close();
+                    });
+                }, this.getAttribute('data-id'));
+            } else {
+                CSSModal.close();
+                pleaseLogin();
+            }
+        } else {
+            CSSModal.close();
         }
     }
 
