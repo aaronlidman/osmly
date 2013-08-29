@@ -145,12 +145,12 @@ osmly.ui = (function() {
         }
     }
 
-    function hide() {
+    ui.hideItem = function() {
         fadeOut($('#hold-problem, #submit, #bottom-right, #action-block, #tags'));
         osmly.map.closePopup();
         osmly.map.removeLayer(osmly.item.layer);
         if (osmly.item.contextLayer) osmly.map.removeLayer(osmly.item.contextLayer);
-    }
+    };
 
     ui.teardown = function() {
         fadeOut($('#tags'));
@@ -158,14 +158,14 @@ osmly.ui = (function() {
     };
 
     function skip() {
-        hide();
+        ui.hideItem();
         osmly.ui.teardown();
         leftToRight($('.foundicon-right-arrow'));
         osmly.item.next();
     }
 
     function submit(result) {
-        hide();
+        ui.hideItem();
 
         if (osmly.auth.authenticated() && token('user')) {
             if (result === 'submit') {
@@ -221,7 +221,7 @@ osmly.ui = (function() {
     }
 
     function reset() {
-        hide();
+        ui.hideItem();
         osmly.ui.teardown();
         osmly.item.setItemLayer(osmly.item.data);
         osmly.ui.setupItem(osmly.item.data.properties);
@@ -240,7 +240,7 @@ osmly.ui = (function() {
         var result = this.getAttribute('data-type');
         if (result == 'yes') {
             if (osmly.auth.authenticated() && token('user')) {
-                osmly.connect.updateItem('submit', {done: 3}, function(){
+                osmly.connect.updateItem('submit', {submit: 3}, function(){
                     osmly.overview.modalDone(function(){
                         CSSModal.close();
                     });
@@ -268,7 +268,7 @@ osmly.ui = (function() {
         var result = this.getAttribute('data-type');
         if (result == 'yes') {
             if (osmly.auth.authenticated() && token('user')) {
-                osmly.connect.updateItem('submit', {done: 2}, function(){
+                osmly.connect.updateItem('submit', {submit: 2}, function(){
                     osmly.overview.modalDone(function(){
                         CSSModal.close();
                     });

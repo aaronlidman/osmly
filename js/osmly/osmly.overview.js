@@ -5,7 +5,7 @@ osmly.overview = (function () {
         // will probably need to paginate over ~1000 items
             // right now it's pretty quick w/ 1200 on chrome
             // firefox is a bit slow
-        // index from simple.py: id, problem, done, user, time
+        // index from simple.py: id, problem, submit, user, time
         items = overview.data;
         var table = document.getElementById('main_table');
 
@@ -22,7 +22,7 @@ osmly.overview = (function () {
                     text = items[a][b];
 
                 if (b == 2) {
-                    // checkmark for done items
+                    // checkmark for submitted items
                     if (items[a][b] === 1) {
                         text = '&#x2713;';
                     } else if (items[a][b] === 2) {
@@ -86,14 +86,14 @@ osmly.overview = (function () {
         });
     }
 
+    // entry point
     overview.refresh = function(callback) {
         osmly.ui.notify('Loading...');
         request(function() {
             buildTable(callback);
             problem_selection();
             user_selection();
-            }
-        );
+        });
     };
 
     function filter(options) {
@@ -101,11 +101,11 @@ osmly.overview = (function () {
         // also takes values as a list of multiple possible values
             // {'problem': ['no_park', 'bad_imagery', 'you_ugly']}
             // or even better: {'problem': unique('problem')}
-        // index from simple.py: id, problem, done, user, time
+        // index from simple.py: id, problem, submit, user, time
         // if multiple keys are provided a value from each key must be true
         var ndx = {
             'problem': 1,
-            'done': 2,
+            'submit': 2,
             'user': 3,
             'time': 4
         };
@@ -137,7 +137,7 @@ osmly.overview = (function () {
         // probably only useful for 'problem' and 'user'
         var ndx = {
             'problem': 1,
-            'done': 2,
+            'submit': 2,
             'user': 3,
             'time': 4
         };
@@ -201,14 +201,14 @@ osmly.overview = (function () {
     overview.click_red = function() {
         filter({
             'problem': unique('problem'),
-            'done': 0
+            'submit': 0
         });
         changeRadio('red');
         buildTable();
     };
 
     overview.click_green = function() {
-        filter({'done': [1, 2, 3]});
+        filter({'submit': [1, 2, 3]});
             // filter needs an inverse
         changeRadio('green');
         buildTable();
@@ -217,15 +217,16 @@ osmly.overview = (function () {
     overview.drop_selection = function(select) {
         // gets the value of the changed dropdown menu and filters based on it
         // also selects the parent radio button
+        console.log(select);
         var selector = document.getElementById(select),
             value = selector.options[selector.selectedIndex].value,
             dict = {};
         value = value.split(':');
         dict[value[0]] = value[1];
-            // dict is necessary because value = {value[0]: value[1]} didn't work
+            // dict is necessary because literal value = {value[0]: value[1]} didn't work
                 // why doesn't that work?
-        if (value[0] == 'problem') dict['done'] = 0;
-            // only want un-done problems, not strictly honest but more useful
+        if (value[0] == 'problem') dict['submit'] = 0;
+            // only want un-submitted problems, not strictly true but more useful
 
         filter(dict);
         buildTable();
