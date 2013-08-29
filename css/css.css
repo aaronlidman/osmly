@@ -366,3 +366,7 @@ button:hover {
     background-color: #333;
 }
 .markdone, .editjosm {    cursor: pointer }
+.wide800 {
+    width: 800px !important;
+    margin-left: -400px !important;
+}

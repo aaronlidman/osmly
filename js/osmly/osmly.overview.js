@@ -5,7 +5,7 @@ osmly.overview = (function () {
         // will probably need to paginate over ~1000 items
             // right now it's pretty quick w/ 1200 on chrome
             // firefox is a bit slow
-        // index from simple.py: id, problem, submit, user, time
+        // index from simple.py: id, problem, submit, user
         items = overview.data;
         var table = document.getElementById('main_table');
 
@@ -18,26 +18,17 @@ osmly.overview = (function () {
         for (var a = 0; a < items.length; a++) {
             var tr = document.createElement('tr');
             for (var b = 0; b < items[a].length; b++) {
+                // easy to forget: we're making a td for each item fetched, used or not
+                // so only fetch what you need, in simple.py elif 'overview'
                 var column = document.createElement('td'),
                     text = items[a][b];
 
                 if (b == 2) {
                     // checkmark for submitted items
-                    if (items[a][b] === 1) {
+                    if (items[a][b] > 0) {
                         text = '&#x2713;';
-                    } else if (items[a][b] === 2) {
-                        text = 'marked';
-                    } else if (items[a][b] === 3) {
-                        text = 'via JOSM';
                     } else {
                         text = '';
-                    }
-                } else if (b == 4) {
-                    if (items[a][b]) {
-                        var date = new Date(items[a][b]*1000),
-                            months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-                        text = months[date.getMonth()] + ' ' + date.getDate() + ' ' + date.getFullYear() + ' ' +
-                            date.getHours() + ':' + date.getMinutes();
                     }
                 }
 
@@ -101,13 +92,12 @@ osmly.overview = (function () {
         // also takes values as a list of multiple possible values
             // {'problem': ['no_park', 'bad_imagery', 'you_ugly']}
             // or even better: {'problem': unique('problem')}
-        // index from simple.py: id, problem, submit, user, time
+        // index from simple.py: id, problem, submit, user
         // if multiple keys are provided a value from each key must be true
         var ndx = {
             'problem': 1,
             'submit': 2,
-            'user': 3,
-            'time': 4
+            'user': 3
         };
 
         var items = overview.rawData,
@@ -138,8 +128,7 @@ osmly.overview = (function () {
         var ndx = {
             'problem': 1,
             'submit': 2,
-            'user': 3,
-            'time': 4
+            'user': 3
         };
         
         var items = overview.rawData,

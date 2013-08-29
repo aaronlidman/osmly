@@ -6,14 +6,11 @@
 
         <link rel="stylesheet" href="js/lib/leaflet-0.6.4/leaflet.css" />
         <link rel="stylesheet" href="css/leaflet.label.css" />
-        <link rel="stylesheet" href="css/css.css" />
         <link rel="stylesheet" href="css/animations.css" />
         <link rel="stylesheet" href="css/modal.css" />
         <link rel="stylesheet" href="css/leaflet-overwrite.css" />
         <link rel="stylesheet" href="css/general_foundicons.css">
-        <!--[if lte IE 8]>
-            <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/leaflet/0.6.3/leaflet.ie.css" />
-        <![endif]-->
+        <link rel="stylesheet" href="css/css.css" />
         <script src="js/lib/leaflet-0.6.4/leaflet.js"></script>
         <script src="js/lib/leaflet.label.js"></script>
         <script src="js/lib/leaflet.draw.js"></script>
@@ -139,9 +136,9 @@
         </div>
 
         <div class="semantic-content" id="markdone-modal">
-            <div class="modal-inner">
+            <div class="modal-inner wide800">
                 <div class="modal-content">
-                    <h2 style="margin: 20px 0; text-align: center;">Are you sure?</h2>
+                    <h2 style="margin: 20px 0; text-align: center;">Are you sure? Please use with caution.</h2>
                     <h2 style="margin: 20px 0; text-align: center;"> This will prevent other users from editing this feature.</h2>
                     <div style="width: 100%; text-align: center;">
                         <button data-type="no" style="margin-left: 0;">No, don't mark it as done</button>
@@ -181,9 +178,8 @@
                     <tr>
                         <th>#</th>
                         <th>Problem</th>
-                        <th>Done</th>
+                        <th>Submitted</th>
                         <th>User</th>
-                        <th>Time</th>
                         <th>Mark as done</th>
                         <th>Edit in JOSM</th>
                     </tr>
@@ -211,7 +207,7 @@
         <script type="text/javascript">
             var config = {
                 title: 'Outline the park',
-                db: 'http://127.0.0.1:5000/?db=test-parks',
+                db: 'http://127.0.0.1:5000/?db=pppparks',
                 origin: [34.0577, -118.2409],
                 zoom: 10,
                 usePropertyAsTag: ['name'],
