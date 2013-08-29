@@ -27,7 +27,7 @@ def get():
     c = conn.cursor()
     if 'id' in request.args:
         row = c.execute(
-            'SELECT geo, remote, done FROM osmly WHERE id = ? LIMIT 1',
+            'SELECT geo, remote, submit FROM osmly WHERE id = ? LIMIT 1',
             [request.args['id']]
         )
         row = row.fetchone()
@@ -46,13 +46,12 @@ def get():
                 out = json.dumps(out)
 
     elif 'overview' in request.args:
-        query = 'SELECT id, problem, done, user, time FROM osmly ORDER BY id'
-        c.execute(query)
+        c.execute('SELECT id, problem, submit, user, time FROM osmly ORDER BY id')
         out = json.dumps(c.fetchall());
     else:
         # random selection
         row = c.execute(
-            'SELECT geo FROM osmly WHERE problem = "" AND done = 0 ORDER BY RANDOM() LIMIT 1')
+            'SELECT geo FROM osmly WHERE problem = "" AND submit = 0 ORDER BY RANDOM() LIMIT 1')
         row = row.fetchone()
         conn.commit()
         conn.close()
@@ -74,20 +73,20 @@ def post():
         elif request.args['action'] == 'remote':
             return post_remote()
         elif request.args['action'] == 'submit':
-            return done()
+            return submit()
 
 
-def done():
-    done = 1
+def submit():
+    submit = 1
 
-    if request.form and 'done' in request.form:
-        done = request.form['done']
+    if request.form and 'submit' in request.form:
+        submit = request.form['submit']
 
     conn = sqlite3.connect(request.args['db'] + '.sqlite')
     c = conn.cursor()
     c.execute(
-        'UPDATE osmly SET done = ?, user = ?, time = ? WHERE id = ?',
-        (done, request.form['user'], int(time.time()), request.args['id'])
+        'UPDATE osmly SET submit = ?, user = ?, time = ? WHERE id = ?',
+        (submit, request.form['user'], int(time.time()), request.args['id'])
     )
     conn.commit()
     conn.close()

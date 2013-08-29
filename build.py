@@ -33,11 +33,11 @@ def isEditable(geo):
     # items that are easily editable for leaflet
     # mirrors isEditable() in osmly.item.js
     if geo.geom_type == 'Polygon' and geo.interiors:
-        return 'incompatible (complex polygon)'
+        return 'complex polygon'
     elif geo.geom_type == 'MultiPolygon':
-        return 'incompatible (multipolygon)'
+        return 'multipolygon'
     if geo.area > MAX_EDITABLE_AREA:
-        return 'too large for the browser'
+        return 'too large'
     if geo.area == 0:
         return 'data problem'
     return ''
@@ -61,7 +61,7 @@ db_conn.isolation_level = None
 db_c = db_conn.cursor()
 db_c.execute('DROP TABLE IF EXISTS osmly')
 db_c.execute('CREATE TABLE osmly (id INTEGER PRIMARY KEY, geo TEXT, remote TEXT,' +
-             'problem TEXT, done INT, comments TEXT, user TEXT, time INT)')
+             'problem TEXT, submit INT, comments TEXT, user TEXT, time INT, done INT)')
 
 count = 0
 
@@ -70,7 +70,7 @@ for feature in data['features']:
     bounds = trunc_bounds(geo.bounds)
     problem = isEditable(geo)
 
-    # simplify() False is faster
+    # simplify(x, False) is faster, turns off preserve_topology
     # but it occasionally deletes all nodes and that upsets mapping()
     try:
         simple = geo.simplify(0.0001, False)
@@ -82,10 +82,11 @@ for feature in data['features']:
     feature['properties']['bounds'] = bounds
     feature['geometry']['coordinates'] = geo['coordinates']
     feature['properties']['id'] = count
-    statement = 'INSERT INTO osmly VALUES (?, ?, ?, ?, ?, ?, ?, ?);'
+    statement = 'INSERT INTO osmly VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);'
 
+    # refer to CREATE TABLE, lame I know
     db_c.execute(statement, (
-        count, json.dumps(feature), '', problem, 0, '', '', ''))
+        count, json.dumps(feature), '', problem, 0, '', '', 0, 0))
     count = count + 1
 
 print str(count) + ' items'
