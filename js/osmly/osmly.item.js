@@ -30,7 +30,7 @@ osmly.item = (function () {
                 usePropertiesAsTag();
                 appendTags();
 
-                if (item.isEditable) {
+                if (item.isEditable && !osmly.settings.noContext) {
                     getOsm(function() {
                         osmly.ui.setupItem(item.data.properties);
                         osmly.ui.displayItem();
