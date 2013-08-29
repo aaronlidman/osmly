@@ -372,3 +372,16 @@ button:hover {
     width: 800px !important;
     margin-left: -400px !important;
 }
+
+#report {
+    position: absolute;
+    bottom: 25px;
+    right: 10px;
+    background: white;
+    font-size: 16px;
+    padding: 10px 15px;
+}
+
+.bold {
+    font-weight: bold;
+}

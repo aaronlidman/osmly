@@ -5,6 +5,7 @@ OSMLY_JS = \
 	js/osmly/osmly.connect.js \
 	js/osmly/osmly.item.js \
 	js/osmly/osmly.overview.js \
+	js/osmly/osmly.qa.js \
 	js/osmly/common.js \
 	js/osmly/animations.js
 

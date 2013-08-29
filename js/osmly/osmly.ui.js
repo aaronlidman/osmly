@@ -36,6 +36,8 @@ osmly.ui = (function() {
             osmly.overview.refresh();
         });
 
+        bean.on($('#qa')[0], 'click', osmly.qa.go);
+
         bean.on($('#overview_bg')[0],'click', function(){
             $('#overview_bg, #overview-controls, #overview_block').hide();
             osmly.overview.close();
