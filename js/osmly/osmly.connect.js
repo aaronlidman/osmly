@@ -34,8 +34,9 @@ osmly.connect = (function() {
     };
 
     function checkItem(id, callback) {
+        // checks the items again before uploading to OSM
+        // in case more than one uses is working on the same item at the same time
         var url = osmly.settings.db + '&id=' + id + '&action=status';
-
         reqwest({
             url: url,
             crossOrigin: true,
@@ -140,6 +141,7 @@ osmly.connect = (function() {
         }
         var u = res.getElementsByTagName('user')[0];
         token('user', u.getAttribute('display_name'));
+        if (u.getElementsByTagName('img')) token('avatar', u.getElementsByTagName('img')[0].getAttribute('href'));
         // there's more if needed
         // http://wiki.openstreetmap.org/wiki/API_v0.6#Details_of_the_logged-in_user
         osmly.ui.setUserDetails();

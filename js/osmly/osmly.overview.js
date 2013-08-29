@@ -18,18 +18,13 @@ osmly.overview = (function () {
         for (var a = 0; a < items.length; a++) {
             var tr = document.createElement('tr');
             for (var b = 0; b < items[a].length; b++) {
-                // easy to forget: we're making a td for each item fetched, used or not
-                // so only fetch what you need, in simple.py elif 'overview'
                 var column = document.createElement('td'),
                     text = items[a][b];
 
                 if (b == 2) {
                     // checkmark for submitted items
-                    if (items[a][b] > 0) {
-                        text = '&#x2713;';
-                    } else {
-                        text = '';
-                    }
+                    if (items[a][b] > 0) text = '&#x2713;';
+                    else text = '';
                 }
 
                 column.innerHTML = text;

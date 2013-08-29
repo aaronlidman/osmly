@@ -283,8 +283,9 @@ osmly.ui = (function() {
     }
 
     ui.setUserDetails = function() {
+        if (token('avatar')) $('#user').append('<img height="25px" src="' + token('avatar') + '"/>');
         fadeIn($('#user')
-            .html('<a href="' + osmly.settings.writeApi + '/user/' +
+            .append('<a href="' + osmly.settings.writeApi + '/user/' +
                 token('user') + '/edits" target="_blank">' +
                 token('user') + '</a>')
         );

@@ -19,3 +19,5 @@ function token(k, x) {
     }
     return localStorage[keyclean(osmly.settings.writeApi) + k];
 }
+
+function byId(id) {return document.getElementById(id);}
