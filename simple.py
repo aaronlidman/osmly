@@ -4,12 +4,19 @@ import sqlite3
 from flask import Flask, request, make_response
 import json
 import time
+import glob
 
 app = Flask(__name__)
 
-
 @app.route('/', methods=['GET', 'POST'])
 def slash():
+    if 'db' not in request.args:
+        out = []
+        for item in glob.glob('*.sqlite'):
+            out.append(item.split('.')[0])
+        response = make_response(json.dumps(out))
+        return response
+
     if request.method == 'GET':
         response = get()
     elif request.method == 'POST':
@@ -21,48 +28,27 @@ def slash():
     return response
 
 
-def get():
-    out = ''
+def DB():
     conn = sqlite3.connect(request.args['db'] + '.sqlite')
-    c = conn.cursor()
+    cursor = conn.cursor()
+    return {
+        'conn': conn,
+        'c': cursor
+    }
+
+
+def get():
     if 'id' in request.args:
-        row = c.execute(
-            'SELECT geo, remote, submit FROM osmly WHERE id = ? LIMIT 1',
-            [request.args['id']]
-        )
-        row = row.fetchone()
-        conn.commit()
-        conn.close()
-
-        out = row[0]
-
-        if 'action' in request.args:
-            if request.args['action'] == 'remote':
-                out = row[1]
-            elif request.args['action'] == 'status':
-                out = {'status': 'ok'}
-                if row[2] != 0:
-                    out = {'status': 'no_go'}
-                out = json.dumps(out)
-
+        return specific()
     elif 'overview' in request.args:
-        c.execute('SELECT id, problem, submit, user, time FROM osmly ORDER BY id')
-        out = json.dumps(c.fetchall());
+        return overview()
     else:
-        # random selection
-        row = c.execute(
-            'SELECT geo FROM osmly WHERE problem = "" AND submit = 0 ORDER BY RANDOM() LIMIT 1')
-        row = row.fetchone()
-        conn.commit()
-        conn.close()
-        out = row[0]
-
-    return out
+        return random()
 
 
 def post():
     # obviously these are public facing and could be abused easily, marked all done etc...
-    # taking the risk right now, if needed it can be limited easily
+    # taking the risk right now, if needed it can be limited with some effort
         # on osm login or changeset creation, we log them in here with a time window
         # as they perform actions that window stays open, like changesets
 
@@ -76,45 +62,80 @@ def post():
             return submit()
 
 
-def submit():
-    submit = 1
+def random():
+    # out most common product, just returns a random
+    db = DB()
+    row = db['c'].execute(
+        'SELECT geo FROM osmly WHERE problem = "" AND submit = 0 ORDER BY RANDOM() LIMIT 1')
+    row = row.fetchone()
+    db['conn'].commit()
+    db['conn'].close()
+    return row[0]
 
+
+def specific():
+    db = DB()
+    row = db['c'].execute(
+        'SELECT geo, remote, submit FROM osmly WHERE id = ? LIMIT 1',
+        [request.args['id']]
+    )
+    row = row.fetchone()
+    db['conn'].commit()
+    db['conn'].close()
+    out = row[0]
+    if 'action' in request.args:
+        if request.args['action'] == 'remote':
+            out = row[1]
+        elif request.args['action'] == 'status':
+            out = {'status': 'ok'}
+            if row[2] != 0:
+                out = {'status': 'no_go'}
+            out = json.dumps(out)
+    return out
+
+
+def overview():
+    db = DB()
+    db['c'].execute('SELECT id, problem, submit, user FROM osmly ORDER BY id')
+    return json.dumps(db['c'].fetchall());
+
+
+def submit():
+    db = DB()
+    submit = 1
     if request.form and 'submit' in request.form:
         submit = request.form['submit']
 
-    conn = sqlite3.connect(request.args['db'] + '.sqlite')
-    c = conn.cursor()
-    c.execute(
+    db['c'].execute(
         'UPDATE osmly SET submit = ?, user = ?, time = ? WHERE id = ?',
         (submit, request.form['user'], int(time.time()), request.args['id'])
     )
-    conn.commit()
-    conn.close()
+    db['conn'].commit()
+    db['conn'].close()
     return json.dumps({'status': 'ok'})
 
 
 def problem():
-    conn = sqlite3.connect(request.args['db'] + '.sqlite')
-    c = conn.cursor()
-    c.execute(
+    db = DB()
+    db['c'].execute(
         'UPDATE osmly SET problem = ?, user = ?, time = ? WHERE id = ?',
         (request.form['problem'], request.form['user'], int(time.time()), request.args['id'])
     )
-    conn.commit()
-    conn.close()
+    db['conn'].commit()
+    db['conn'].close()
     return json.dumps({'id': request.args['id']})
 
 
 def post_remote():
-    conn = sqlite3.connect(request.args['db'] + '.sqlite')
-    c = conn.cursor()
-    c.execute(
+    db = DB()
+    db['c'].execute(
         'UPDATE osmly SET remote = ? WHERE id = ?',
         (request.form['remote'], request.args['id'])
     )
-    conn.commit()
-    conn.close()
+    db['conn'].commit()
+    db['conn'].close()
     return json.dumps('remoted')
+
 
 if __name__ == '__main__':
     app.run(debug=True)

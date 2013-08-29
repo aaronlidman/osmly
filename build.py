@@ -33,7 +33,10 @@ def isEditable(geo):
     # items that are easily editable for leaflet
     # mirrors isEditable() in osmly.item.js
     if geo.geom_type == 'Polygon' and geo.interiors:
-        return 'complex polygon'
+        # geojson makes a distinction between multipolygons and polygon w/ a hole
+        # osm does not
+        # actually a holey polygon, 'complex polygon'
+        return 'multipolygon'
     elif geo.geom_type == 'MultiPolygon':
         return 'multipolygon'
     if geo.area > MAX_EDITABLE_AREA:
