@@ -42,6 +42,8 @@ def get():
         return specific()
     elif 'overview' in request.args:
         return overview()
+    elif 'qa' in request.args:
+        return qa()
     else:
         return random()
 
@@ -57,13 +59,14 @@ def post():
         if request.args['action'] == 'problem':
             return problem()
         elif request.args['action'] == 'remote':
-            return post_remote()
+            return remote()
         elif request.args['action'] == 'submit':
             return submit()
+        elif request.args['action'] == 'confirm':
+            return confirm()
 
 
 def random():
-    # out most common product, just returns a random
     db = DB()
     row = db['c'].execute(
         'SELECT geo FROM osmly WHERE problem = "" AND submit = 0 ORDER BY RANDOM() LIMIT 1')
@@ -100,6 +103,17 @@ def overview():
     return json.dumps(db['c'].fetchall());
 
 
+def qa():
+    db = DB()
+    columns = 'id, geo, problem, submit, user, time'
+    row = db['c'].execute(
+        'SELECT ' + columns + ' FROM osmly WHERE submit > 0 AND done = 0 ORDER BY RANDOM() LIMIT 1')
+    row = row.fetchone()
+    db['conn'].commit()
+    db['conn'].close()
+    return json.dumps(row)
+
+
 def submit():
     db = DB()
     submit = 1
@@ -126,7 +140,7 @@ def problem():
     return json.dumps({'id': request.args['id']})
 
 
-def post_remote():
+def remote():
     db = DB()
     db['c'].execute(
         'UPDATE osmly SET remote = ? WHERE id = ?',
@@ -135,6 +149,17 @@ def post_remote():
     db['conn'].commit()
     db['conn'].close()
     return json.dumps('remoted')
+
+
+def confirm():
+    db = DB()
+    db['c'].execute(
+        'UPDATE osmly set done = 1 WHERE id = ?',
+        (request.args['id'])
+    )
+    db['conn'].commit()
+    db['conn'].close()
+    return json.dumps('confirmed')
 
 
 if __name__ == '__main__':
