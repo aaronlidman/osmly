@@ -21,6 +21,13 @@ function token(k, x) {
 }
 
 function byId(id) {return document.getElementById(id);}
+function byTag(tag) {return document.getElementsByTagName(tag);}
+function createE(element) {return document.createElement(element);}
+function createId(element, id) {
+    var elm = createE(element);
+    elm.setAttribute('id', id);
+    return elm;
+}
 
 // http://markroberthenderson.com/2011/08/28/javascript-minutes-hours-seconds-time-ago-function.html
 function format_date(unix_timestamp) {

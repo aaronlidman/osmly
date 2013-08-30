@@ -1,38 +1,42 @@
 osmly.qa = (function () {
-    var qa = {};
-    var ui = {
-        'confirm': {
-            text: 'confirm'
-        },
-        'deny': {
-            text: 'deny'
-        },
-        'qa-skip': {
-            text: 'skip'
-        },
-        'report': {}
+    var qa = {
+        mode: false
     };
 
-    function newInterface() {
-        var body = document.getElementsByTagName('body')[0];
-        for (var id in ui) {
-            if (!Boolean(byId(id))){
-                var item = document.createElement('div');
-                item.setAttribute('id', id);
-                if (ui[id].text) item.innerHTML = ui[id].text;
-                if (ui[id].bind) bean.on($(id)[0], 'click', ui[id].bind);
-                body.appendChild(item);
-            }
-        }
-    }
-
     function getNext() {
+        console.log('next');
         request(fillReport);
-        // get the item, fill in the appropriate fields
-        // filter out own items
         // get the context
         // put the context on the map
         // bind set geometry layer but don't display it
+    }
+
+    function confirm() {
+        console.log('heh');
+        // osmly.connect.updateItem('confirm', false, false, qa.data.id);
+    }
+
+    function newInterface() {
+        qa.mode = true;
+        byId('qa').innerHTML = 'Leave QA';
+        byId('qa').style.backgroundColor = 'orange';
+
+        var body = byTag('body')[0],
+            qablock = createId('div', 'qa-block');
+        body.appendChild(qablock);
+
+        var report = createId('div', 'report');
+        qablock.appendChild(report);
+
+        var skip = createId('div', 'qa-skip');
+        qablock.appendChild(skip);
+        skip.innerHTML = 'skip';
+        bean.on(byId('qa-skip'), 'click', getNext);
+
+        var confirm = createId('div', 'confirm');
+        qablock.appendChild(confirm);
+        confirm.innerHTML = 'confirm';
+        bean.on(byId('confirm'), 'click', confirm);
     }
 
     function request(callback) {
@@ -42,46 +46,62 @@ osmly.qa = (function () {
             crossOrigin: true,
             type: 'json',
             success: function(item){
-                qa.data = item;
+                qa.data = {
+                    id: item[0],
+                    geo: JSON.parse(item[1]),
+                    problem: item[2],
+                    submit: item[3],
+                    user: item[4],
+                    time: item[5],
+                };
+
                 if (callback) callback();
             }
         });
     }
 
     function fillReport() {
-        // index via simple.py qa(): geo, problem, submit, user, time
-        var string = 'User <span class="bold">' + qa.data[3] + '</span> submitted this feature ' +
-        format_date(qa.data[4]);
-        if (qa.data[2] == 2) string += " via the 'Mark as Done' button";
-        if (qa.data[2] == 3) string += ' via JOSM';
-        string += '.';
-        if (qa.data[1] != '') string += 'Previously reported problem: ' + qa.data[1];
+        var table = createE('table'),
+            report = byId('report');
+        if (report.getElementsByTagName('table').length) {
+            report.removeChild(report.childNodes[0]);
+        }
+        var tbody = createE('tbody');
 
-        var report = document.getElementById('report');
-        report.innerHTML = string;
-    }
+        // columns = 'id, geo, problem, submit, user, time'
+        for (var item in qa.data) {
+            var tr = createE('tr');
+            if (item == 'id') tr.innerHTML = '<td>id</td><td>' + qa.data.id + '</td>';
+            if (item == 'user') tr.innerHTML = '<td>who</td><td>' + qa.data.user + '</td>';
+            if (item == 'time') tr.innerHTML = '<td>when</td><td>' + format_date(qa.data.time) + '</td>';
+            if (item == 'problem' && qa.data.problem !== '') tr.innerHTML = '<td>problem</td><td class="k">' + qa.data.problem + '</td>';
+            if (item == 'submit' && qa.data.submit != 1){
+                tr.innerHTML = '<td>via</td>';
+                if (qa.data.submit == 2) tr.innerHTML += '<td>Mark as Done button</td>';
+                if (qa.data.submit == 3) tr.innerHTML += '<td>JOSM</td>';
+            }
+            if (tr.innerHTML !== '') tbody.appendChild(tr);
+        }
 
-    function confirm() {
-
-    }
-
-    function deny() {
-
-    }
-
-    function skip() {
-
+        table.appendChild(tbody);
+        report.appendChild(table);
     }
 
     qa.go = function(){
-        newInterface();
-        osmly.ui.hideItem();
-        getNext();
+        // toggle qa mode
+        if (!qa.mode) {
+            newInterface();
+            osmly.ui.hideItem();
+            getNext();
+        } else {
+            byTag('body')[0].removeChild($('#qa-block')[0]);
+            byId('qa').innerHTML = 'QA';
+            byId('qa').style.backgroundColor = 'white';
+            qa.mode = false;
+            osmly.ui.teardown();
+            osmly.item.next();
+        }
     };
-
-    function show() {
-
-    }
 
     return qa;
 }());

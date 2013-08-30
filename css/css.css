@@ -13,12 +13,9 @@ body, html {
     min-width: 640px;
     font-family: Helvetica, Arial, sans-serif;
 }
-.hidden {
-    display: none;
-}
-.block {
-    display: block;
-}
+table {border-collapse: collapse;}
+.hidden {display: none;}
+.block {display: block;}
 a {
     text-decoration: none;
     color: #222;
@@ -38,7 +35,11 @@ a {
     box-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
 #top-bar li {
-    margin-left: 2px;
+    text-align: center;
+    padding: 7px 10px;
+    cursor: pointer;
+    border-left: 1px solid #ccc;
+    margin: 0 1px;
     float: left;
 }
 #title {
@@ -53,12 +54,6 @@ a {
     padding: 0px 15px;
     line-height: 61px;
     box-shadow: 0 0 5px rgba(0,0,0,0.5);
-}
-#top-bar li {
-    text-align: center;
-    padding: 7px 10px;
-    cursor: pointer;
-    border-left: 1px solid #ccc;
 }
 #bottom-right li {
     text-align: center;
@@ -175,7 +170,6 @@ a {
     border-right: none !important;
     font-family: Arial;
 }
-#tags table {    border-collapse: collapse }
 #tags td {
     border: 1px solid #ccc;
     padding: 5px 7px;
@@ -307,7 +301,6 @@ input[type='radio'] {    margin-right: 5px }
 #count span {    font-size: 24px }
 #main_table {
     width: 100%;
-    border-collapse: collapse;
     text-align: center;
 }
 #main_table tr {    border-top: 1px solid #eee }
@@ -326,7 +319,6 @@ input[type='radio'] {    margin-right: 5px }
 #main_table table {
     max-width: 100%;
     background-color: transparent;
-    border-collapse: collapse;
     border-spacing: 0;
 }
 #main_table .table {
@@ -373,15 +365,40 @@ button:hover {
     margin-left: -400px !important;
 }
 
-#report {
-    position: absolute;
-    bottom: 25px;
-    right: 10px;
-    background: white;
-    font-size: 16px;
-    padding: 10px 15px;
+#confirm, #qa-skip {
+    border: 1px solid rgba(255,255,255,0.25);
+    color: white;
+    padding: 8px 15px;
+    line-height: 25px;
+    height: 25px;
+    font-weight: bold;
+    text-align: center;
+    width: 100px;
+    cursor: pointer;
 }
 
-.bold {
-    font-weight: bold;
+#confirm {background-color: rgba(0, 144, 0, 1);}
+#qa-skip {background-color: rgba(0, 69, 144, 1);}
+
+#qa-block {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    max-width: 450px;
+    overflow: visible;
+}
+#qa-block div {
+    margin-left: 10px;
+    margin-bottom: 10px;
+    float: left;
+}
+
+#report {
+    background: white;
+    padding: 7px;
+}
+#report td {
+    border: 1px solid #ccc;
+    padding: 5px 7px;
+    min-width: 50px;
 }
