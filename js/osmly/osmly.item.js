@@ -31,7 +31,7 @@ osmly.item = (function () {
                 appendTags();
 
                 if (item.isEditable && !osmly.settings.noContext) {
-                    getOsm(function() {
+                    item.getOsm(item.bbox, function() {
                         osmly.ui.setupItem(item.data.properties);
                         osmly.ui.displayItem();
                     });
@@ -103,10 +103,10 @@ osmly.item = (function () {
         return geo;
     }
 
-    function getOsm(callback) {
+    item.getOsm = function(bbox, callback) {
         osmly.ui.notify('getting nearby OSM data');
-        var bbox = 'bbox=' + item.bbox.join(','),
-            request = osmly.settings.readApi + bbox;
+        bbox = 'bbox=' + bbox.join(',');
+        var request = osmly.settings.readApi + bbox;
 
         reqwest({
             url: request,
@@ -120,28 +120,24 @@ osmly.item = (function () {
                 callback();
             }
         });
-    }
+    };
 
     function setContext(osmjson) {
         osmly.item.contextLayer = L.geoJson(osmjson, {
             style: osmly.settings.contextStyle,
             onEachFeature: function(feature, layer) {
                 var popup = '',
-                    label = '[NO NAME] click for tags',
+                    label = 'NO NAME, click for tags',
                     t = 0,
                     tagKeys = Object.keys(feature.properties);
 
                 if (feature.properties) {
-                    if (feature.properties.name) {
-                        label = feature.properties.name;
-                    }
-
+                    if (feature.properties.name) label = feature.properties.name;
                     while (t < tagKeys.length) {
                         popup += '<li><span class="k">' + tagKeys[t] +
                         '</span>: ' + feature.properties[tagKeys[t]] + '</li>';
                         t++;
                     }
-
                     layer.bindPopup(popup);
                     layer.bindLabel(label);
                 }

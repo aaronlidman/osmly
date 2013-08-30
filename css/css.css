@@ -172,7 +172,7 @@ a {
 }
 #tags td {
     border: 1px solid #ccc;
-    padding: 5px 7px;
+    padding: 8px 10px;
     min-width: 50px;
 }
 .k {    font-weight: bold }
@@ -373,7 +373,6 @@ button:hover {
     height: 25px;
     font-weight: bold;
     text-align: center;
-    width: 100px;
     cursor: pointer;
 }
 
@@ -381,16 +380,14 @@ button:hover {
 #qa-skip {background-color: rgba(0, 69, 144, 1);}
 
 #qa-block {
+    bottom: 0;
     position: absolute;
-    bottom: 10px;
-    left: 10px;
-    max-width: 450px;
-    overflow: visible;
+    margin: 0 auto;
+    left: 0;
 }
 #qa-block div {
     margin-left: 10px;
     margin-bottom: 10px;
-    float: left;
 }
 
 #report {
@@ -398,7 +395,5 @@ button:hover {
     padding: 7px;
 }
 #report td {
-    border: 1px solid #ccc;
-    padding: 5px 7px;
-    min-width: 50px;
+    padding: 10px;
 }

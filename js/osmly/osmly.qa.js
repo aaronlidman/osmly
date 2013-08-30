@@ -3,19 +3,6 @@ osmly.qa = (function () {
         mode: false
     };
 
-    function getNext() {
-        console.log('next');
-        request(fillReport);
-        // get the context
-        // put the context on the map
-        // bind set geometry layer but don't display it
-    }
-
-    function confirm() {
-        console.log('heh');
-        // osmly.connect.updateItem('confirm', false, false, qa.data.id);
-    }
-
     function newInterface() {
         qa.mode = true;
         byId('qa').innerHTML = 'Leave QA';
@@ -31,11 +18,11 @@ osmly.qa = (function () {
         var skip = createId('div', 'qa-skip');
         qablock.appendChild(skip);
         skip.innerHTML = 'skip';
-        bean.on(byId('qa-skip'), 'click', getNext);
+        bean.on(byId('qa-skip'), 'click', next);
 
-        var confirm = createId('div', 'confirm');
-        qablock.appendChild(confirm);
-        confirm.innerHTML = 'confirm';
+        var confirmz = createId('div', 'confirm');
+        qablock.appendChild(confirmz);
+        confirmz.innerHTML = 'confirm';
         bean.on(byId('confirm'), 'click', confirm);
     }
 
@@ -87,12 +74,46 @@ osmly.qa = (function () {
         report.appendChild(table);
     }
 
+    function next() {
+        if (osmly.item.contextLayer) osmly.map.removeLayer(osmly.item.contextLayer);
+        request(function(){
+            fillReport();
+            displayContext();
+            // setGeometry();
+            // get, set and hold the geometry
+        });
+    }
+
+    function displayContext() {
+        var bounds = qa.data.geo.properties.bounds,
+            buffered = [
+                bounds[0] - 0.002,
+                bounds[1] - 0.002,
+                bounds[2] + 0.002,
+                bounds[3] + 0.002
+            ]; // double the buffer size
+
+        osmly.item.getOsm(buffered, function(){
+            osmly.map.fitBounds([
+                [bounds[1], bounds[0]],
+                [bounds[3], bounds[2]]
+            ]);
+            osmly.item.contextLayer.addTo(osmly.map);
+            osmly.item.contextLayer.bringToFront();
+        });
+
+    }
+
+    function confirm() {
+        osmly.connect.updateItem('confirm', false, false, qa.data.id);
+    }
+
     qa.go = function(){
         // toggle qa mode
         if (!qa.mode) {
-            newInterface();
             osmly.ui.hideItem();
-            getNext();
+            newInterface();
+            next();
         } else {
             byTag('body')[0].removeChild($('#qa-block')[0]);
             byId('qa').innerHTML = 'QA';
