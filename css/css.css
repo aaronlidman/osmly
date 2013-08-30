@@ -365,7 +365,7 @@ button:hover {
     margin-left: -400px !important;
 }
 
-#confirm, #qa-skip {
+#confirm, #qa-skip, #toggleLayers {
     border: 1px solid rgba(255,255,255,0.25);
     color: white;
     padding: 8px 15px;
@@ -378,6 +378,7 @@ button:hover {
 
 #confirm {background-color: rgba(0, 144, 0, 1);}
 #qa-skip {background-color: rgba(0, 69, 144, 1);}
+#toggleLayers {background-color: #666;}
 
 #qa-block {
     bottom: 0;
@@ -395,5 +396,5 @@ button:hover {
     padding: 7px;
 }
 #report td {
-    padding: 10px;
+    padding: 7px 10px;
 }

@@ -15,6 +15,11 @@ osmly.qa = (function () {
         var report = createId('div', 'report');
         qablock.appendChild(report);
 
+        var layerz = createId('div', 'toggleLayers');
+        qablock.appendChild(layerz);
+        layerz.innerHTML = 'toggle layers';
+        bean.on(byId('toggleLayers'), 'click', toggleLayers);
+
         var skip = createId('div', 'qa-skip');
         qablock.appendChild(skip);
         skip.innerHTML = 'skip';
@@ -24,6 +29,13 @@ osmly.qa = (function () {
         qablock.appendChild(confirmz);
         confirmz.innerHTML = 'confirm';
         bean.on(byId('confirm'), 'click', confirm);
+
+        setTimeout(function(){
+            // give them some time to fade out
+            byId('bottom-right').style.display = 'block';
+            byId('josm').style.display = 'none';
+            byId('reset').style.display = 'none';
+        }, 1000);
     }
 
     function request(callback) {
@@ -42,6 +54,7 @@ osmly.qa = (function () {
                     time: item[5],
                 };
 
+                if (qa.data.geo.properties.name) qa.data.name = qa.data.geo.properties.name;
                 if (callback) callback();
             }
         });
@@ -67,6 +80,7 @@ osmly.qa = (function () {
                 if (qa.data.submit == 2) tr.innerHTML += '<td>Mark as Done button</td>';
                 if (qa.data.submit == 3) tr.innerHTML += '<td>JOSM</td>';
             }
+            if (item == 'name') tr.innerHTML = '<td>name</td><td>' + qa.data.name + '</td>';
             if (tr.innerHTML !== '') tbody.appendChild(tr);
         }
 
@@ -78,8 +92,8 @@ osmly.qa = (function () {
         if (osmly.item.contextLayer) osmly.map.removeLayer(osmly.item.contextLayer);
         request(function(){
             fillReport();
+            setGeometry();
             displayContext();
-            // setGeometry();
             // get, set and hold the geometry
         });
     }
@@ -93,19 +107,48 @@ osmly.qa = (function () {
                 bounds[3] + 0.002
             ]; // double the buffer size
 
+        osmly.map.fitBounds([
+            [bounds[1], bounds[0]],
+            [bounds[3], bounds[2]]
+        ]);
+
         osmly.item.getOsm(buffered, function(){
-            osmly.map.fitBounds([
-                [bounds[1], bounds[0]],
-                [bounds[3], bounds[2]]
-            ]);
+            byId('notify').style.display = 'none';
+            osmly.map.removeLayer(qa.oGeometry);
             osmly.item.contextLayer.addTo(osmly.map);
             osmly.item.contextLayer.bringToFront();
         });
 
     }
 
+    function setGeometry() {
+        qa.oGeometry = L.geoJson(qa.data.geo, {
+            style: osmly.settings.featureStyle,
+        });
+
+        qa.oGeometry.addTo(osmly.map);
+        qa.oGeometry.bringToFront();
+
+        // on first set we display the geometry
+        // then it gets hidden when the context is ready
+        // toggleable via a button afterward
+    }
+
     function confirm() {
         osmly.connect.updateItem('confirm', false, false, qa.data.id);
+    }
+
+    function toggleLayers() {
+        if (osmly.map.hasLayer(qa.oGeometry)) {
+            osmly.map.removeLayer(qa.oGeometry);
+            osmly.item.contextLayer.addTo(osmly.map);
+            osmly.item.contextLayer.bringToFront();
+        } else {
+            osmly.map.removeLayer(osmly.item.contextLayer);
+            qa.oGeometry.addTo(osmly.map);
+            qa.oGeometry.bringToFront();
+            // turn off context, turn on geometry
+        }
     }
 
     qa.go = function(){
