@@ -44,7 +44,7 @@ osmly.item = (function () {
     };
 
     item.setItemLayer = function(json) {
-        osmly.item.layer = L.geoJson(json, {
+        item.layer = L.geoJson(json, {
             style: osmly.settings.featureStyle,
             onEachFeature: function (feature, layer) {
                 if (item.isEditable) {
@@ -59,7 +59,7 @@ osmly.item = (function () {
             }
         });
 
-        osmly.map.fitBounds(osmly.item.layer.getBounds());
+        osmly.map.fitBounds(item.layer.getBounds());
     };
 
     // checks if the feature has holes, leaflet can't edit them
@@ -123,7 +123,7 @@ osmly.item = (function () {
     };
 
     function setContext(osmjson) {
-        osmly.item.contextLayer = L.geoJson(osmjson, {
+        item.contextLayer = L.geoJson(osmjson, {
             style: osmly.settings.contextStyle,
             onEachFeature: function(feature, layer) {
                 var popup = '',
@@ -177,7 +177,7 @@ osmly.item = (function () {
     }
 
     item.getTags = function () {
-        var tgs = document.getElementById('tags'),
+        var tgs = byId('tags'),
             trs = tgs.getElementsByTagName('tr'),
             tags = {};
 

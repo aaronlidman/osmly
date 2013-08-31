@@ -109,7 +109,7 @@ osmly.connect = (function() {
             // it would have the new comment in it, making this unnecessary
             // we just do it twice, this update option is only available for existing changesets
             // worse case senario: we do two almost identical requests instead of one
-        osmly.connect.openChangeset(function() {
+        connect.openChangeset(function() {
             osmly.ui.notify('updating changeset');
             osmly.auth.xhr({
                 method: 'PUT',
@@ -187,7 +187,7 @@ osmly.connect = (function() {
 
         if (id === osmly.item.id) {
             osm = osmly.item.toOsm(osmly.item.layer.toGeoJSON());
-            osmly.connect.updateItem('remote', {remote: osm}, callback, id);
+            connect.updateItem('remote', {remote: osm}, callback, id);
         } else {
             reqwest({
                 url: osmly.settings.db + '&id=' + id,
@@ -213,7 +213,7 @@ osmly.connect = (function() {
                     }
 
                     osm = osmly.item.toOsm(geo);
-                    osmly.connect.updateItem('remote', {remote: osm}, callback, id);
+                    connect.updateItem('remote', {remote: osm}, callback, id);
                 }
             });
         }

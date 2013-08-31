@@ -3,6 +3,14 @@ osmly.qa = (function () {
         mode: false
     };
 
+    // TODO:
+        // include problems
+            // 'done' column in db and all calls needs to converted to string
+        // confirm button confirms type of action
+            // 'confirm upload'
+            // 'confirm problem'
+                // change color based on type?
+
     function setInterface() {
         qa.mode = true;
         byId('qa').innerHTML = 'Leave QA';
@@ -46,7 +54,7 @@ osmly.qa = (function () {
         bean.off(byId('confirm'));
         bean.off(byTag('body')[0], 'keydown');
 
-        byTag('body')[0].removeChild($('#qa-block')[0]);
+        byTag('body')[0].removeChild(byId('qa-block'));
         byId('qa').innerHTML = 'QA';
         byId('qa').style.backgroundColor = 'white';
         byId('qa').style.color = 'black';
@@ -124,7 +132,7 @@ osmly.qa = (function () {
         request(function(){
             fillReport();
             setGeometry();
-            setContext();
+            if (osmly.item.contextLayer) setContext();
         });
     }
 

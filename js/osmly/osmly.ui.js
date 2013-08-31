@@ -18,36 +18,36 @@ osmly.ui = (function() {
     };
 
     function bind() {
-        bean.on($('#demo')[0], 'click', demo);
-        bean.on($('#login')[0], 'click', login);
-        bean.on($('#josm')[0], 'click', josm);
-        bean.on($('#skip')[0], 'click', skip);
-        bean.on($('#reset')[0], 'click', reset);
-        bean.on($('#update-change')[0], 'click', changeset);
-        bean.on($('#remote-edit-modal')[0], 'click', 'button', remoteEdit);
-        bean.on($('#add-new-tag')[0], 'click', addTag);
-        bean.on($('#markdone-modal')[0], 'click', 'button', markDone);
-        bean.on($('#problem')[0], 'change', problem);
-        bean.on($('#submit')[0], 'click', submit);
-        bean.on($('#qa')[0], 'click', osmly.qa.go);
+        bean.on(byId('demo'), 'click', demo);
+        bean.on(byId('login'), 'click', login);
+        bean.on(byId('josm'), 'click', josm);
+        bean.on(byId('skip'), 'click', skip);
+        bean.on(byId('reset'), 'click', reset);
+        bean.on(byId('update-change'), 'click', changeset);
+        bean.on(byId('remote-edit-modal'), 'click', 'button', remoteEdit);
+        bean.on(byId('add-new-tag'), 'click', addTag);
+        bean.on(byId('markdone-modal'), 'click', 'button', markDone);
+        bean.on(byId('problem'), 'change', problem);
+        bean.on(byId('submit'), 'click', submit);
+        bean.on(byId('qa'), 'click', osmly.qa.go);
 
-        bean.on($('#osmlink')[0], 'click', function(){ window.open(osmly.osmlink);} );
+        bean.on(byId('osmlink'), 'click', function(){ window.open(osmly.osmlink);} );
 
-        bean.on($('#go_overview')[0], 'click', function(){
+        bean.on(byId('go_overview'), 'click', function(){
             fadeIn($('#overview_bg, #overview-controls, #overview_block'));
             osmly.overview.refresh();
         });
 
-        bean.on($('#overview_bg')[0],'click', function(){
+        bean.on(byId('overview_bg'),'click', function(){
             $('#overview_bg, #overview-controls, #overview_block').hide();
             osmly.overview.close();
         });
 
-        bean.on($('#tags')[0], 'click', '.minus', function(){
+        bean.on(byId('tags'), 'click', '.minus', function(){
             if ($('#tags tr').length > 1) this.parentNode.remove();
         });
 
-        bean.on($('#main_table')[0], 'click', '.editjosm', function(){
+        bean.on(byId('main_table'), 'click', '.editjosm', function(){
             if (osmly.auth.authenticated() && token('user')) {
                 $('#remote-edit-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
                 osmly.connect.editInJosm(this.getAttribute('data-id'));
@@ -56,7 +56,7 @@ osmly.ui = (function() {
             }
         });
 
-        bean.on($('#main_table')[0], 'click', '.markdone', function(){
+        bean.on(byId('main_table'), 'click', '.markdone', function(){
             if (osmly.auth.authenticated() && token('user')) {
                 $('#markdone-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
                 CSSModal.open('markdone-modal');
@@ -65,19 +65,19 @@ osmly.ui = (function() {
             }
         });
 
-        bean.on($('#everything')[0], 'click', osmly.overview.click_everything);
-        bean.on($('#red')[0], 'click', osmly.overview.click_red);
-        bean.on($('#green')[0], 'click', osmly.overview.click_green);
-        bean.on($('#users')[0], 'click', function(){
+        bean.on(byId('everything'), 'click', osmly.overview.click_everything);
+        bean.on(byId('red'), 'click', osmly.overview.click_red);
+        bean.on(byId('green'), 'click', osmly.overview.click_green);
+        bean.on(byId('users'), 'click', function(){
             osmly.overview.drop_selection('users-select');
         });
-        bean.on($('#users-select')[0], 'change', function(){
+        bean.on(byId('users-select'), 'change', function(){
             osmly.overview.drop_selection('users-select');
         });
-        bean.on($('#problems')[0], 'click', function(){
+        bean.on(byId('problems'), 'click', function(){
             osmly.overview.drop_selection('problems-select');
         });
-        bean.on($('#problems-select')[0], 'change', function(){
+        bean.on(byId('problems-select'), 'change', function(){
             osmly.overview.drop_selection('problems-select');
         });
     }

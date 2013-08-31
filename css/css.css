@@ -39,7 +39,6 @@ a {
     padding: 7px 10px;
     cursor: pointer;
     border-left: 1px solid #ccc;
-    margin: 0 1px;
     float: left;
 }
 #title {
@@ -374,6 +373,7 @@ button:hover {
     font-weight: bold;
     text-align: center;
     cursor: pointer;
+    text-shadow: 0 0 10px black;
 }
 
 #confirm {background-color: rgba(0, 144, 0, 1);}

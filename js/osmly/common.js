@@ -1,7 +1,9 @@
 window.select = function(query) {
     var d = document;
     if (query.split(' ').length > 1 ||
-        query.split(',').length > 1) return d.querySelectorAll(query);
+        query.split(',').length > 1 ||
+        query.split('[').length > 1 ||
+        query.split(':').lenght > 1) return d.querySelectorAll(query);
     if (query.charAt(0) === '#') return d.getElementById(query.substring(1));
     if (query.charAt(0) === '.') return d.getElementsByClassName(query.substring(1));
     return d.getElementsByTagName(query);
@@ -48,9 +50,9 @@ function format_date(unix_timestamp) {
     return hours + " hour" + _plural(hours) + " ago";
   } else if (difference_in_seconds > 60*60*24){
     if(current_date.getYear() !== new Date().getYear())
-      return current_date.getDay() + " " + months[current_date.getMonth()].substr(0,3) + " " + _fourdigits(current_date.getYear());
+      return months[current_date.getMonth()] + ' ' + current_date.getDay() + ', ' + _fourdigits(current_date.getYear());
     
-    return current_date.getDay() + " " + months[current_date.getMonth()].substr(0,3);
+    return months[current_date.getMonth()] + ' ' + current_date.getDay();
   }
   
   return difference_in_seconds;

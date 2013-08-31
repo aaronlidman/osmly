@@ -7,7 +7,7 @@ osmly.overview = (function () {
             // firefox is a bit slow
         // index from simple.py: id, problem, submit, user
         items = overview.data;
-        var table = document.getElementById('main_table');
+        var table = byId('main_table');
 
         if (table.getElementsByTagName('tbody').length) {
             table.removeChild(table.getElementsByTagName('tbody')[0]);
@@ -141,7 +141,7 @@ osmly.overview = (function () {
     function problem_selection() {
         var problems = unique('problem'),
             html = '',
-            select = document.getElementById('problems-select');
+            select = byId('problems-select');
 
         for (var a = 0; a < problems.length; a++) {
             html += '<option value="problem:' + problems[a] + '">' + problems[a] + '</option>';
@@ -153,7 +153,7 @@ osmly.overview = (function () {
     function user_selection() {
         var user = unique('user'),
             html = '',
-            select = document.getElementById('users-select');
+            select = byId('users-select');
 
         for (var a = 0; a < user.length; a++) {
             html += '<option value="user:' + user[a] +'">' + user[a] + '</option>';
@@ -163,7 +163,7 @@ osmly.overview = (function () {
     }
 
     function changeRadio(value) {
-        var controls = document.getElementById('overview-controls'),
+        var controls = byId('overview-controls'),
             inputs = controls.getElementsByTagName('input');
 
         for (var i = 0; i < inputs.length; i++) {
@@ -201,7 +201,7 @@ osmly.overview = (function () {
     overview.drop_selection = function(select) {
         // gets the value of the changed dropdown menu and filters based on it
         // also selects the parent radio button
-        var selector = document.getElementById(select),
+        var selector = byId(select),
             value = selector.options[selector.selectedIndex].value,
             dict = {};
         value = value.split(':');
@@ -217,7 +217,7 @@ osmly.overview = (function () {
     };
 
     function update_row_count() {
-        var count = document.getElementById('count');
+        var count = byId('count');
 
         if (overview.data.length === overview.rawData.length) {
             count.innerHTML = overview.data.length;
@@ -230,19 +230,19 @@ osmly.overview = (function () {
         overview.data = false;
         overview.rawData = false;
 
-        if (document.getElementsByTagName('tbody').length) {
-            var table = document.getElementById('main_table');
+        if (byTag('tbody').length) {
+            var table = byId('main_table');
             table.removeChild(table.getElementsByTagName('tbody')[0]);
         }
 
         changeRadio('everything');
-        var count = document.getElementById('count');
+        var count = byId('count');
         count.innerHTML = '';
     };
 
     overview.modalDone = function(callback) {
         changeRadio('everything');
-        osmly.overview.refresh(callback);
+        overview.refresh(callback);
     };
 
     return overview;
