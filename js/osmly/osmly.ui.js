@@ -18,76 +18,39 @@ osmly.ui = (function() {
     };
 
     function bind() {
+        // initial buttons
         bean.on(byId('demo'), 'click', demo);
         bean.on(byId('login'), 'click', login);
-        bean.on(byId('josm'), 'click', josm);
-        bean.on(byId('skip'), 'click', skip);
-        bean.on(byId('reset'), 'click', reset);
-        bean.on(byId('update-change'), 'click', changeset);
-        bean.on(byId('remote-edit-modal'), 'click', 'button', remoteEdit);
-        bean.on(byId('add-new-tag'), 'click', addTag);
-        bean.on(byId('markdone-modal'), 'click', 'button', markDone);
-        bean.on(byId('problem'), 'change', problem);
-        bean.on(byId('submit'), 'click', submit);
-        bean.on(byId('qa'), 'click', osmly.qa.go);
 
+        // bottom-right buttons
+        bean.on(byId('josm'), 'click', josm);
+        bean.on(byId('reset'), 'click', reset);
         bean.on(byId('osmlink'), 'click', function(){ window.open(osmly.osmlink);} );
 
-        bean.on(byId('go_overview'), 'click', function(){
-            fadeIn($('#overview_bg, #overview-controls, #overview_block'));
-            osmly.overview.refresh();
-        });
-
-        bean.on(byId('overview_bg'),'click', function(){
-            $('#overview_bg, #overview-controls, #overview_block').hide();
-            osmly.overview.close();
-        });
-
+        // osmly.add botton-left buttons
+        bean.on(byId('skip'), 'click', skip);
+        bean.on(byId('problem'), 'change', problem);
+        bean.on(byId('submit'), 'click', submit);
+        bean.on(byId('add-new-tag'), 'click', addTag);
         bean.on(byId('tags'), 'click', '.minus', function(){
             if ($('#tags tr').length > 1) this.parentNode.remove();
         });
 
-        bean.on(byId('main_table'), 'click', '.editjosm', function(){
-            if (osmly.auth.authenticated() && token('user')) {
-                $('#remote-edit-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
-                osmly.connect.editInJosm(this.getAttribute('data-id'));
-            } else {
-                pleaseLogin();
-            }
-        });
+        // top-bar
+        bean.on(byId('qa'), 'click', osmly.qa.go);
+        bean.on(byId('overview'), 'click', osmly.overview.go);
 
-        bean.on(byId('main_table'), 'click', '.markdone', function(){
-            if (osmly.auth.authenticated() && token('user')) {
-                $('#markdone-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
-                CSSModal.open('markdone-modal');
-            } else {
-                pleaseLogin();
-            }
-        });
-
-        bean.on(byId('everything'), 'click', osmly.overview.click_everything);
-        bean.on(byId('red'), 'click', osmly.overview.click_red);
-        bean.on(byId('green'), 'click', osmly.overview.click_green);
-        bean.on(byId('users'), 'click', function(){
-            osmly.overview.drop_selection('users-select');
-        });
-        bean.on(byId('users-select'), 'change', function(){
-            osmly.overview.drop_selection('users-select');
-        });
-        bean.on(byId('problems'), 'click', function(){
-            osmly.overview.drop_selection('problems-select');
-        });
-        bean.on(byId('problems-select'), 'change', function(){
-            osmly.overview.drop_selection('problems-select');
-        });
+        // top-bar related
+        bean.on(byId('update-change'), 'click', changeset);
+        bean.on(byId('remote-edit-modal'), 'click', 'button', remoteEdit);
     }
 
-    function pleaseLogin() {
+    ui.pleaseLogin = function () {
         $('#reusable-modal .modal-content').html(
             '<h3>Please login. It helps track your changes so other users don\'t edit the same feature.</h3>');
         // login button/link?
         CSSModal.open('reusable-modal');
-    }
+    };
 
     ui.notify = function(string) {
         if (string !== '') string = '<span>' + string + '</span>';
@@ -213,7 +176,7 @@ osmly.ui = (function() {
             bean.fire($('#reset'), 'click');
             osmly.connect.editInJosm(osmly.item.id);
         } else {
-            pleaseLogin();
+            ui.pleaseLogin();
         }
     }
 
@@ -236,17 +199,22 @@ osmly.ui = (function() {
     function remoteEdit() {
         var result = this.getAttribute('data-type');
         if (result == 'yes') {
+            var id = osmly.item.id;
+            if (this.getAttribute('data-id')) id = this.getAttribute('data-id');
+
             if (osmly.auth.authenticated() && token('user')) {
                 osmly.connect.updateItem('submit', {submit: 'JOSM'}, function(){
-                    osmly.overview.modalDone(function(){
-                        CSSModal.close();
-                    });
-                }, this.getAttribute('data-id'));
+                    CSSModal.close();
+                    if (id == osmly.item.id) {
+                        skip();
+                    } else {
+                        osmly.overview.modalDone();
+                    }
+                }, id);
             } else {
                 CSSModal.close();
-                pleaseLogin();
+                ui.pleaseLogin();
             }
-
         } else {
             CSSModal.close();
         }
@@ -259,24 +227,6 @@ osmly.ui = (function() {
             '<td class="v" spellcheck="false" contenteditable="true"></td>' +
             '<td class="minus">-</td>' +
             '</tr>');
-    }
-
-    function markDone() {
-        var result = this.getAttribute('data-type');
-        if (result == 'yes') {
-            if (osmly.auth.authenticated() && token('user')) {
-                osmly.connect.updateItem('submit', {submit: 'Mark as Done'}, function(){
-                    osmly.overview.modalDone(function(){
-                        CSSModal.close();
-                    });
-                }, this.getAttribute('data-id'));
-            } else {
-                CSSModal.close();
-                pleaseLogin();
-            }
-        } else {
-            CSSModal.close();
-        }
     }
 
     ui.setUserDetails = function() {

@@ -1,13 +1,74 @@
 osmly.overview = (function () {
     var overview = {};
 
+    overview.go = function() {
+        fadeIn($('#overview_bg, #overview-controls, #overview_block'));
+        overview.refresh();
+        bind();
+    };
+
+    function bind() {
+        bean.on(byId('main_table'), 'click', '.editjosm', function(){
+            if (osmly.auth.authenticated() && token('user')) {
+                osmly.connect.editInJosm(this.getAttribute('data-id'));
+            } else {
+                osmly.ui.pleaseLogin();
+            }
+        });
+
+        bean.on(byId('main_table'), 'click', '.markdone', function(){
+            if (osmly.auth.authenticated() && token('user')) {
+                $('#markdone-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
+                CSSModal.open('markdone-modal');
+            } else {
+                osmly.ui.pleaseLogin();
+            }
+        });
+
+        bean.on(byId('overview_bg'),'click', function(){
+            $('#overview_bg, #overview-controls, #overview_block').hide();
+            overview.close();
+        });
+
+        bean.on(byId('everything'), 'click', overview.everything);
+        bean.on(byId('red'), 'click', overview.red);
+        bean.on(byId('green'), 'click', overview.green);
+        bean.on(byId('users'), 'click', function(){
+            overview.drop_selection('users-select');
+        });
+        bean.on(byId('users-select'), 'change', function(){
+            overview.drop_selection('users-select');
+        });
+        bean.on(byId('problems'), 'click', function(){
+            overview.drop_selection('problems-select');
+        });
+        bean.on(byId('problems-select'), 'change', function(){
+            overview.drop_selection('problems-select');
+        });
+
+        bean.on(byId('markdone-modal'), 'click', 'button', markDone);
+    }
+
+    function unbind() {
+        bean.off(byId('main_table'));
+        bean.off(byId('overview_bg'));
+        bean.off(byId('everything'));
+        bean.off(byId('red'));
+        bean.off(byId('green'));
+        bean.off(byId('users'));
+        bean.off(byId('users-select'));
+        bean.off(byId('problems'));
+        bean.off(byId('problems-select'));
+        bean.off(byId('markdone-modal'));
+    }
+
     function buildTable(callback) {
         // will probably need to paginate over ~1000 items
             // right now it's pretty quick w/ 1200 on chrome
             // firefox is a bit slow
         // index from simple.py: id, problem, submit, user
-        items = overview.data;
-        var table = byId('main_table');
+        var items = overview.data,
+            table = byId('main_table');
 
         if (table.getElementsByTagName('tbody').length) {
             table.removeChild(table.getElementsByTagName('tbody')[0]);
@@ -177,23 +238,22 @@ osmly.overview = (function () {
         }
     }
 
-    overview.click_everything = function() {
+    overview.everything = function() {
         overview.data = overview.rawData;
         buildTable();
     };
 
-    overview.click_red = function() {
+    overview.red = function() {
         filter({
             'problem': unique('problem'),
-            'submit': 0
+            'submit': ''
         });
         changeRadio('red');
         buildTable();
     };
 
-    overview.click_green = function() {
-        filter({'submit': [1, 2, 3]});
-            // filter needs an inverse
+    overview.green = function() {
+        filter({'submit': unique('submit')});
         changeRadio('green');
         buildTable();
     };
@@ -231,14 +291,31 @@ osmly.overview = (function () {
         overview.rawData = false;
 
         if (byTag('tbody').length) {
-            var table = byId('main_table');
-            table.removeChild(table.getElementsByTagName('tbody')[0]);
+            byId('main_table').removeChild(table.getElementsByTagName('tbody')[0]);
         }
 
         changeRadio('everything');
-        var count = byId('count');
-        count.innerHTML = '';
+        byId('count').innerHTML = '';
+        unbind();
     };
+
+    function markDone() {
+        var result = this.getAttribute('data-type');
+        if (result == 'yes') {
+            if (osmly.auth.authenticated() && token('user')) {
+                osmly.connect.updateItem('submit', {submit: 'Mark as Done'}, function(){
+                    osmly.overview.modalDone(function(){
+                        CSSModal.close();
+                    });
+                }, this.getAttribute('data-id'));
+            } else {
+                CSSModal.close();
+                ui.pleaseLogin();
+            }
+        } else {
+            CSSModal.close();
+        }
+    }
 
     overview.modalDone = function(callback) {
         changeRadio('everything');

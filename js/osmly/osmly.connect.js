@@ -228,7 +228,10 @@ osmly.connect = (function() {
                         '<h3>JOSM doesn\'t seem to be running. Start JOSM and try again.</h3>');
                     CSSModal.open('reusable-modal');
                 },
-                success: CSSModal.open('remote-edit-modal')
+                success: function() {
+                    $('#remote-edit-modal button')[1].setAttribute('data-id', id);
+                    CSSModal.open('remote-edit-modal');
+                }
             });
         }
     };
