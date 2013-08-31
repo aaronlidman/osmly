@@ -29,13 +29,21 @@ osmly.qa = (function () {
         qablock.appendChild(confirmz);
         confirmz.innerHTML = 'confirm';
         bean.on(byId('confirm'), 'click', confirm);
+    }
 
+    function showOsmLink() {
         setTimeout(function(){
             // give them some time to fade out
             byId('bottom-right').style.display = 'block';
             byId('josm').style.display = 'none';
             byId('reset').style.display = 'none';
         }, 1000);
+    }
+
+    function resetOsmLink() {
+        byId('bottom-right').style.display = 'block';
+        byId('josm').style.display = 'block';
+        byId('reset').style.display = 'block';
     }
 
     function request(callback) {
@@ -89,16 +97,23 @@ osmly.qa = (function () {
     }
 
     function next() {
-        if (osmly.item.contextLayer) osmly.map.removeLayer(osmly.item.contextLayer);
+        reset();
         request(function(){
             fillReport();
             setGeometry();
-            displayContext();
-            // get, set and hold the geometry
+            setContext();
         });
     }
 
-    function displayContext() {
+    function reset() {
+        if (osmly.item.contextLayer) osmly.map.removeLayer(osmly.item.contextLayer);
+        if (qa.oGeometry) osmly.map.removeLayer(qa.oGeometry);
+        byId('toggleLayers').innerHTML = 'toggle layers';
+        byId('qa-block').style.display = 'none';
+        byId('osmlink').style.display = 'none';
+    }
+
+    function setContext() {
         var bounds = qa.data.geo.properties.bounds,
             buffered = [
                 bounds[0] - 0.002,
@@ -117,6 +132,8 @@ osmly.qa = (function () {
             osmly.map.removeLayer(qa.oGeometry);
             osmly.item.contextLayer.addTo(osmly.map);
             osmly.item.contextLayer.bringToFront();
+            byId('qa-block').style.display = 'block';
+            byId('osmlink').style.display = 'block';
         });
 
     }
@@ -128,26 +145,24 @@ osmly.qa = (function () {
 
         qa.oGeometry.addTo(osmly.map);
         qa.oGeometry.bringToFront();
-
-        // on first set we display the geometry
-        // then it gets hidden when the context is ready
-        // toggleable via a button afterward
     }
 
     function confirm() {
         osmly.connect.updateItem('confirm', false, false, qa.data.id);
+        next();
     }
 
     function toggleLayers() {
         if (osmly.map.hasLayer(qa.oGeometry)) {
+            byId('toggleLayers').innerHTML = 'see original';
             osmly.map.removeLayer(qa.oGeometry);
             osmly.item.contextLayer.addTo(osmly.map);
             osmly.item.contextLayer.bringToFront();
         } else {
+            byId('toggleLayers').innerHTML = 'see OSM data';
             osmly.map.removeLayer(osmly.item.contextLayer);
             qa.oGeometry.addTo(osmly.map);
             qa.oGeometry.bringToFront();
-            // turn off context, turn on geometry
         }
     }
 
@@ -156,12 +171,15 @@ osmly.qa = (function () {
         if (!qa.mode) {
             osmly.ui.hideItem();
             newInterface();
+            showOsmLink();
             next();
         } else {
+            reset();
             byTag('body')[0].removeChild($('#qa-block')[0]);
             byId('qa').innerHTML = 'QA';
             byId('qa').style.backgroundColor = 'white';
             qa.mode = false;
+            resetOsmLink();
             osmly.ui.teardown();
             osmly.item.next();
         }
