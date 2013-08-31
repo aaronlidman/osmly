@@ -18,13 +18,18 @@ osmly.qa = (function () {
 
         var layerz = createId('div', 'toggleLayers');
         qablock.appendChild(layerz);
-        layerz.innerHTML = 'toggle layers';
+        layerz.innerHTML = '[w] see original feature';
         bean.on(byId('toggleLayers'), 'click', toggleLayers);
 
         var skip = createId('div', 'qa-skip');
         qablock.appendChild(skip);
-        skip.innerHTML = 'skip';
+        skip.innerHTML = '[s] skip';
         bean.on(byId('qa-skip'), 'click', next);
+
+        bean.on(byTag('body')[0], 'keydown', function(that){
+            if (that.keyCode === 87) toggleLayers(); //w
+            if (that.keyCode === 83) next(); //s
+        });
 
         var confirmz = createId('div', 'confirm');
         qablock.appendChild(confirmz);
@@ -39,6 +44,7 @@ osmly.qa = (function () {
         bean.off(byId('toggleLayers'));
         bean.off(byId('qa-skip'));
         bean.off(byId('confirm'));
+        bean.off(byTag('body')[0], 'keydown');
 
         byTag('body')[0].removeChild($('#qa-block')[0]);
         byId('qa').innerHTML = 'QA';
@@ -114,7 +120,6 @@ osmly.qa = (function () {
     }
 
     function next() {
-        console.log('next');
         reset();
         request(function(){
             fillReport();
@@ -126,7 +131,7 @@ osmly.qa = (function () {
     function reset() {
         if (osmly.item.contextLayer) osmly.map.removeLayer(osmly.item.contextLayer);
         if (qa.oGeometry) osmly.map.removeLayer(qa.oGeometry);
-        byId('toggleLayers').innerHTML = 'toggle layers';
+        byId('toggleLayers').innerHTML = '[w] see original feature';
         byId('qa-block').style.display = 'none';
         byId('osmlink').style.display = 'none';
     }
@@ -138,7 +143,7 @@ osmly.qa = (function () {
                 bounds[1] - 0.002,
                 bounds[2] + 0.002,
                 bounds[3] + 0.002
-            ]; // double the buffer size
+            ]; // double the buffer size just to be extra sure
 
         osmly.map.fitBounds([
             [bounds[1], bounds[0]],
@@ -160,7 +165,6 @@ osmly.qa = (function () {
         qa.oGeometry = L.geoJson(qa.data.geo, {
             style: osmly.settings.featureStyle,
         });
-
         qa.oGeometry.addTo(osmly.map);
         qa.oGeometry.bringToFront();
     }
@@ -172,12 +176,12 @@ osmly.qa = (function () {
 
     function toggleLayers() {
         if (osmly.map.hasLayer(qa.oGeometry)) {
-            byId('toggleLayers').innerHTML = 'see original';
+            byId('toggleLayers').innerHTML = '[w] see original feature';
             osmly.map.removeLayer(qa.oGeometry);
             osmly.item.contextLayer.addTo(osmly.map);
             osmly.item.contextLayer.bringToFront();
         } else {
-            byId('toggleLayers').innerHTML = 'see OSM data';
+            byId('toggleLayers').innerHTML = '[w] see OSM data';
             osmly.map.removeLayer(osmly.item.contextLayer);
             qa.oGeometry.addTo(osmly.map);
             qa.oGeometry.bringToFront();
