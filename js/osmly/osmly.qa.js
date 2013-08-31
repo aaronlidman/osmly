@@ -3,10 +3,11 @@ osmly.qa = (function () {
         mode: false
     };
 
-    function newInterface() {
+    function setInterface() {
         qa.mode = true;
         byId('qa').innerHTML = 'Leave QA';
-        byId('qa').style.backgroundColor = 'orange';
+        byId('qa').style.backgroundColor = 'black';
+        byId('qa').style.color = 'white';
 
         var body = byTag('body')[0],
             qablock = createId('div', 'qa-block');
@@ -29,6 +30,21 @@ osmly.qa = (function () {
         qablock.appendChild(confirmz);
         confirmz.innerHTML = 'confirm';
         bean.on(byId('confirm'), 'click', confirm);
+
+        showOsmLink();
+    }
+
+    function unsetInterface() {
+        qa.mode = false;
+        bean.off(byId('toggleLayers'));
+        bean.off(byId('qa-skip'));
+        bean.off(byId('confirm'));
+
+        byTag('body')[0].removeChild($('#qa-block')[0]);
+        byId('qa').innerHTML = 'QA';
+        byId('qa').style.backgroundColor = 'white';
+        byId('qa').style.color = 'black';
+        resetOsmLink();
     }
 
     function showOsmLink() {
@@ -41,9 +57,10 @@ osmly.qa = (function () {
     }
 
     function resetOsmLink() {
-        byId('bottom-right').style.display = 'block';
+        byId('bottom-right').style.display = 'none';
         byId('josm').style.display = 'block';
         byId('reset').style.display = 'block';
+        byId('osmlink').style.display = 'block';
     }
 
     function request(callback) {
@@ -97,6 +114,7 @@ osmly.qa = (function () {
     }
 
     function next() {
+        console.log('next');
         reset();
         request(function(){
             fillReport();
@@ -170,16 +188,11 @@ osmly.qa = (function () {
         // toggle qa mode
         if (!qa.mode) {
             osmly.ui.hideItem();
-            newInterface();
-            showOsmLink();
+            setInterface();
             next();
         } else {
             reset();
-            byTag('body')[0].removeChild($('#qa-block')[0]);
-            byId('qa').innerHTML = 'QA';
-            byId('qa').style.backgroundColor = 'white';
-            qa.mode = false;
-            resetOsmLink();
+            unsetInterface();
             osmly.ui.teardown();
             osmly.item.next();
         }

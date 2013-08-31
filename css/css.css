@@ -378,7 +378,7 @@ button:hover {
 
 #confirm {background-color: rgba(0, 144, 0, 1);}
 #qa-skip {background-color: rgba(0, 69, 144, 1);}
-#toggleLayers {background-color: #666;}
+#toggleLayers {background-color: #333;}
 
 #qa-block {
     bottom: 0;
@@ -396,5 +396,20 @@ button:hover {
     padding: 7px;
 }
 #report td {
+    text-align: right;
     padding: 7px 10px;
+}
+
+#report tr {
+    border-bottom: 1px solid #ccc;
+}
+
+#report tr td:last-child {
+    border-left: 1px solid #ccc;
+    text-align: left;
+    font-weight: bold;
+}
+
+#report tr:last-child {
+    border-bottom: none;
 }
