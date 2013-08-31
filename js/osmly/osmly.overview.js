@@ -1,5 +1,6 @@
 osmly.overview = (function () {
-    var overview = {};
+    var overview = {},
+        ov = {};
 
     overview.go = function() {
         fadeIn($('#overview_bg, #overview-controls, #overview_block'));
@@ -23,23 +24,23 @@ osmly.overview = (function () {
 
         bean.on(byId('overview_bg'),'click', function(){
             $('#overview_bg, #overview-controls, #overview_block').hide();
-            overview.close();
+            close();
         });
 
-        bean.on(byId('everything'), 'click', overview.everything);
-        bean.on(byId('red'), 'click', overview.red);
-        bean.on(byId('green'), 'click', overview.green);
+        bean.on(byId('everything'), 'click', everything);
+        bean.on(byId('red'), 'click', red);
+        bean.on(byId('green'), 'click', green);
         bean.on(byId('users'), 'click', function(){
-            overview.drop_selection('users-select');
+            drop_selection('users-select');
         });
         bean.on(byId('users-select'), 'change', function(){
-            overview.drop_selection('users-select');
+            drop_selection('users-select');
         });
         bean.on(byId('problems'), 'click', function(){
-            overview.drop_selection('problems-select');
+            drop_selection('problems-select');
         });
         bean.on(byId('problems-select'), 'change', function(){
-            overview.drop_selection('problems-select');
+            drop_selection('problems-select');
         });
 
         bean.on(byId('markdone-modal'), 'click', 'button', markDone);
@@ -63,7 +64,7 @@ osmly.overview = (function () {
             // right now it's pretty quick w/ 1200 on chrome
             // firefox is a bit slow
         // index from simple.py: id, problem, submit, user
-        var items = overview.data,
+        var items = ov.data,
             table = byId('main_table');
 
         if (table.getElementsByTagName('tbody').length) {
@@ -121,8 +122,8 @@ osmly.overview = (function () {
             crossOrigin: true,
             type: 'json',
             success: function(items){
-                overview.data = items;
-                overview.rawData = items;
+                ov.data = items;
+                ov.rawData = items;
                 // they both start this way, .data get modified
                 if (callback) callback();
             }
@@ -151,7 +152,7 @@ osmly.overview = (function () {
             'user': 3
         };
 
-        var items = overview.rawData,
+        var items = ov.rawData,
             optionslength = Object.keys(options).length,
             out = [];
 
@@ -170,7 +171,7 @@ osmly.overview = (function () {
                 out.push(items[a]);
             }
         }
-        overview.data = out;
+        ov.data = out;
     }
 
     function unique(column) {
@@ -182,7 +183,7 @@ osmly.overview = (function () {
             'user': 3
         };
         
-        var items = overview.rawData,
+        var items = ov.rawData,
             vals = [];
 
         for (var a = 0; a < items.length; a++) {
@@ -228,27 +229,27 @@ osmly.overview = (function () {
         }
     }
 
-    overview.everything = function() {
-        overview.data = overview.rawData;
+    function everything() {
+        ov.data = ov.rawData;
         buildTable();
-    };
+    }
 
-    overview.red = function() {
+    function red() {
         filter({
             'problem': unique('problem'),
             'submit': ''
         });
         changeRadio('red');
         buildTable();
-    };
+    }
 
-    overview.green = function() {
+    function green() {
         filter({'submit': unique('submit')});
         changeRadio('green');
         buildTable();
-    };
+    }
 
-    overview.drop_selection = function(select) {
+    function drop_selection(select) {
         var selector = byId(select),
             value = selector.options[selector.selectedIndex].value,
             dict = {};
@@ -262,19 +263,19 @@ osmly.overview = (function () {
         filter(dict);
         buildTable();
         changeRadio(select.split('-')[0]);
-    };
+    }
 
     function update_row_count() {
-        if (overview.data.length === overview.rawData.length) {
-            byId('count').innerHTML = overview.data.length;
+        if (ov.data.length === ov.rawData.length) {
+            byId('count').innerHTML = ov.data.length;
         } else {
-            byId('count').innerHTML = overview.data.length.toString() + '<span>/' + overview.rawData.length + '</span>';
+            byId('count').innerHTML = ov.data.length.toString() + '<span>/' + ov.rawData.length + '</span>';
         }
     }
 
-    overview.close = function() {
-        overview.data = false;
-        overview.rawData = false;
+    function close() {
+        ov.data = false;
+        ov.rawData = false;
 
         if (byTag('tbody').length) {
             byId('main_table').removeChild(table.getElementsByTagName('tbody')[0]);
@@ -283,7 +284,7 @@ osmly.overview = (function () {
         changeRadio('everything');
         byId('count').innerHTML = '';
         unbind();
-    };
+    }
 
     function markDone() {
         if (this.getAttribute('data-type') == 'yes') {

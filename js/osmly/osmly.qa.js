@@ -1,7 +1,6 @@
 osmly.qa = (function () {
-    var qa = {
-        mode: false
-    };
+    var qa = {mode: false},
+        q = {};
 
     qa.go = function(){
         // toggle qa mode
@@ -98,7 +97,7 @@ osmly.qa = (function () {
             crossOrigin: true,
             type: 'json',
             success: function(item){
-                qa.data = {
+                q.data = {
                     id: item[0],
                     geo: JSON.parse(item[1]),
                     problem: item[2],
@@ -107,7 +106,7 @@ osmly.qa = (function () {
                     time: item[5],
                 };
 
-                if (qa.data.geo.properties.name) qa.data.name = qa.data.geo.properties.name;
+                if (q.data.geo.properties.name) q.data.name = q.data.geo.properties.name;
                 if (callback) callback();
             }
         });
@@ -122,16 +121,16 @@ osmly.qa = (function () {
         var tbody = createE('tbody');
 
         // columns = 'id, geo, problem, submit, user, time'
-        for (var item in qa.data) {
+        for (var item in q.data) {
             var tr = createE('tr');
-            if (item == 'id') tr.innerHTML = '<td>id</td><td>' + qa.data.id + '</td>';
-            if (item == 'user') tr.innerHTML = '<td>who</td><td>' + qa.data.user + '</td>';
-            if (item == 'time') tr.innerHTML = '<td>when</td><td>' + format_date(qa.data.time) + '</td>';
-            if (item == 'problem' && qa.data.problem !== '') tr.innerHTML = '<td>problem</td><td class="k">' + qa.data.problem + '</td>';
-            if (item == 'submit' && qa.data.submit != 1){
-                tr.innerHTML = '<td>via</td><td>' + qa.data.submit + '</td>';
+            if (item == 'id') tr.innerHTML = '<td>id</td><td>' + q.data.id + '</td>';
+            if (item == 'user') tr.innerHTML = '<td>who</td><td>' + q.data.user + '</td>';
+            if (item == 'time') tr.innerHTML = '<td>when</td><td>' + format_date(q.data.time) + '</td>';
+            if (item == 'problem' && q.data.problem !== '') tr.innerHTML = '<td>problem</td><td class="k">' + q.data.problem + '</td>';
+            if (item == 'submit' && q.data.submit != 1){
+                tr.innerHTML = '<td>via</td><td>' + q.data.submit + '</td>';
             }
-            if (item == 'name') tr.innerHTML = '<td>name</td><td>' + qa.data.name + '</td>';
+            if (item == 'name') tr.innerHTML = '<td>name</td><td>' + q.data.name + '</td>';
             if (tr.innerHTML !== '') tbody.appendChild(tr);
         }
 
@@ -150,14 +149,14 @@ osmly.qa = (function () {
 
     function reset() {
         if (osmly.item.contextLayer) osmly.map.removeLayer(osmly.item.contextLayer);
-        if (qa.oGeometry) osmly.map.removeLayer(qa.oGeometry);
+        if (q.oGeometry) osmly.map.removeLayer(q.oGeometry);
         byId('toggleLayers').innerHTML = '[w] see original feature';
         byId('qa-block').style.display = 'none';
         byId('osmlink').style.display = 'none';
     }
 
     function setContext() {
-        var bounds = qa.data.geo.properties.bounds,
+        var bounds = q.data.geo.properties.bounds,
             buffered = [
                 bounds[0] - 0.002,
                 bounds[1] - 0.002,
@@ -172,7 +171,7 @@ osmly.qa = (function () {
 
         osmly.item.getOsm(buffered, function(){
             byId('notify').style.display = 'none';
-            osmly.map.removeLayer(qa.oGeometry);
+            osmly.map.removeLayer(q.oGeometry);
             osmly.item.contextLayer.addTo(osmly.map);
             osmly.item.contextLayer.bringToFront();
             byId('qa-block').style.display = 'block';
@@ -182,29 +181,29 @@ osmly.qa = (function () {
     }
 
     function setGeometry() {
-        qa.oGeometry = L.geoJson(qa.data.geo, {
+        q.oGeometry = L.geoJson(q.data.geo, {
             style: osmly.settings.featureStyle,
         });
-        qa.oGeometry.addTo(osmly.map);
-        qa.oGeometry.bringToFront();
+        q.oGeometry.addTo(osmly.map);
+        q.oGeometry.bringToFront();
     }
 
     function confirm() {
-        osmly.connect.updateItem('confirm', false, false, qa.data.id);
+        osmly.connect.updateItem('confirm', false, false, q.data.id);
         next();
     }
 
     function toggleLayers() {
-        if (osmly.map.hasLayer(qa.oGeometry)) {
+        if (osmly.map.hasLayer(q.oGeometry)) {
             byId('toggleLayers').innerHTML = '[w] see original feature';
-            osmly.map.removeLayer(qa.oGeometry);
+            osmly.map.removeLayer(q.oGeometry);
             osmly.item.contextLayer.addTo(osmly.map);
             osmly.item.contextLayer.bringToFront();
         } else {
             byId('toggleLayers').innerHTML = '[w] see OSM data';
             osmly.map.removeLayer(osmly.item.contextLayer);
-            qa.oGeometry.addTo(osmly.map);
-            qa.oGeometry.bringToFront();
+            q.oGeometry.addTo(osmly.map);
+            q.oGeometry.bringToFront();
         }
     }
 
