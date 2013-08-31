@@ -69,7 +69,7 @@ def post():
 def random():
     db = DB()
     row = db['c'].execute(
-        'SELECT geo FROM osmly WHERE problem = "" AND submit = 0 ORDER BY RANDOM() LIMIT 1')
+        'SELECT geo FROM osmly WHERE problem = "" AND submit = "" ORDER BY RANDOM() LIMIT 1')
     row = row.fetchone()
     db['conn'].commit()
     db['conn'].close()
@@ -91,7 +91,7 @@ def specific():
             out = row[1]
         elif request.args['action'] == 'status':
             out = {'status': 'ok'}
-            if row[2] != 0:
+            if row[2] != '':
                 out = {'status': 'no_go'}
             out = json.dumps(out)
     return out
@@ -107,7 +107,7 @@ def qa():
     db = DB()
     columns = 'id, geo, problem, submit, user, time'
     row = db['c'].execute(
-        'SELECT ' + columns + ' FROM osmly WHERE submit > 0 AND done = 0 ORDER BY RANDOM() LIMIT 1')
+        'SELECT ' + columns + ' FROM osmly WHERE submit != "" AND done = 0 ORDER BY RANDOM() LIMIT 1')
     row = row.fetchone()
     db['conn'].commit()
     db['conn'].close()
@@ -155,7 +155,7 @@ def confirm():
     db = DB()
     db['c'].execute(
         'UPDATE osmly set done = 1 WHERE id = ?',
-        (request.args['id'])
+        (request.args['id'],)
     )
     db['conn'].commit()
     db['conn'].close()

@@ -64,7 +64,7 @@ db_conn.isolation_level = None
 db_c = db_conn.cursor()
 db_c.execute('DROP TABLE IF EXISTS osmly')
 db_c.execute('CREATE TABLE osmly (id INTEGER PRIMARY KEY, geo TEXT, remote TEXT,' +
-             'problem TEXT, submit INT, comments TEXT, user TEXT, time INT, done INT)')
+             'problem TEXT, submit TEXT, comments TEXT, user TEXT, time INT, done INT)')
 
 count = 0
 
@@ -87,9 +87,8 @@ for feature in data['features']:
     feature['properties']['id'] = count
     statement = 'INSERT INTO osmly VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);'
 
-    # refer to CREATE TABLE, lame I know
     db_c.execute(statement, (
-        count, json.dumps(feature), '', problem, 0, '', '', 0, 0))
+        count, json.dumps(feature), '', problem, '', '', '', 0, 0))
     count = count + 1
 
 print str(count) + ' items'
