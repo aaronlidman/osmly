@@ -13,12 +13,12 @@ osmly.overview = (function () {
             table.removeChild(table.getElementsByTagName('tbody')[0]);
         }
 
-        var tbody = document.createElement('tbody');
+        var tbody = createE('tbody');
 
         for (var a = 0; a < items.length; a++) {
-            var tr = document.createElement('tr');
+            var tr = createE('tr');
             for (var b = 0; b < items[a].length; b++) {
-                var column = document.createElement('td'),
+                var column = createE('td'),
                     text = items[a][b];
 
                 if (b == 2) {
@@ -31,13 +31,13 @@ osmly.overview = (function () {
                 tr.appendChild(column);
             }
 
-            var markdone = document.createElement('td');
+            var markdone = createE('td');
             if (items[a][2] === 0) {
                 markdone.innerHTML = '<span data-id="' + items[a][0] + '" class="markdone">mark as done?</span>';
             }
             tr.appendChild(markdone);
 
-            var editjosm = document.createElement('td');
+            var editjosm = createE('td');
             if (items[a][2] === 0) {
                 editjosm.innerHTML = '<span data-id="' + items[a][0] + '" class="editjosm">edit in JOSM</span>';
             }
@@ -201,7 +201,6 @@ osmly.overview = (function () {
     overview.drop_selection = function(select) {
         // gets the value of the changed dropdown menu and filters based on it
         // also selects the parent radio button
-        console.log(select);
         var selector = document.getElementById(select),
             value = selector.options[selector.selectedIndex].value,
             dict = {};

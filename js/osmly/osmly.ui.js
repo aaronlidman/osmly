@@ -107,7 +107,6 @@ osmly.ui = (function() {
     };
 
     ui.displayItem = function() {
-        var isEditable = osmly.item.isEditable;
         osmly.item.layer.addTo(osmly.map);
 
         if (osmly.item.contextLayer) {
@@ -119,7 +118,7 @@ osmly.ui = (function() {
         $('#notify').hide();
         fadeIn($('#hold-problem, #submit, #bottom-right, #action-block'));
 
-        if (isEditable) {
+        if (osmly.item.isEditable) {
             fadeIn($('#tags'));
         } else {
             fadeOut($('#hold-problem, #submit'));
