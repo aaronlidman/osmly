@@ -373,7 +373,7 @@ button:hover {
     font-weight: bold;
     text-align: center;
     cursor: pointer;
-    text-shadow: 0 0 10px black;
+    text-shadow: 0 0 5px black;
 }
 
 #confirm {background-color: rgba(0, 144, 0, 1);}

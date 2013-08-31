@@ -115,9 +115,7 @@ osmly.qa = (function () {
             if (item == 'time') tr.innerHTML = '<td>when</td><td>' + format_date(qa.data.time) + '</td>';
             if (item == 'problem' && qa.data.problem !== '') tr.innerHTML = '<td>problem</td><td class="k">' + qa.data.problem + '</td>';
             if (item == 'submit' && qa.data.submit != 1){
-                tr.innerHTML = '<td>via</td>';
-                if (qa.data.submit == 2) tr.innerHTML += '<td>Mark as Done button</td>';
-                if (qa.data.submit == 3) tr.innerHTML += '<td>JOSM</td>';
+                tr.innerHTML = '<td>via</td><td>' + qa.data.submit + '</td>';
             }
             if (item == 'name') tr.innerHTML = '<td>name</td><td>' + qa.data.name + '</td>';
             if (tr.innerHTML !== '') tbody.appendChild(tr);

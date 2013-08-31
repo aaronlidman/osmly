@@ -237,7 +237,7 @@ osmly.ui = (function() {
         var result = this.getAttribute('data-type');
         if (result == 'yes') {
             if (osmly.auth.authenticated() && token('user')) {
-                osmly.connect.updateItem('submit', {submit: 3}, function(){
+                osmly.connect.updateItem('submit', {submit: 'JOSM'}, function(){
                     osmly.overview.modalDone(function(){
                         CSSModal.close();
                     });
@@ -265,7 +265,7 @@ osmly.ui = (function() {
         var result = this.getAttribute('data-type');
         if (result == 'yes') {
             if (osmly.auth.authenticated() && token('user')) {
-                osmly.connect.updateItem('submit', {submit: 2}, function(){
+                osmly.connect.updateItem('submit', {submit: 'Mark as Done'}, function(){
                     osmly.overview.modalDone(function(){
                         CSSModal.close();
                     });

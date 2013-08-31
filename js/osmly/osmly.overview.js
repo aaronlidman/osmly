@@ -23,7 +23,7 @@ osmly.overview = (function () {
 
                 if (b == 2) {
                     // checkmark for submitted items
-                    if (items[a][b] > 0) text = '&#x2713;';
+                    if (items[a][b] !== '') text = '&#x2713;';
                     else text = '';
                 }
 
@@ -32,18 +32,18 @@ osmly.overview = (function () {
             }
 
             var markdone = createE('td');
-            if (items[a][2] === 0) {
+            if (items[a][2] === '') {
                 markdone.innerHTML = '<span data-id="' + items[a][0] + '" class="markdone">mark as done?</span>';
             }
             tr.appendChild(markdone);
 
             var editjosm = createE('td');
-            if (items[a][2] === 0) {
+            if (items[a][2] === '') {
                 editjosm.innerHTML = '<span data-id="' + items[a][0] + '" class="editjosm">edit in JOSM</span>';
             }
             tr.appendChild(editjosm);
 
-            if (items[a][2] > 0) {
+            if (items[a][2] !== '') {
                 tr.setAttribute('class', 'success');
             } else if (items[a][1] !== '') {
                 tr.setAttribute('class', 'error');
