@@ -3,17 +3,13 @@ osmly.overview = (function () {
 
     overview.go = function() {
         fadeIn($('#overview_bg, #overview-controls, #overview_block'));
-        overview.refresh();
+        refresh();
         bind();
     };
 
     function bind() {
         bean.on(byId('main_table'), 'click', '.editjosm', function(){
-            if (osmly.auth.authenticated() && token('user')) {
-                osmly.connect.editInJosm(this.getAttribute('data-id'));
-            } else {
-                osmly.ui.pleaseLogin();
-            }
+            osmly.connect.editInJosm(this.getAttribute('data-id'));
         });
 
         bean.on(byId('main_table'), 'click', '.markdone', function(){
@@ -133,15 +129,14 @@ osmly.overview = (function () {
         });
     }
 
-    // entry point
-    overview.refresh = function(callback) {
+    function refresh(callback) {
         osmly.ui.notify('Loading...');
         request(function() {
             buildTable(callback);
             problem_selection();
             user_selection();
         });
-    };
+    }
 
     function filter(options) {
         // {'problem': 1, 'user': 'Joe Fake Name'}
@@ -201,31 +196,26 @@ osmly.overview = (function () {
 
     function problem_selection() {
         var problems = unique('problem'),
-            html = '',
-            select = byId('problems-select');
+            html = '';
 
         for (var a = 0; a < problems.length; a++) {
             html += '<option value="problem:' + problems[a] + '">' + problems[a] + '</option>';
         }
-
-        select.innerHTML = html;
+        byId('problems-select').innerHTML = html;
     }
 
     function user_selection() {
         var user = unique('user'),
-            html = '',
-            select = byId('users-select');
+            html = '';
 
         for (var a = 0; a < user.length; a++) {
             html += '<option value="user:' + user[a] +'">' + user[a] + '</option>';
         }
-
-        select.innerHTML = html;
+        byId('users-select').innerHTML = html;
     }
 
     function changeRadio(value) {
-        var controls = byId('overview-controls'),
-            inputs = controls.getElementsByTagName('input');
+        var inputs = byId('overview-controls').getElementsByTagName('input');
 
         for (var i = 0; i < inputs.length; i++) {
             if (inputs[i].type === 'radio') {
@@ -259,8 +249,6 @@ osmly.overview = (function () {
     };
 
     overview.drop_selection = function(select) {
-        // gets the value of the changed dropdown menu and filters based on it
-        // also selects the parent radio button
         var selector = byId(select),
             value = selector.options[selector.selectedIndex].value,
             dict = {};
@@ -268,7 +256,7 @@ osmly.overview = (function () {
         dict[value[0]] = value[1];
             // dict is necessary because literal value = {value[0]: value[1]} didn't work
                 // why doesn't that work?
-        if (value[0] == 'problem') dict['submit'] = 0;
+        if (value[0] == 'problem') dict['submit'] = '';
             // only want un-submitted problems, not strictly true but more useful
 
         filter(dict);
@@ -277,12 +265,10 @@ osmly.overview = (function () {
     };
 
     function update_row_count() {
-        var count = byId('count');
-
         if (overview.data.length === overview.rawData.length) {
-            count.innerHTML = overview.data.length;
+            byId('count').innerHTML = overview.data.length;
         } else {
-            count.innerHTML = overview.data.length.toString() + '<span>/' + overview.rawData.length + '</span>';
+            byId('count').innerHTML = overview.data.length.toString() + '<span>/' + overview.rawData.length + '</span>';
         }
     }
 
@@ -300,18 +286,12 @@ osmly.overview = (function () {
     };
 
     function markDone() {
-        var result = this.getAttribute('data-type');
-        if (result == 'yes') {
-            if (osmly.auth.authenticated() && token('user')) {
-                osmly.connect.updateItem('submit', {submit: 'Mark as Done'}, function(){
-                    osmly.overview.modalDone(function(){
-                        CSSModal.close();
-                    });
-                }, this.getAttribute('data-id'));
-            } else {
-                CSSModal.close();
-                ui.pleaseLogin();
-            }
+        if (this.getAttribute('data-type') == 'yes') {
+            osmly.connect.updateItem('submit', {submit: 'Mark as Done'}, function(){
+                osmly.overview.modalDone(function(){
+                    CSSModal.close();
+                });
+            }, this.getAttribute('data-id'));
         } else {
             CSSModal.close();
         }
@@ -319,7 +299,7 @@ osmly.overview = (function () {
 
     overview.modalDone = function(callback) {
         changeRadio('everything');
-        overview.refresh(callback);
+        refresh(callback);
     };
 
     return overview;

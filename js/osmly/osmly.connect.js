@@ -182,6 +182,11 @@ osmly.connect = (function() {
     }
 
     connect.editInJosm = function(id) {
+        if (!osmly.auth.authenticated() || !token('user')) {
+            osmly.ui.pleaseLogin();
+            return false;
+        }
+
         var osm,
             url = osmly.settings.db + '&id=' + id + '&action=remote';
 
@@ -194,6 +199,8 @@ osmly.connect = (function() {
                 crossOrigin: true,
                 type: 'json',
                 success: function(geo) {
+                    // should just use the same path as we use for the map
+
                     // from osmly.item.js, renameProperties()
                     for (var prop in osmly.settings.renameProperty) {
                         var change = osmly.settings.renameProperty[prop];

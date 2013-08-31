@@ -1,7 +1,7 @@
 osmly.ui = (function() {
     var ui = {};
 
-    ui.initialize = function() {
+    ui.go = function() {
         document.title = osmly.settings.title;
         $('#title').text(osmly.settings.title);
         fadeIn($('#title, #top-bar'));
@@ -172,12 +172,8 @@ osmly.ui = (function() {
     }
 
     function josm() {
-        if (osmly.auth.authenticated() && token('user')) {
-            bean.fire($('#reset'), 'click');
-            osmly.connect.editInJosm(osmly.item.id);
-        } else {
-            ui.pleaseLogin();
-        }
+        bean.fire($('#reset'), 'click');
+        osmly.connect.editInJosm(osmly.item.id);
     }
 
     function reset() {

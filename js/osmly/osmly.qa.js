@@ -3,13 +3,21 @@ osmly.qa = (function () {
         mode: false
     };
 
-    // TODO:
-        // include problems
-            // 'done' column in db and all calls needs to converted to string
-        // confirm button confirms type of action
-            // 'confirm upload'
-            // 'confirm problem'
-                // change color based on type?
+    qa.go = function(){
+        // toggle qa mode
+        if (!qa.mode) {
+            osmly.ui.hideItem();
+            setInterface();
+            bind();
+            next();
+        } else {
+            reset();
+            unbind();
+            unsetInterface();
+            osmly.ui.teardown();
+            osmly.item.next();
+        }
+    };
 
     function setInterface() {
         qa.mode = true;
@@ -27,32 +35,38 @@ osmly.qa = (function () {
         var layerz = createId('div', 'toggleLayers');
         qablock.appendChild(layerz);
         layerz.innerHTML = '[w] see original feature';
-        bean.on(byId('toggleLayers'), 'click', toggleLayers);
 
         var skip = createId('div', 'qa-skip');
         qablock.appendChild(skip);
         skip.innerHTML = '[s] skip';
+
+        var confirmz = createId('div', 'confirm');
+        qablock.appendChild(confirmz);
+        confirmz.innerHTML = 'confirm';
+
+        showOsmLink();
+    }
+
+    function bind() {
+        bean.on(byId('toggleLayers'), 'click', toggleLayers);
         bean.on(byId('qa-skip'), 'click', next);
+        bean.on(byId('confirm'), 'click', confirm);
 
         bean.on(byTag('body')[0], 'keydown', function(that){
             if (that.keyCode === 87) toggleLayers(); //w
             if (that.keyCode === 83) next(); //s
         });
-
-        var confirmz = createId('div', 'confirm');
-        qablock.appendChild(confirmz);
-        confirmz.innerHTML = 'confirm';
-        bean.on(byId('confirm'), 'click', confirm);
-
-        showOsmLink();
     }
 
-    function unsetInterface() {
-        qa.mode = false;
+    function unbind() {
         bean.off(byId('toggleLayers'));
         bean.off(byId('qa-skip'));
         bean.off(byId('confirm'));
         bean.off(byTag('body')[0], 'keydown');
+    }
+
+    function unsetInterface() {
+        qa.mode = false;
 
         byTag('body')[0].removeChild(byId('qa-block'));
         byId('qa').innerHTML = 'QA';
@@ -193,20 +207,6 @@ osmly.qa = (function () {
             qa.oGeometry.bringToFront();
         }
     }
-
-    qa.go = function(){
-        // toggle qa mode
-        if (!qa.mode) {
-            osmly.ui.hideItem();
-            setInterface();
-            next();
-        } else {
-            reset();
-            unsetInterface();
-            osmly.ui.teardown();
-            osmly.item.next();
-        }
-    };
 
     return qa;
 }());
