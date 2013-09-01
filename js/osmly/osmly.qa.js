@@ -14,7 +14,7 @@ osmly.qa = (function () {
             unbind();
             unsetInterface();
             $('#tags tr').remove();
-            osmly.item.next();
+            osmly.import.next();
         }
     };
 
@@ -168,7 +168,7 @@ osmly.qa = (function () {
             [bounds[3], bounds[2]]
         ]);
 
-        osmly.item.getOsm(buffered, function(){
+        osmly.import.getOsm(buffered, function(){
             byId('notify').style.display = 'none';
             osmly.map.removeLayer(q.oGeometry);
             osmly.item.contextLayer.addTo(osmly.map);

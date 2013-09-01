@@ -57,7 +57,7 @@ osmly.ui = (function() {
             $('#login, #demo').fadeOut(250);
             CSSModal.open('instruction-modal');
             osmly.connect.getDetails();
-            osmly.item.next();
+            osmly.import.next();
         });
     }
 

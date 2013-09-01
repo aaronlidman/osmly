@@ -3,7 +3,7 @@ osmly.connect = (function() {
 
     connect.updateItem = function(action, data, callback, id) {
         if (typeof data != 'object') data = {};
-        id = id || osmly.item.id;
+        id = id || osmly.import.id;
 
         var url = osmly.settings.db + '&id=' + id + '&action=' + action;
 
@@ -150,10 +150,10 @@ osmly.connect = (function() {
         byId('changeset-link').innerHTML = '<a href="' + osmly.settings.writeApi +
         '/browse/changeset/' + id + '" target="_blank">Details on osm.org »</a>';
 
-        var geojson = osmly.item.layer.toGeoJSON();
-        geojson['features'][0]['properties'] = osmly.item.getTags();
+        var geojson = osmly.import.layer.toGeoJSON();
+        geojson['features'][0]['properties'] = osmly.import.getTags();
             // this is sketchy but works for single items
-        var osmChange = osmly.item.toOsmChange(geojson, token('changeset_id'));
+        var osmChange = toOsmChange(geojson, token('changeset_id'));
 
         osmly.ui.notify('uploading to OSM');
 
@@ -174,7 +174,7 @@ osmly.connect = (function() {
             // :/
         }
         $('#tags tr').remove();
-        osmly.item.next();
+        osmly.import.next();
     }
 
     connect.editInJosm = function(id) {
@@ -186,8 +186,8 @@ osmly.connect = (function() {
         var osm,
             url = osmly.settings.db + '&id=' + id + '&action=remote';
 
-        if (id === osmly.item.id) {
-            osm = osmly.item.toOsm(osmly.item.layer.toGeoJSON());
+        if (id === osmly.import.id) {
+            osm = toOsm(osmly.import.layer.toGeoJSON());
             connect.updateItem('remote', {remote: osm}, callback, id);
         } else {
             $.ajax({
@@ -196,25 +196,25 @@ osmly.connect = (function() {
                 success: function(geo) {
                     // should just use the same path as we use for the map
 
-                    // from osmly.item.js, renameProperties()
+                    // from osmly.import.js, renameProperties()
                     for (var prop in osmly.settings.renameProperty) {
                         var change = osmly.settings.renameProperty[prop];
                         geo.properties[change] = geo.properties[prop];
                     }
 
-                    // from osmly.item.js, usePropertiesAsTag()
+                    // from osmly.import.js, usePropertiesAsTag()
                     for (var poop in geo.properties) {
                         if (osmly.settings.usePropertyAsTag.indexOf(poop) === -1) {
                             geo.properties[poop] = null;
                         }
                     }
 
-                    // from osmly.item.js, append()
+                    // from osmly.import.js, append()
                     for (var append in osmly.settings.appendTag) {
                         geo.properties[append] = osmly.settings.appendTag[append];
                     }
 
-                    osm = osmly.item.toOsm(geo);
+                    osm = toOsm(geo);
                     connect.updateItem('remote', {remote: osm}, callback, id);
                 }
             });
@@ -235,6 +235,14 @@ osmly.connect = (function() {
             });
         }
     };
+
+    function toOsm(geojson) {
+        return osm_geojson.geojson2osm(geojson);
+    }
+
+    function toOsmChange(geojson, changesetId) {
+        return osm_geojson.geojson2osm(geojson, changesetId, true);
+    }
 
     return connect;
 }());
