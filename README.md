@@ -12,9 +12,7 @@ OSMLY is a browser based importer for collaborative item-by-item reviewing, edit
 - [osm-auth](https://github.com/osmlab/osm-auth) for OSM authentication
 - [CSS-Modal](http://drublic.github.io/css-modal/) for the modals
 - [reqwest](https://github.com/ded/reqwest) for requests
-- [bonzo](https://github.com/ded/bonzo) for DOM manipulation
-- [bean](https://github.com/fat/bean) for events
+- [Zepto](http://zeptojs.com/) for DOM, events, and animations
 - [Foundicons](http://zurb.com/playground/foundation-icons) for the icons
-- [Animate.css](https://github.com/daneden/animate.css) for animations
 
 ### BSD License

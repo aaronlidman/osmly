@@ -47,21 +47,21 @@ osmly.qa = (function () {
     }
 
     function bind() {
-        bean.on(byId('toggleLayers'), 'click', toggleLayers);
-        bean.on(byId('qa-skip'), 'click', next);
-        bean.on(byId('confirm'), 'click', confirm);
+        $('#toggleLayers').on('click', toggleLayers);
+        $('#qa-skip').on('click', next);
+        $('#confirm').on('click', confirm);
 
-        bean.on(byTag('body')[0], 'keydown', function(that){
+        $('body').on('keydown', function(that){
             if (that.keyCode === 87) toggleLayers(); //w
             if (that.keyCode === 83) next(); //s
         });
     }
 
     function unbind() {
-        bean.off(byId('toggleLayers'));
-        bean.off(byId('qa-skip'));
-        bean.off(byId('confirm'));
-        bean.off(byTag('body')[0], 'keydown');
+        $('#toggleLayers').off();
+        $('#qa-skip').off();
+        $('#confirm').off();
+        $('body').off('keydown');
     }
 
     function unsetInterface() {

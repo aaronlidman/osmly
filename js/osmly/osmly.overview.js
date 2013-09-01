@@ -9,11 +9,11 @@ osmly.overview = (function () {
     };
 
     function bind() {
-        bean.on(byId('main_table'), 'click', '.editjosm', function(){
+        $('#main_table').on('click', '.editjosm', function(){
             osmly.connect.editInJosm(this.getAttribute('data-id'));
         });
 
-        bean.on(byId('main_table'), 'click', '.markdone', function(){
+        $('#main_table').on('click', '.markdone', function(){
             if (osmly.auth.authenticated() && token('user')) {
                 $('#markdone-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
                 CSSModal.open('markdone-modal');
@@ -22,41 +22,42 @@ osmly.overview = (function () {
             }
         });
 
-        bean.on(byId('overview_bg'),'click', function(){
+        $('#overview_bg').on('click', function(){
             $('#overview_bg, #overview-controls, #overview_block').hide();
             close();
         });
 
-        bean.on(byId('everything'), 'click', everything);
-        bean.on(byId('red'), 'click', red);
-        bean.on(byId('green'), 'click', green);
-        bean.on(byId('users'), 'click', function(){
+        $('#everything').on('click', everything);
+        $('#red').on('click', red);
+        $('#green').on('click', green);
+        $('#users').on('click', function(){
             drop_selection('users-select');
-        });
-        bean.on(byId('users-select'), 'change', function(){
-            drop_selection('users-select');
-        });
-        bean.on(byId('problems'), 'click', function(){
-            drop_selection('problems-select');
-        });
-        bean.on(byId('problems-select'), 'change', function(){
-            drop_selection('problems-select');
         });
 
-        bean.on(byId('markdone-modal'), 'click', 'button', markDone);
+        $('#users-select').on('click', function(){
+            drop_selection('users-select');
+        });
+        $('#problems').on('click', function(){
+            drop_selection('problems-select');
+        });
+        $('#problems-select').on('click', function(){
+            drop_selection('problems-select');
+        });
+        $('#markdone-modal').on('click', 'button', markDone);
+
     }
 
     function unbind() {
-        bean.off(byId('main_table'));
-        bean.off(byId('overview_bg'));
-        bean.off(byId('everything'));
-        bean.off(byId('red'));
-        bean.off(byId('green'));
-        bean.off(byId('users'));
-        bean.off(byId('users-select'));
-        bean.off(byId('problems'));
-        bean.off(byId('problems-select'));
-        bean.off(byId('markdone-modal'));
+        $('#main_table').off();
+        $('#overview_bg').off();
+        $('#everything').off();
+        $('#red').off();
+        $('#green').off();
+        $('#users').off();
+        $('#users-select').off();
+        $('#problems').off();
+        $('#problems-select').off();
+        $('#markdone-modal').off();
     }
 
     function buildTable(callback) {

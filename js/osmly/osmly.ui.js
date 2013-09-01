@@ -19,37 +19,36 @@ osmly.ui = (function() {
 
     function bind() {
         // initial buttons
-        bean.on(byId('demo'), 'click', demo);
-        bean.on(byId('login'), 'click', login);
+        $('#demo').on('click', demo);
+        $('#login').on('click', login);
 
         // bottom-right buttons
-        bean.on(byId('josm'), 'click', josm);
-        bean.on(byId('reset'), 'click', reset);
-        bean.on(byId('osmlink'), 'click', function(){
+        $('#josm').on('click', josm);
+        $('#reset').on('click', reset);
+        $('#osmlink').on('click', function(){
             window.open(osmly.osmlink);
         });
 
         // osmly.add botton-left buttons
-        bean.on(byId('skip'), 'click', skip);
-        bean.on(byId('problem'), 'change', problem);
-        bean.on(byId('submit'), 'click', submit);
-        bean.on(byId('add-new-tag'), 'click', addTag);
-        bean.on(byId('tags'), 'click', '.minus', function(){
+        $('#skip').on('click', skip);
+        $('#problem').on('click', problem);
+        $('#submit').on('click', submit);
+        $('#add-new-tag').on('click', addTag);
+        $('#tags').on('click', '.minus', function(){
             if ($('#tags tr').length > 1) this.parentNode.remove();
         });
 
         // top-bar
-        bean.on(byId('qa'), 'click', osmly.qa.go);
-        bean.on(byId('overview'), 'click', osmly.overview.go);
+        $('#qa').on('click', osmly.qa.go);
+        $('#overview').on('click', osmly.overview.go);
 
         // top-bar related
-        bean.on(byId('update-change'), 'click', changeset);
-        bean.on(byId('remote-edit-modal'), 'click', 'button', remoteEdit);
+        $('#update-change').on('click', changeset);
+        $('#remote-edit-modal').on('click', remoteEdit);
     }
 
     ui.pleaseLogin = function () {
-        $('#reusable-modal .modal-content').html(
-            '<h3>Please login. It helps track your changes so other users don\'t edit the same feature.</h3>');
+        $('#reusable-modal .modal-content').html('<h3>Please login. It helps track your changes so other users don\'t edit the same feature.</h3>');
         // login button/link?
         CSSModal.open('reusable-modal');
     };
@@ -75,7 +74,8 @@ osmly.ui = (function() {
             osmly.item.contextLayer.bringToFront();
         }
 
-        $('#login, #notify').fadeOut(250);
+        $('#login').fadeOut(250);
+        $('#notify').hide();
         $('#hold-problem, #submit, #bottom-right, #action-block').fadeIn(250);
 
         if (osmly.item.isEditable) {
@@ -170,7 +170,7 @@ osmly.ui = (function() {
     }
 
     function josm() {
-        bean.fire(byId('reset'), 'click');
+        $('#reset').trigger('click');
         osmly.connect.editInJosm(osmly.item.id);
     }
 
@@ -185,7 +185,7 @@ osmly.ui = (function() {
         osmly.settings.changesetTags['comment'] = $('#changeset-form').text();
         osmly.connect.updateComment(function(){
             CSSModal.close();
-            $('#notify').fadeOut(250);
+            $('#notify').hide();
         });
     }
 

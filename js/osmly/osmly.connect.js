@@ -230,8 +230,7 @@ osmly.connect = (function() {
                 crossOrigin: true,
                 type: 'xml',
                 error: function() {
-                    $('#reusable-modal .modal-content').innerHTML =
-                        '<h3>JOSM doesn\'t seem to be running. Start JOSM and try again.</h3>';
+                    $('#reusable-modal .modal-content').html('<h3>JOSM doesn\'t seem to be running. Start JOSM and try again.</h3>');
                     CSSModal.open('reusable-modal');
                 },
                 success: function() {
