@@ -1,31 +1,24 @@
-function leftToRight(sel, callback) {
-    // sel.each(function(element){
-    //     bean.one(
-    //         element,
-    //         'animationend webkitAnimationEnd MSAnimationEnd oAnimationEnd',
-    //         function(){
-    //             element.hide();
-    //             element.classList.remove('fadeLefttoRight');
-    //             if (callback) callback();
-    //         }
-    //     );
-    //     element.show();
-    //     element.classList.add('fadeLefttoRight');
-    // });
+// animations are done in css because I counldn't find a decent lib
+// that did chaining without stuttering
+function leftToRight(element) {
+    $(element).on(
+        'animationend webkitAnimationEnd MSAnimationEnd oAnimationEnd',
+        function() {
+            element.hide();
+            element.removeClass('fadeLefttoRight');
+    });
+    element.show();
+    element.addClass('fadeLefttoRight');
 }
 
-function bigUp(sel, callback) {
-    // sel.each(function(element){
-    //     bean.one(
-    //         element,
-    //         'animationend webkitAnimationEnd MSAnimationEnd oAnimationEnd',
-    //         function(){
-    //             element.style.display = 'none';
-    //             element.classList.remove('fadeInUpBig');
-    //             if (callback) callback();
-    //         }
-    //     );
-    //     element.show();
-    //     element.classList.add('fadeInUpBig');
-    // });
+function bigUp(element) {
+    $(element).on(
+        'animationend webkitAnimationEnd MSAnimationEnd oAnimationEnd',
+        function() {
+            element.hide();
+            element.removeClass('fadeInUpBig');
+        }
+    );
+    element.show();
+    element.addClass('fadeInUpBig');
 }
