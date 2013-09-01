@@ -29,7 +29,7 @@ JS_LIBS = \
 	js/lib/modal.js \
 	js/lib/reqwest.js \
 	js/lib/bean.js \
-	js/lib/bonzo.js
+	js/lib/zepto.js
 
 all: dist/osmly.min.js  dist/libs.min.js dist/osmly.min.css dist/static
 

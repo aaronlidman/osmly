@@ -149,10 +149,9 @@ osmly.connect = (function() {
 
     connect.submitToOSM = function() {
         var id = token('changeset_id');
-        fadeIn($('#changeset'));
-        $('#changeset-link')
-            .html('<a href="' + osmly.settings.writeApi + '/browse/changeset/' +
-                id + '" target="_blank">Details on osm.org »</a>');
+        $('#changeset').fadeIn();
+        byId('changeset-link').innerHTML = '<a href="' + osmly.settings.writeApi +
+        '/browse/changeset/' + id + '" target="_blank">Details on osm.org »</a>';
 
         var geojson = osmly.item.layer.toGeoJSON();
         geojson['features'][0]['properties'] = osmly.item.getTags();
@@ -177,7 +176,7 @@ osmly.connect = (function() {
             console.log(err);
             // :/
         }
-        osmly.ui.teardown();
+        $('#tags tr').remove();
         osmly.item.next();
     }
 
@@ -231,8 +230,8 @@ osmly.connect = (function() {
                 crossOrigin: true,
                 type: 'xml',
                 error: function() {
-                    $('#reusable-modal .modal-content').html(
-                        '<h3>JOSM doesn\'t seem to be running. Start JOSM and try again.</h3>');
+                    $('#reusable-modal .modal-content').innerHTML =
+                        '<h3>JOSM doesn\'t seem to be running. Start JOSM and try again.</h3>';
                     CSSModal.open('reusable-modal');
                 },
                 success: function() {

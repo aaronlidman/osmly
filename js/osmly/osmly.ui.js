@@ -3,17 +3,17 @@ osmly.ui = (function() {
 
     ui.go = function() {
         document.title = osmly.settings.title;
-        $('#title').text(osmly.settings.title);
-        fadeIn($('#title, #top-bar'));
+        $('#title').html(osmly.settings.title);
+        $('#title, #top-bar').fadeIn();
 
         if (osmly.auth.authenticated() && token('user')) {
             ui.setUserDetails();
             osmly.item.next();
         } else {
-            fadeIn($('#login, #demo'));
+            $('#login, #demo').fadeIn();
         }
 
-        if (!osmly.settings.demo) $('#demo').hide();
+        if (!osmly.settings.demo) $('#demo').fadeOut();
         bind();
     };
 
@@ -56,7 +56,8 @@ osmly.ui = (function() {
         if (string !== '') string = '<span>' + string + '</span>';
         string = '<img src="static/loader.gif" />' + string;
 
-        $('#notify').html(string).show('block');
+        $('#notify').html(string);
+        $('#notify').show();
         // don't forget to hide #notify later
     };
 
@@ -72,16 +73,15 @@ osmly.ui = (function() {
             osmly.item.contextLayer.bringToFront();
         }
 
-        fadeOut($('#login'));
-        $('#notify').hide();
-        fadeIn($('#hold-problem, #submit, #bottom-right, #action-block'));
+        $('#login').fadeOut();
+        $('#notify').fadeOut();
+        $('#hold-problem, #submit, #bottom-right, #action-block').fadeIn();
 
         if (osmly.item.isEditable) {
-            fadeIn($('#tags'));
+            $('#tags').fadeIn();
         } else {
-            fadeOut($('#hold-problem, #submit'));
-            $('#reusable-modal .modal-content').html(
-                '<h3>This feature is too complex. <a>Edit it in JOSM?</a></h3>');
+            $('#hold-problem, #submit').fadeOut();
+            $('#reusable-modal .modal-content').html('<h3>This feature is too complex. <a>Edit it in JOSM?</a></h3>');
             // put an 'Edit in JOSM' button right there, when clicked close the modal and let the other modal open
             // literally bind, $('#josm').click()
             CSSModal.open('reusable-modal');
@@ -105,15 +105,16 @@ osmly.ui = (function() {
     }
 
     ui.hideItem = function() {
-        fadeOut($('#hold-problem, #submit, #bottom-right, #action-block, #tags'));
+        $('#hold-problem, #submit, #bottom-right, #action-block, #tags').fadeOut();
         osmly.map.closePopup();
         osmly.map.removeLayer(osmly.item.layer);
         if (osmly.item.contextLayer) osmly.map.removeLayer(osmly.item.contextLayer);
     };
 
     ui.teardown = function() {
-        fadeOut($('#tags'));
-        $('#tags tr').remove();
+        $('#tags').fadeOut(250, function(){
+            $('#tags tr').remove();
+        });
     };
 
     function skip() {
@@ -123,7 +124,7 @@ osmly.ui = (function() {
         osmly.item.next();
     }
 
-    function submit(result) {
+    function submit() {
         ui.hideItem();
 
         if (osmly.auth.authenticated() && token('user')) {
@@ -144,9 +145,9 @@ osmly.ui = (function() {
                 problem: $('#problem').val()
             });
         }
-        fadeIn($('.foundicon-remove'), function(){
+        $('.foundicon-remove').show(function(){
             setTimeout(function(){
-                fadeOut($('.foundicon-remove'));
+                $('.foundicon-remove').fadeOut();
             }, 250);
         });
         $('#problem').val('problem');
@@ -155,16 +156,16 @@ osmly.ui = (function() {
     }
 
     function demo() {
-        fadeOut($('#login, #demo'));
+        $('#login, #demo').fadeOut();
         CSSModal.open('demo-modal');
-        $('#demo-mode').show('block');
+        $('#demo-mode').show();
         osmly.item.next();
     }
 
     function login() {
         ui.notify('');
         osmly.auth.authenticate(function(){
-            fadeOut($('#login, #demo'));
+            $('#login, #demo').fadeOut();
             CSSModal.open('instruction-modal');
             osmly.connect.getDetails();
             osmly.item.next();
@@ -172,7 +173,7 @@ osmly.ui = (function() {
     }
 
     function josm() {
-        bean.fire($('#reset'), 'click');
+        bean.fire(byId('reset'), 'click');
         osmly.connect.editInJosm(osmly.item.id);
     }
 
@@ -188,7 +189,7 @@ osmly.ui = (function() {
         osmly.settings.changesetTags['comment'] = $('#changeset-form').text();
         osmly.connect.updateComment(function(){
             CSSModal.close();
-            $('#notify').hide();
+            $('#notify').fadeOut();
         });
     }
 
@@ -227,11 +228,11 @@ osmly.ui = (function() {
 
     ui.setUserDetails = function() {
         if (token('avatar')) $('#user').append('<img height="25px" src="' + token('avatar') + '"/>');
-        fadeIn($('#user')
+        $('#user')
             .append('<a href="' + osmly.settings.writeApi + '/user/' +
                 token('user') + '/edits" target="_blank">' +
                 token('user') + '</a>')
-        );
+            .fadeIn();
     };
 
     return ui;

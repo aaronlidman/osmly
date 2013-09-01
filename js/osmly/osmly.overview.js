@@ -3,7 +3,7 @@ osmly.overview = (function () {
         ov = {};
 
     overview.go = function() {
-        fadeIn($('#overview_bg, #overview-controls, #overview_block'));
+        $('#overview_bg, #overview-controls, #overview_block').fadeIn();
         refresh();
         bind();
     };

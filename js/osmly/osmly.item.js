@@ -3,7 +3,6 @@ osmly.item = (function () {
 
     item.next = function() {
         osmly.ui.notify('getting next item');
-        $('#tags tr').remove();
 
         reqwest({
             url: osmly.settings.db,
