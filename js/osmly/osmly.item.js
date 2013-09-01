@@ -4,10 +4,9 @@ osmly.item = (function () {
     item.next = function() {
         osmly.ui.notify('getting next item');
 
-        reqwest({
+        $.ajax({
             url: osmly.settings.db,
-            crossOrigin: true,
-            type: 'json',
+            dataType: 'json',
             success: function(data) {
                 item.data = data;
                 item.id = item.data.properties.id;
@@ -107,10 +106,9 @@ osmly.item = (function () {
         bbox = 'bbox=' + bbox.join(',');
         var request = osmly.settings.readApi + bbox;
 
-        reqwest({
+        $.ajax({
             url: request,
-            type: 'xml',
-            crossOrigin: true,
+            dataType: 'xml',
             success: function(xml) {
                 osmly.ui.notify('rendering OSM data');
                 item.osmContext = osm_geojson.osm2geojson(xml);

@@ -27,7 +27,6 @@ JS_LIBS = \
 	js/lib/osmauth.js \
 	js/lib/sha.js \
 	js/lib/modal.js \
-	js/lib/reqwest.js \
 	js/lib/zepto.js
 
 all: dist/osmly.min.js  dist/libs.min.js dist/osmly.min.css dist/static

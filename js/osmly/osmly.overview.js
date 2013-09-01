@@ -117,11 +117,10 @@ osmly.overview = (function () {
     }
 
     function request(callback) {
-        reqwest({
+        $.ajax({
             url: osmly.settings.db + '&overview',
             cache: false,
-            crossOrigin: true,
-            type: 'json',
+            dataType: 'json',
             success: function(items){
                 ov.data = items;
                 ov.rawData = items;

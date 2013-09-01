@@ -11,8 +11,7 @@ OSMLY is a browser based importer for collaborative item-by-item reviewing, edit
 - [Leaflet Bing layer](https://github.com/shramov/leaflet-plugins/blob/master/layer/tile/Bing.js) for the Bing tiles
 - [osm-auth](https://github.com/osmlab/osm-auth) for OSM authentication
 - [CSS-Modal](http://drublic.github.io/css-modal/) for the modals
-- [reqwest](https://github.com/ded/reqwest) for requests
-- [Zepto](http://zeptojs.com/) for DOM, events, and animations
+- [Zepto](http://zeptojs.com/) for DOM, events, ajax, and animations
 - [Foundicons](http://zurb.com/playground/foundation-icons) for the icons
 
 ### BSD License

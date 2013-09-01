@@ -91,11 +91,10 @@ osmly.qa = (function () {
     }
 
     function request(callback) {
-        reqwest({
+        $.ajax({
             url: osmly.settings.db + '&qa',
             cache: false,
-            crossOrigin: true,
-            type: 'json',
+            dataType: 'json',
             success: function(item){
                 q.data = {
                     id: item[0],

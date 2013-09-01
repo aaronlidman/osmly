@@ -19,12 +19,11 @@ osmly.connect = (function() {
             if (skip && callback) {
                 callback();
             } else {
-                reqwest({
+                $.ajax({
                     url: url,
-                    method: 'POST',
-                    crossOrigin: true,
+                    type: 'POST',
                     data: data,
-                    type: 'json',
+                    dataType: 'json',
                     success: function() {
                         if (callback) callback();
                     }
@@ -37,10 +36,9 @@ osmly.connect = (function() {
         // checks the items again before uploading to OSM
         // in case more than one uses is working on the same item at the same time
         var url = osmly.settings.db + '&id=' + id + '&action=status';
-        reqwest({
+        $.ajax({
             url: url,
-            crossOrigin: true,
-            type: 'json',
+            dataType: 'json',
             success: function(status) {
                 if (status.status == 'ok') {
                     callback();
@@ -57,10 +55,9 @@ osmly.connect = (function() {
         } else {
             osmly.ui.notify('checking changeset status');
 
-            reqwest({
+            $.ajax({
                 url: osmly.settings.writeApi + '/api/0.6/changeset/' + token('changeset_id'),
-                crossOrigin: true,
-                type: 'xml',
+                dataType: 'xml',
                 success: function(xml) {
                     var cs = xml.getElementsByTagName('changeset');
                     if (cs[0].getAttribute('open') === 'true') {
@@ -193,10 +190,9 @@ osmly.connect = (function() {
             osm = osmly.item.toOsm(osmly.item.layer.toGeoJSON());
             connect.updateItem('remote', {remote: osm}, callback, id);
         } else {
-            reqwest({
+            $.ajax({
                 url: osmly.settings.db + '&id=' + id,
-                crossOrigin: true,
-                type: 'json',
+                dataType: 'json',
                 success: function(geo) {
                     // should just use the same path as we use for the map
 
@@ -225,10 +221,9 @@ osmly.connect = (function() {
         }
 
         function callback() {
-            reqwest({
+            $.ajax({
                 url: 'http://127.0.0.1:8111/import?url=' + url,
-                crossOrigin: true,
-                type: 'xml',
+                dataType: 'xml',
                 error: function() {
                     $('#reusable-modal .modal-content').html('<h3>JOSM doesn\'t seem to be running. Start JOSM and try again.</h3>');
                     CSSModal.open('reusable-modal');
