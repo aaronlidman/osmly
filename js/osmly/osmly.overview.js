@@ -3,7 +3,7 @@ osmly.overview = (function () {
         ov = {};
 
     overview.go = function() {
-        $('#overview_bg, #overview-controls, #overview_block').fadeIn();
+        $('#overview_bg, #overview-controls, #overview_block').fadeIn(250);
         refresh();
         bind();
     };
@@ -278,7 +278,7 @@ osmly.overview = (function () {
         ov.rawData = false;
 
         if (byTag('tbody').length) {
-            byId('main_table').removeChild(table.getElementsByTagName('tbody')[0]);
+            byId('main_table').removeChild(byId('main_table').getElementsByTagName('tbody')[0]);
         }
 
         changeRadio('everything');

@@ -4,16 +4,16 @@ osmly.ui = (function() {
     ui.go = function() {
         document.title = osmly.settings.title;
         $('#title').html(osmly.settings.title);
-        $('#title, #top-bar').fadeIn();
+        $('#title, #top-bar').fadeIn(250);
 
         if (osmly.auth.authenticated() && token('user')) {
             ui.setUserDetails();
             osmly.item.next();
         } else {
-            $('#login, #demo').fadeIn();
+            $('#login, #demo').fadeIn(250);
         }
 
-        if (!osmly.settings.demo) $('#demo').fadeOut();
+        if (!osmly.settings.demo) $('#demo').fadeOut(250);
         bind();
     };
 
@@ -25,7 +25,9 @@ osmly.ui = (function() {
         // bottom-right buttons
         bean.on(byId('josm'), 'click', josm);
         bean.on(byId('reset'), 'click', reset);
-        bean.on(byId('osmlink'), 'click', function(){ window.open(osmly.osmlink);} );
+        bean.on(byId('osmlink'), 'click', function(){
+            window.open(osmly.osmlink);
+        });
 
         // osmly.add botton-left buttons
         bean.on(byId('skip'), 'click', skip);
@@ -73,14 +75,13 @@ osmly.ui = (function() {
             osmly.item.contextLayer.bringToFront();
         }
 
-        $('#login').fadeOut();
-        $('#notify').fadeOut();
-        $('#hold-problem, #submit, #bottom-right, #action-block').fadeIn();
+        $('#login, #notify').fadeOut(250);
+        $('#hold-problem, #submit, #bottom-right, #action-block').fadeIn(250);
 
         if (osmly.item.isEditable) {
-            $('#tags').fadeIn();
+            $('#tags').fadeIn(250);
         } else {
-            $('#hold-problem, #submit').fadeOut();
+            $('#hold-problem, #submit').fadeOut(250);
             $('#reusable-modal .modal-content').html('<h3>This feature is too complex. <a>Edit it in JOSM?</a></h3>');
             // put an 'Edit in JOSM' button right there, when clicked close the modal and let the other modal open
             // literally bind, $('#josm').click()
@@ -104,22 +105,18 @@ osmly.ui = (function() {
         }
     }
 
-    ui.hideItem = function() {
-        $('#hold-problem, #submit, #bottom-right, #action-block, #tags').fadeOut();
+    ui.hideItem = function(callback) {
+        $('#bottom-right, #action-block, #tags').fadeOut(250, function(){
+            if (callback) callback();
+        });
         osmly.map.closePopup();
         osmly.map.removeLayer(osmly.item.layer);
         if (osmly.item.contextLayer) osmly.map.removeLayer(osmly.item.contextLayer);
     };
 
-    ui.teardown = function() {
-        $('#tags').fadeOut(250, function(){
-            $('#tags tr').remove();
-        });
-    };
-
     function skip() {
         ui.hideItem();
-        ui.teardown();
+        $('#tags tr').remove();
         leftToRight($('.foundicon-right-arrow'));
         osmly.item.next();
     }
@@ -131,7 +128,7 @@ osmly.ui = (function() {
             osmly.connect.updateItem('submit');
             osmly.connect.openChangeset(osmly.connect.submitToOSM);
         } else {
-            ui.teardown();
+            $('#tags tr').remove();
             osmly.item.next();
         }
         bigUp($('.foundicon-up-arrow'));
@@ -147,16 +144,16 @@ osmly.ui = (function() {
         }
         $('.foundicon-remove').show(function(){
             setTimeout(function(){
-                $('.foundicon-remove').fadeOut();
+                $('.foundicon-remove').fadeOut(250);
             }, 250);
         });
         $('#problem').val('problem');
-        ui.teardown();
+        $('#tags tr').remove();
         osmly.item.next();
     }
 
     function demo() {
-        $('#login, #demo').fadeOut();
+        $('#login, #demo').fadeOut(250);
         CSSModal.open('demo-modal');
         $('#demo-mode').show();
         osmly.item.next();
@@ -165,7 +162,7 @@ osmly.ui = (function() {
     function login() {
         ui.notify('');
         osmly.auth.authenticate(function(){
-            $('#login, #demo').fadeOut();
+            $('#login, #demo').fadeOut(250);
             CSSModal.open('instruction-modal');
             osmly.connect.getDetails();
             osmly.item.next();
@@ -178,18 +175,17 @@ osmly.ui = (function() {
     }
 
     function reset() {
-        ui.hideItem();
-        ui.teardown();
+        $('#tags tr').remove();
+        ui.hideItem(ui.displayItem);
         osmly.item.setItemLayer(osmly.item.data);
-        ui.setupItem(osmly.item.data.properties);
-        ui.displayItem();
+        populateTags(osmly.item.data.properties);
     }
 
     function changeset() {
         osmly.settings.changesetTags['comment'] = $('#changeset-form').text();
         osmly.connect.updateComment(function(){
             CSSModal.close();
-            $('#notify').fadeOut();
+            $('#notify').fadeOut(250);
         });
     }
 
@@ -232,7 +228,7 @@ osmly.ui = (function() {
             .append('<a href="' + osmly.settings.writeApi + '/user/' +
                 token('user') + '/edits" target="_blank">' +
                 token('user') + '</a>')
-            .fadeIn();
+            .fadeIn(250);
     };
 
     return ui;

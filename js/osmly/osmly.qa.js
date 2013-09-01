@@ -13,7 +13,7 @@ osmly.qa = (function () {
             reset();
             unbind();
             unsetInterface();
-            osmly.ui.teardown();
+            $('#tags tr').remove();
             osmly.item.next();
         }
     };
@@ -77,17 +77,17 @@ osmly.qa = (function () {
     function showOsmLink() {
         setTimeout(function(){
             // give them some time to fade out
-            byId('bottom-right').style.display = 'block';
-            byId('josm').style.display = 'none';
-            byId('reset').style.display = 'none';
+            $('#bottom-right').show();
+            $('#josm').hide();
+            $('#reset').hide();
         }, 1000);
     }
 
     function resetOsmLink() {
-        byId('bottom-right').style.display = 'none';
-        byId('josm').style.display = 'block';
-        byId('reset').style.display = 'block';
-        byId('osmlink').style.display = 'block';
+        $('#bottom-right').hide();
+        $('#josm').show();
+        $('#reset').show();
+        $('#osmlink').show();
     }
 
     function request(callback) {
@@ -151,8 +151,8 @@ osmly.qa = (function () {
         if (osmly.item.contextLayer) osmly.map.removeLayer(osmly.item.contextLayer);
         if (q.oGeometry) osmly.map.removeLayer(q.oGeometry);
         byId('toggleLayers').innerHTML = '[w] see original feature';
-        byId('qa-block').style.display = 'none';
-        byId('osmlink').style.display = 'none';
+        $('#qa-block').hide();
+        $('#osmlink').hide();
     }
 
     function setContext() {
