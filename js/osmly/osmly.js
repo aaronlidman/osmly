@@ -32,8 +32,7 @@ window.osmly = (function () {
             fillOpacity: 0.3,
             weight: 3,
             opacity: 1
-        },
-        noContext: false
+        }
     };
 
     osmly.initialize = function(settings) {

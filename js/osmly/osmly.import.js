@@ -15,9 +15,9 @@ osmly.import = (function() {
             window.open(osmly.osmlink);
         });
 
-        // osmly.add botton-left buttons
+        // botton-left buttons
         $('#skip').on('click', skip);
-        $('#problem').on('click', problem);
+        $('#problem').on('change', problem);
         $('#submit').on('click', submit);
         $('#add-new-tag').on('click', addTag);
         $('#tags').on('click', '.minus', function(){
@@ -127,13 +127,6 @@ osmly.import = (function() {
         });
         $('#problem').val('problem');
         $('#tags tr').remove();
-        imp.next();
-    }
-
-    function demo() {
-        $('#login, #demo').fadeOut(250);
-        CSSModal.open('demo-modal');
-        $('#demo-mode').show();
         imp.next();
     }
 

@@ -30,19 +30,11 @@ osmly.overview = (function () {
         $('#everything').on('click', everything);
         $('#red').on('click', red);
         $('#green').on('click', green);
-        $('#users').on('click', function(){
-            drop_selection('users-select');
-        });
+        $('#users').on('click', function(){ drop_selection('users-select'); });
 
-        $('#users-select').on('click', function(){
-            drop_selection('users-select');
-        });
-        $('#problems').on('click', function(){
-            drop_selection('problems-select');
-        });
-        $('#problems-select').on('click', function(){
-            drop_selection('problems-select');
-        });
+        $('#users-select').on('change', function(){ drop_selection('users-select'); });
+        $('#problems').on('click', function(){ drop_selection('problems-select'); });
+        $('#problems-select').on('change', function(){ drop_selection('problems-select'); });
         $('#markdone-modal').on('click', 'button', markDone);
 
     }

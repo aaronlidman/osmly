@@ -142,10 +142,3 @@ but other key/values should also be included for items that are often near schoo
     opacity: 1
 }
 ```
-
-### noContext
-- bool
-- to disable OSM context from attempting to fetch
-- mostly a way for me to keep working on this while offline
-- SHOULD NOT BE DEPLOYED AS SUCH
-- default: false
