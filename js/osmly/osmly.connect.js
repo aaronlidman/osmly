@@ -151,7 +151,7 @@ osmly.connect = (function() {
         '/browse/changeset/' + id + '" target="_blank">Details on osm.org »</a>';
 
         var geojson = osmly.import.layer.toGeoJSON();
-        geojson['features'][0]['properties'] = osmly.import.getTags();
+        geojson['features'][0]['properties'] = osmly.import.tags();
             // this is sketchy but works for single items
         var osmChange = toOsmChange(geojson, token('changeset_id'));
 

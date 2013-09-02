@@ -25,19 +25,19 @@ osmly.import = (function() {
         });
     }
 
-    imp.displayItem = function() {
-        osmly.imp.layer.addTo(osmly.map);
+    function displayItem() {
+        imp.layer.addTo(osmly.map);
 
-        if (osmly.imp.contextLayer) {
-            osmly.imp.contextLayer.addTo(osmly.map);
-            osmly.imp.contextLayer.bringToFront();
+        if (imp.contextLayer) {
+            imp.contextLayer.addTo(osmly.map);
+            imp.contextLayer.bringToFront();
         }
 
         $('#login').fadeOut(250);
         $('#notify').hide();
         $('#hold-problem, #submit, #bottom-right, #action-block').fadeIn(250);
 
-        if (osmly.imp.isEditable) {
+        if (imp.isEditable) {
             $('#tags').fadeIn(250);
         } else {
             $('#hold-problem, #submit').fadeOut(250);
@@ -46,7 +46,7 @@ osmly.import = (function() {
             // literally bind, $('#josm').click()
             CSSModal.open('reusable-modal');
         }
-    };
+    }
 
     function setItemLayer() {
         imp.layer = L.geoJson(imp.data, {
@@ -88,8 +88,8 @@ osmly.import = (function() {
             if (callback) callback();
         });
         osmly.map.closePopup();
-        osmly.map.removeLayer(osmly.imp.layer);
-        if (osmly.imp.contextLayer) osmly.map.removeLayer(osmly.imp.contextLayer);
+        osmly.map.removeLayer(imp.layer);
+        if (imp.contextLayer) osmly.map.removeLayer(imp.contextLayer);
     };
 
     function skip() {
@@ -139,12 +139,12 @@ osmly.import = (function() {
 
     function josm() {
         $('#reset').trigger('click');
-        osmly.connect.editInJosm(osmly.imp.id);
+        osmly.connect.editInJosm(imp.id);
     }
 
     function reset() {
         $('#tags tr').remove();
-        imp.hideItem(imp.displayItem);
+        imp.hideItem(displayItem);
         setItemLayer();
         populateTags();
     }
@@ -155,30 +155,6 @@ osmly.import = (function() {
             CSSModal.close();
             $('#notify').hide();
         });
-    }
-
-    function remoteEdit() {
-        var result = this.getAttribute('data-type');
-        if (result == 'yes') {
-            var id = osmly.imp.id;
-            if (this.getAttribute('data-id')) id = this.getAttribute('data-id');
-
-            if (osmly.auth.authenticated() && token('user')) {
-                osmly.connect.updateItem('submit', {submit: 'JOSM'}, function(){
-                    CSSModal.close();
-                    if (id == osmly.imp.id) {
-                        skip();
-                    } else {
-                        osmly.overview.modalDone();
-                    }
-                }, id);
-            } else {
-                CSSModal.close();
-                osmly.ui.pleaseLogin();
-            }
-        } else {
-            CSSModal.close();
-        }
     }
 
     function addTag() {
@@ -224,11 +200,11 @@ osmly.import = (function() {
         if (imp.isEditable) {
             imp.getOsm(imp.bbox, function() {
                 populateTags();
-                osmly.ui.displayItem();
+                displayItem();
             });
         } else {
             populateTags();
-            osmly.ui.displayItem();
+            displayItem();
         }
     }
 
@@ -364,4 +340,5 @@ osmly.import = (function() {
         return tags;
     };
 
+    return imp;
 }());

@@ -36,6 +36,30 @@ osmly.ui = (function() {
         $('#remote-edit-modal').on('click', remoteEdit);
     }
 
+    function remoteEdit() {
+        var result = this.getAttribute('data-type');
+        if (result == 'yes') {
+            var id = osmly.imp.id;
+            if (this.getAttribute('data-id')) id = this.getAttribute('data-id');
+
+            if (osmly.auth.authenticated() && token('user')) {
+                osmly.connect.updateItem('submit', {submit: 'JOSM'}, function(){
+                    CSSModal.close();
+                    if (id == osmly.imp.id) {
+                        skip();
+                    } else {
+                        osmly.overview.modalDone();
+                    }
+                }, id);
+            } else {
+                CSSModal.close();
+                osmly.ui.pleaseLogin();
+            }
+        } else {
+            CSSModal.close();
+        }
+    }
+
     ui.pleaseLogin = function () {
         $('#reusable-modal .modal-content').html('<h3>Please login. It helps track your changes so other users don\'t edit the same feature.</h3>');
         // login button/link?

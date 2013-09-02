@@ -5,7 +5,7 @@ osmly.qa = (function () {
     qa.go = function(){
         // toggle qa mode
         if (!qa.mode) {
-            osmly.ui.hideItem();
+            osmly.import.hideItem();
             setInterface();
             bind();
             next();
@@ -142,12 +142,12 @@ osmly.qa = (function () {
         request(function(){
             fillReport();
             setGeometry();
-            if (osmly.item.contextLayer) setContext();
+            if (osmly.import.contextLayer) setContext();
         });
     }
 
     function reset() {
-        if (osmly.item.contextLayer) osmly.map.removeLayer(osmly.item.contextLayer);
+        if (osmly.import.contextLayer) osmly.map.removeLayer(osmly.import.contextLayer);
         if (q.oGeometry) osmly.map.removeLayer(q.oGeometry);
         byId('toggleLayers').innerHTML = '[w] see original feature';
         $('#qa-block').hide();
@@ -171,8 +171,8 @@ osmly.qa = (function () {
         osmly.import.getOsm(buffered, function(){
             byId('notify').style.display = 'none';
             osmly.map.removeLayer(q.oGeometry);
-            osmly.item.contextLayer.addTo(osmly.map);
-            osmly.item.contextLayer.bringToFront();
+            osmly.import.contextLayer.addTo(osmly.map);
+            osmly.import.contextLayer.bringToFront();
             byId('qa-block').style.display = 'block';
             byId('osmlink').style.display = 'block';
         });
@@ -196,11 +196,11 @@ osmly.qa = (function () {
         if (osmly.map.hasLayer(q.oGeometry)) {
             byId('toggleLayers').innerHTML = '[w] see original feature';
             osmly.map.removeLayer(q.oGeometry);
-            osmly.item.contextLayer.addTo(osmly.map);
-            osmly.item.contextLayer.bringToFront();
+            osmly.import.contextLayer.addTo(osmly.map);
+            osmly.import.contextLayer.bringToFront();
         } else {
             byId('toggleLayers').innerHTML = '[w] see OSM data';
-            osmly.map.removeLayer(osmly.item.contextLayer);
+            osmly.map.removeLayer(osmly.import.contextLayer);
             q.oGeometry.addTo(osmly.map);
             q.oGeometry.bringToFront();
         }
