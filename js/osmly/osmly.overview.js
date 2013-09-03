@@ -4,10 +4,17 @@ osmly.overview = (function () {
         ov = {};
 
     overview.go = function() {
+        setInterface();
         $('#overview_bg, #overview-controls, #overview_block').fadeIn(250);
         refresh();
         bind();
     };
+
+    function close() {
+        ov = {};
+        $('#markdone, #overview_block, #overview_bg, #overview-controls').remove();
+        unbind();
+    }
 
     function setInterface() {
         $('body').append('\
@@ -316,19 +323,6 @@ osmly.overview = (function () {
         } else {
             byId('count').innerHTML = ov.data.length.toString() + '<span>/' + ov.rawData.length + '</span>';
         }
-    }
-
-    function close() {
-        ov.data = false;
-        ov.rawData = false;
-
-        if (byTag('tbody').length) {
-            byId('main_table').removeChild(byId('main_table').getElementsByTagName('tbody')[0]);
-        }
-
-        changeRadio('everything');
-        byId('count').innerHTML = '';
-        unbind();
     }
 
     function markDone() {

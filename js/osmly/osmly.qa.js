@@ -54,7 +54,7 @@ osmly.qa = (function () {
 
     function bind() {
         $('#toggleLayers').on('click', toggleLayers);
-        $('#qa-skip').on('click', next);
+        $('#qa-skip').one('click', next);
         $('#confirm').on('click', confirm);
         $('#osmlink').on('click', function(){
             window.open(osmly.osmlink);
@@ -133,10 +133,13 @@ osmly.qa = (function () {
             fillReport();
             setGeometry();
             setContext();
+            setTimeout(bind, 1000);
+                // it can be too quick
         });
     }
 
     function reset() {
+        unbind();
         osmly.map.removeContext();
         if (data.layer) osmly.map.removeLayer(data.layer);
         byId('toggleLayers').innerHTML = '[w] see original feature';

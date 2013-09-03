@@ -16,7 +16,8 @@ osmly.map = function() {
     });
 
     map.attributionControl.setPrefix(false);
-    if (osmly.settings.writeApi.split('dev').length > 1) map.attributionControl.setPrefix('OSM DEV SERVER');
+    if (osmly.settings.writeApi.split('dev').length > 1) map.attributionControl.setPrefix('on the DEV SERVER');
+
     map.osmTiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png');
 
     map.context = function(bbox, buffer, callback){

@@ -99,6 +99,8 @@ osmly.import = (function() {
 
         $('#notify').hide();
         $('#hold-problem, #submit, #bottom-right, #action-block').fadeIn(250);
+        setTimeout(bind, 250);
+            // might needs to throttle this more significantly
 
         if (imp.isEditable) {
             $('#tags').fadeIn(250);
@@ -226,6 +228,7 @@ osmly.import = (function() {
     }
 
     function next() {
+        unbind();
         osmly.map.removeOSM();
         osmly.ui.notify('getting next item');
 
