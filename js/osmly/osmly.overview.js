@@ -1,3 +1,4 @@
+/* jshint multistr:true */
 osmly.overview = (function () {
     var overview = {},
         ov = {};
@@ -7,6 +8,58 @@ osmly.overview = (function () {
         refresh();
         bind();
     };
+
+    function setInterface() {
+        $('body').append('\
+            <div class="semantic-content" id="markdone-modal">\
+                <div class="modal-inner wide800">\
+                    <div class="modal-content">\
+                        <h2 style="margin: 20px 0; text-align: center;">Are you sure? Please use with caution.</h2>\
+                        <h2 style="margin: 20px 0; text-align: center;"> This will prevent other users from editing this feature.</h2>\
+                        <div style="width: 100%; text-align: center;">\
+                            <button data-type="no" style="margin-left: 0;">No, don\'t mark it as done</button>\
+                            <button data-type="yes">Yes, mark it as done</button>\
+                        </div>\
+                    </div>\
+                </div>\
+                <a href="#!" class="modal-close" title="Close this modal" data-close="Close" data-dismiss="modal"></a>\
+            </div>\
+            <div id="overview_bg"></div>\
+            <div id="overview_block">\
+                <table id="main_table" class="table">\
+                    <thead>\
+                        <tr>\
+                            <th>#</th>\
+                            <th>Problem</th>\
+                            <th>Submitted</th>\
+                            <th>User</th>\
+                            <th>Use with caution</th>\
+                            <th>Edit in JOSM</th>\
+                        </tr>\
+                    </thead>\
+                </table>\
+            </div>\
+            <div id="overview-controls">\
+                <span id="count"></span>\
+                <input type="radio" name="filter" value="everything" id="everything" checked>\
+                    <label for="everything"> everything</label><br>\
+                <input type="radio" name="filter" value="red" id="red">\
+                    <label for="red"> problems (red)</label><br>\
+                <input type="radio" name="filter" value="green" id="green">\
+                    <label for="green"> done (green)</label><br>\
+                <input type="radio" name="filter" value="users" id="users">\
+                    <label for="users"> user: </label>\
+                    <select id="users-select"></select><br>\
+                <input type="radio" name="filter" value="problems" id="problems">\
+                    <label for="problems"> problem: </label>\
+                    <select id="problems-select"></select><br>\
+            </div>\
+        ');
+    }
+
+    function unsetInterface() {
+        $('#markdone-modal, #overview_bg, #overview_block, #overview-controls').remove();
+    }
 
     function bind() {
         $('#main_table').on('click', '.editjosm', function(){

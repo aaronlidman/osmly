@@ -34,14 +34,9 @@ osmly.import = (function() {
     }
 
     function unbind() {
-        $('#josm').off();
-        $('#reset').off();
-        $('#osmlink').off();
-        $('#skip').off();
-        $('#problem').off();
-        $('#submit').off();
-        $('#add-new-tag').off();
-        $('#tags').off();
+        $('#skip, #problem, #submit').off();
+        $('#josm, #reset, #osmlink').off();
+        $('#add-new-tag, #tags').off();
     }
 
     function setInterface() {
@@ -77,13 +72,20 @@ osmly.import = (function() {
                 <li id="osmlink" style="border-bottom: none;">open at osm.org</li>\
             </ul>\
         ');
+
+        $('body').append('\
+            <div id="flash">\
+                <div style="position: relative">\
+                    <i class="foundicon-remove hidden display"></i>\
+                    <i class="foundicon-right-arrow hidden display"></i>\
+                    <i class="foundicon-up-arrow hidden display"></i>\
+                </div>\
+            </div>\
+        ');
     }
 
     function unsetInterface() {
-        $('#tags').remove();
-        $('#action-block').remove();
-        $('#bottom-right').remove();
-
+        $('#tags, #action-block, #bottom-right, #flash').remove();
         osmly.map.closePopup();
         if (imp.layer) osmly.map.removeLayer(imp.layer);
         if (imp.contextLayer) osmly.map.removeLayer(imp.contextLayer);

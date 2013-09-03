@@ -58,9 +58,7 @@ osmly.qa = (function () {
     }
 
     function unbind() {
-        $('#toggleLayers').off();
-        $('#qa-skip').off();
-        $('#confirm').off();
+        $('#toggleLayers, #qa-skip, #confirm').off();
         $('body').off('keydown');
     }
 
