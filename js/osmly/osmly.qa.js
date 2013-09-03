@@ -151,20 +151,14 @@ osmly.qa = (function () {
     }
 
     function setContext() {
-        var bounds = data.geo.properties.bounds,
-            buffered = [
-                bounds[0] - 0.002,
-                bounds[1] - 0.002,
-                bounds[2] + 0.002,
-                bounds[3] + 0.002
-            ]; // double the buffer size just to be extra sure
+        var bounds = data.geo.properties.bounds;
 
         osmly.map.fitBounds([
             [bounds[1], bounds[0]],
             [bounds[3], bounds[2]]
         ]);
 
-        osmly.map.context(buffered, function(){
+        osmly.map.context(bounds, 0.002, function(){
             osmly.map.removeLayer(data.layer);
             byId('notify').style.display = 'none';
             byId('qa-block').style.display = 'block';

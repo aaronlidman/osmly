@@ -8,7 +8,7 @@ osmly.import = (function() {
             imp.live = true;
             setInterface();
             bind();
-            imp.next();
+            next();
         } else {
             unbind();
             unsetInterface();
@@ -159,7 +159,7 @@ osmly.import = (function() {
         hideItem();
         $('#tags tr').remove();
         leftToRight($('.foundicon-right-arrow'));
-        imp.next();
+        next();
     }
 
     function submit() {
@@ -170,7 +170,7 @@ osmly.import = (function() {
             osmly.connect.openChangeset(submitToOSM);
         } else {
             $('#tags tr').remove();
-            imp.next();
+            next();
         }
         bigUp($('.foundicon-up-arrow'));
     }
@@ -190,7 +190,7 @@ osmly.import = (function() {
         });
         $('#problem').val('problem');
         $('#tags tr').remove();
-        imp.next();
+        next();
     }
 
     function josm() {
@@ -223,7 +223,7 @@ osmly.import = (function() {
         ');
     }
 
-    imp.next = function() {
+    function next() {
         osmly.ui.notify('getting next item');
 
         $.ajax({
@@ -233,27 +233,18 @@ osmly.import = (function() {
                 nextPrep(data);
             }
         });
-    };
+    }
 
     function nextPrep(data) {
         imp.data = data;
         imp.id = imp.data.properties.id;
         imp.bbox = imp.data.properties.bounds;
         imp.isEditable = isEditable(imp.data.geometry);
-
-        // buffer the bounds
-        imp.bbox = [
-            imp.bbox[0] - 0.001,
-            imp.bbox[1] - 0.001,
-            imp.bbox[2] + 0.001,
-            imp.bbox[3] + 0.001
-        ];
-
         setItemLayer();
         imp.prepTags();
 
         if (imp.isEditable) {
-            osmly.map.context(imp.bbox, function() {
+            osmly.map.context(imp.bbox, 0.001, function() {
                 populateTags();
                 displayItem();
             });
@@ -353,7 +344,7 @@ osmly.import = (function() {
             // :/
         }
         $('#tags tr').remove();
-        osmly.import.next();
+        next();
     }
 
     return imp;

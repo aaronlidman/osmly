@@ -18,8 +18,17 @@ osmly.map = function() {
     map.attributionControl.setPrefix(false);
     map.osmTiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png');
 
-    map.context = function(bbox, callback){
+    map.context = function(bbox, buffer, callback){
         // gets, filters, sets, and shows context
+        if (buffer) {
+            bbox = [
+                bbox[0] - buffer,
+                bbox[1] - buffer,
+                bbox[2] + buffer,
+                bbox[3] + buffer
+            ];
+        }
+
         map.removeContext();
         osmly.ui.notify('getting nearby OSM data');
         getOsm(bbox, function(xml) {
