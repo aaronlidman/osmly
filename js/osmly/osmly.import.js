@@ -1,10 +1,19 @@
-// import is a reserved word but they don't apply to properties
+/* jshint multistr:true */
+// import is a reserved word but it doesn't apply to properties
 osmly.import = (function() {
-    var imp = {};
+    var imp = {live: false};
 
     imp.go = function(){
-        bind();
-        imp.next();
+        if (!imp.live) {
+            imp.live = true;
+            setInterface();
+            bind();
+            imp.next();
+        } else {
+            unbind();
+            unsetInterface();
+            imp.live = false;
+        }
     };
 
     function bind() {
@@ -14,7 +23,6 @@ osmly.import = (function() {
         $('#osmlink').on('click', function(){
             window.open(osmly.osmlink);
         });
-
         // botton-left buttons
         $('#skip').on('click', skip);
         $('#problem').on('change', problem);
@@ -25,6 +33,62 @@ osmly.import = (function() {
         });
     }
 
+    function unbind() {
+        $('#josm').off();
+        $('#reset').off();
+        $('#osmlink').off();
+        $('#skip').off();
+        $('#problem').off();
+        $('#submit').off();
+        $('#add-new-tag').off();
+        $('#tags').off();
+    }
+
+    function setInterface() {
+        $('body').append('\
+            <div id="tags">\
+                <table>\
+                    <tbody></tbody>\
+                </table>\
+                <span class="k" id="add-new-tag" alt="Add a new tag">+</span>\
+            </div>\
+        ');
+
+        $('body').append('\
+            <div id="action-block">\
+                <li id="hold-problem" style="margin-left: 0;">\
+                    <select name="problem" id="problem">\
+                        <option value="problem" disabled selected>Problem</option>\
+                        <option value="no_park_here">no park here</option>\
+                        <option value="already_mapped">already mapped</option>\
+                        <option value="poor_imagery">poor imagery</option>\
+                        <option value="too_difficult">too difficult</option>\
+                    </select>\
+                </li>\
+                <li id="skip">Skip</li>\
+                <li id="submit">Submit</li>\
+            </div>\
+        ');
+
+        $('body').append('\
+            <ul id="bottom-right">\
+                <li id="reset">reset</li>\
+                <li id="josm">edit in JOSM</li>\
+                <li id="osmlink" style="border-bottom: none;">open at osm.org</li>\
+            </ul>\
+        ');
+    }
+
+    function unsetInterface() {
+        $('#tags').remove();
+        $('#action-block').remove();
+        $('#bottom-right').remove();
+
+        osmly.map.closePopup();
+        if (imp.layer) osmly.map.removeLayer(imp.layer);
+        if (imp.contextLayer) osmly.map.removeLayer(imp.contextLayer);
+    }
+
     function displayItem() {
         imp.layer.addTo(osmly.map);
 
@@ -33,7 +97,6 @@ osmly.import = (function() {
             imp.contextLayer.bringToFront();
         }
 
-        $('#login').fadeOut(250);
         $('#notify').hide();
         $('#hold-problem, #submit, #bottom-right, #action-block').fadeIn(250);
 
@@ -41,8 +104,10 @@ osmly.import = (function() {
             $('#tags').fadeIn(250);
         } else {
             $('#hold-problem, #submit').fadeOut(250);
-            $('#reusable-modal .modal-content').html('<h3>This feature is too complex. <a>Edit it in JOSM?</a></h3>');
-            // put an 'Edit in JOSM' button right there, when clicked close the modal and let the other modal open
+            $('#reusable-modal .modal-content').html(
+                '<h3>This feature is too complex. <a>Edit it in JOSM?</a></h3>');
+            // put an 'Edit in JOSM' button right there
+                // when clicked close the modal and let the other modal open
             // literally bind, $('#josm').click()
             CSSModal.open('reusable-modal');
         }
@@ -88,7 +153,7 @@ osmly.import = (function() {
             if (callback) callback();
         });
         osmly.map.closePopup();
-        osmly.map.removeLayer(imp.layer);
+        if (imp.layer) osmly.map.removeLayer(imp.layer);
         if (imp.contextLayer) osmly.map.removeLayer(imp.contextLayer);
     };
 
@@ -151,12 +216,13 @@ osmly.import = (function() {
     }
 
     function addTag() {
-        $('#tags tbody').append(
-            '<tr>' +
-            '<td class="k" spellcheck="false" contenteditable="true"></td>' +
-            '<td class="v" spellcheck="false" contenteditable="true"></td>' +
-            '<td class="minus">-</td>' +
-            '</tr>');
+        $('#tags tbody').append('\
+            <tr>\
+            <td class="k" spellcheck="false" contenteditable="true"></td>\
+            <td class="v" spellcheck="false" contenteditable="true"></td>\
+            <td class="minus">-</td>\
+            </tr>\
+        ');
     }
 
     imp.next = function() {
