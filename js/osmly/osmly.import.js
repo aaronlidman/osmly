@@ -23,6 +23,7 @@ osmly.import = (function() {
         $('#osmlink').on('click', function(){
             window.open(osmly.osmlink);
         });
+        $('#osmtiles').on('click', osmly.map.toggleOSM);
         // botton-left buttons
         $('#skip').on('click', skip);
         $('#problem').on('change', problem);
@@ -35,7 +36,7 @@ osmly.import = (function() {
 
     function unbind() {
         $('#skip, #problem, #submit').off();
-        $('#josm, #reset, #osmlink').off();
+        $('#josm, #reset, #osmlink, #osmtiles').off();
         $('#add-new-tag, #tags').off();
     }
 
@@ -69,6 +70,7 @@ osmly.import = (function() {
             <ul id="bottom-right">\
                 <li id="reset">reset</li>\
                 <li id="josm">edit in JOSM</li>\
+                <li id="osmtiles">see OSM map</li>\
                 <li id="osmlink" style="border-bottom: none;">open at osm.org</li>\
             </ul>\
         ');
@@ -224,6 +226,7 @@ osmly.import = (function() {
     }
 
     function next() {
+        osmly.map.removeOSM();
         osmly.ui.notify('getting next item');
 
         $.ajax({

@@ -1,3 +1,4 @@
+/* jshint multistr:true */
 osmly.qa = (function () {
     var qa = {live: false},
         data = {};
@@ -43,13 +44,22 @@ osmly.qa = (function () {
         qablock.appendChild(confirmz);
         confirmz.innerHTML = 'confirm';
 
-        showOsmLink();
+        $('body').append('\
+            <ul id="bottom-right">\
+                <li id="osmtiles">see OSM map</li>\
+                <li id="osmlink" style="border-bottom: none;">open at osm.org</li>\
+            </ul>\
+        ');
     }
 
     function bind() {
         $('#toggleLayers').on('click', toggleLayers);
         $('#qa-skip').on('click', next);
         $('#confirm').on('click', confirm);
+        $('#osmlink').on('click', function(){
+            window.open(osmly.osmlink);
+        });
+        $('#osmtiles').on('click', osmly.map.toggleOSM);
 
         $('body').on('keydown', function(that){
             if (that.keyCode === 87) toggleLayers(); //w
@@ -60,6 +70,7 @@ osmly.qa = (function () {
     function unbind() {
         $('#toggleLayers, #qa-skip, #confirm').off();
         $('body').off('keydown');
+        $('#osmlink, #osmtiles').off();
     }
 
     function unsetInterface() {
@@ -67,23 +78,6 @@ osmly.qa = (function () {
         byId('qa').innerHTML = 'QA';
         byId('qa').style.backgroundColor = 'white';
         byId('qa').style.color = 'black';
-        resetOsmLink();
-    }
-
-    function showOsmLink() {
-        setTimeout(function(){
-            // give them some time to fade out
-            $('#bottom-right').show();
-            $('#josm').hide();
-            $('#reset').hide();
-        }, 1000);
-    }
-
-    function resetOsmLink() {
-        $('#bottom-right').hide();
-        $('#josm').show();
-        $('#reset').show();
-        $('#osmlink').show();
     }
 
     function request(callback) {
@@ -146,8 +140,8 @@ osmly.qa = (function () {
         osmly.map.removeContext();
         if (data.layer) osmly.map.removeLayer(data.layer);
         byId('toggleLayers').innerHTML = '[w] see original feature';
-        $('#qa-block').hide();
-        $('#osmlink').hide();
+        $('#qa-block, #bottom-right').hide();
+        osmly.map.removeOSM();
     }
 
     function setContext() {
@@ -160,9 +154,8 @@ osmly.qa = (function () {
 
         osmly.map.context(bounds, 0.002, function(){
             osmly.map.removeLayer(data.layer);
-            byId('notify').style.display = 'none';
-            byId('qa-block').style.display = 'block';
-            // byId('osmlink').style.display = 'block';
+            $('#qa-block, #bottom-right').fadeIn(250);
+            $('#notify').fadeOut(250);
         });
 
     }
