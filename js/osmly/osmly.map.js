@@ -128,5 +128,29 @@ osmly.map = function() {
         });
     }
 
+    map.setFeature = function(geojson, edit, show) {
+        map.featureLayer = L.geoJson(geojson, {
+            style: osmly.settings.featureStyle,
+            onEachFeature: function (feature, layer) {
+                if (edit) {
+                    if (geojson.geometry.type == 'MultiPolygon') {
+                        for (var el in layer._layers) {
+                            layer._layers[el].editing.enable();
+                        }
+                    } else {
+                        layer.editing.enable();
+                    }
+                }
+            }
+        });
+
+        osmly.map.fitBounds(map.featureLayer.getBounds());
+
+        if (show) {
+            map.featureLayer.addTo(osmly.map);
+            map.featureLayer.bringToFront();
+        }
+    };
+
     return map;
 };

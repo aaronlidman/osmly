@@ -141,7 +141,7 @@ osmly.qa = (function () {
     function reset() {
         unbind();
         osmly.map.removeContext();
-        if (data.layer) osmly.map.removeLayer(data.layer);
+        if (osmly.map.featureLayer) osmly.map.removeLayer(osmly.map.featureLayer);
         byId('toggleLayers').innerHTML = '[w] see original feature';
         $('#qa-block, #bottom-right').hide();
         osmly.map.removeOSM();
@@ -156,7 +156,7 @@ osmly.qa = (function () {
         ]);
 
         osmly.map.context(bounds, 0.002, function(){
-            osmly.map.removeLayer(data.layer);
+            osmly.map.removeLayer(osmly.map.featureLayer);
             $('#qa-block, #bottom-right').fadeIn(250);
             $('#notify').fadeOut(250);
         });
@@ -164,11 +164,7 @@ osmly.qa = (function () {
     }
 
     function setGeometry() {
-        data.layer = L.geoJson(data.geo, {
-            style: osmly.settings.featureStyle,
-        });
-        data.layer.addTo(osmly.map);
-        data.layer.bringToFront();
+        osmly.map.setFeature(data.geo, false, true);
     }
 
     function confirm() {
@@ -177,15 +173,15 @@ osmly.qa = (function () {
     }
 
     function toggleLayers() {
-        if (osmly.map.hasLayer(data.layer)) {
+        if (osmly.map.hasLayer(osmly.map.featureLayer)) {
             byId('toggleLayers').innerHTML = '[w] see original feature';
-            osmly.map.removeLayer(data.layer);
+            osmly.map.removeLayer(osmly.map.featureLayer);
             osmly.map.showContext();
         } else {
             byId('toggleLayers').innerHTML = '[w] see OSM data';
             osmly.map.removeContext();
-            data.layer.addTo(osmly.map);
-            data.layer.bringToFront();
+            osmly.map.featureLayer.addTo(osmly.map);
+            osmly.map.featureLayer.bringToFront();
         }
     }
 

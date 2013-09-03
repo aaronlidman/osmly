@@ -89,12 +89,12 @@ osmly.import = (function() {
     function unsetInterface() {
         $('#tags, #action-block, #bottom-right, #flash').remove();
         osmly.map.closePopup();
-        if (imp.layer) osmly.map.removeLayer(imp.layer);
+        if (osmly.map.featureLayer) osmly.map.removeLayer(osmly.map.featureLayer);
         osmly.map.removeContext();
     }
 
     function displayItem() {
-        imp.layer.addTo(osmly.map);
+        osmly.map.featureLayer.addTo(osmly.map);
         osmly.map.showContext();
 
         $('#notify').hide();
@@ -113,25 +113,6 @@ osmly.import = (function() {
             // literally bind, $('#josm').click()
             CSSModal.open('reusable-modal');
         }
-    }
-
-    function setItemLayer() {
-        imp.layer = L.geoJson(imp.data, {
-            style: osmly.settings.featureStyle,
-            onEachFeature: function (feature, layer) {
-                if (imp.isEditable) {
-                    if (imp.data.geometry.type == 'MultiPolygon') {
-                        for (var el in layer._layers) {
-                            layer._layers[el].editing.enable();
-                        }
-                    } else {
-                        layer.editing.enable();
-                    }
-                }
-            }
-        });
-
-        osmly.map.fitBounds(imp.layer.getBounds());
     }
 
     function populateTags() {
@@ -155,7 +136,7 @@ osmly.import = (function() {
             if (callback) callback();
         });
         osmly.map.closePopup();
-        if (imp.layer) osmly.map.removeLayer(imp.layer);
+        if (osmly.map.featureLayer) osmly.map.removeLayer(osmly.map.featureLayer);
         osmly.map.removeContext();
     }
 
@@ -205,7 +186,7 @@ osmly.import = (function() {
     function reset() {
         $('#tags tr').remove();
         hideItem(displayItem);
-        setItemLayer();
+        osmly.map.setFeature(imp.data, imp.isEditable);
         populateTags();
     }
 
@@ -246,7 +227,7 @@ osmly.import = (function() {
         imp.id = imp.data.properties.id;
         imp.bbox = imp.data.properties.bounds;
         imp.isEditable = isEditable(imp.data.geometry);
-        setItemLayer();
+        osmly.map.setFeature(imp.data, imp.isEditable);
         imp.prepTags();
 
         if (imp.isEditable) {
