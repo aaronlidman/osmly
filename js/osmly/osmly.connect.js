@@ -144,39 +144,6 @@ osmly.connect = (function() {
         osmly.ui.setUserDetails();
     }
 
-    connect.submitToOSM = function() {
-        var id = token('changeset_id');
-        $('#changeset').fadeIn();
-        byId('changeset-link').innerHTML = '<a href="' + osmly.settings.writeApi +
-        '/browse/changeset/' + id + '" target="_blank">Details on osm.org »</a>';
-
-        var geojson = osmly.import.layer.toGeoJSON();
-        geojson['features'][0]['properties'] = osmly.import.tags();
-            // this is sketchy but works for single items
-        var osmChange = toOsmChange(geojson, token('changeset_id'));
-
-        osmly.ui.notify('uploading to OSM');
-
-        osmly.auth.xhr({
-            method: 'POST',
-            path: '/api/0.6/changeset/' + id + '/upload',
-            content: osmChange,
-            options: {header: {'Content-Type': 'text/xml'}}
-        }, after_submit);
-    };
-
-    function after_submit(err, res) {
-        if (res && !err) {
-            // do some kind of special green checkmark
-            // can we double notify?
-        } else {
-            console.log(err);
-            // :/
-        }
-        $('#tags tr').remove();
-        osmly.import.next();
-    }
-
     connect.editInJosm = function(id) {
         if (!osmly.auth.authenticated() || !token('user')) {
             osmly.ui.pleaseLogin();

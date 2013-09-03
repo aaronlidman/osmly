@@ -1,25 +1,25 @@
 osmly.qa = (function () {
-    var qa = {mode: false},
-        q = {};
+    var qa = {live: false},
+        data = {};
 
     qa.go = function(){
         // toggle qa mode
-        if (!qa.mode) {
-            osmly.import.hideItem();
+        if (!qa.live) {
+            if (osmly.import.live) osmly.import.go();
             setInterface();
             bind();
             next();
+            qa.live = true;
         } else {
             reset();
             unbind();
             unsetInterface();
-            $('#tags tr').remove();
-            osmly.import.next();
+            qa.live = false;
+            osmly.import.go();
         }
     };
 
     function setInterface() {
-        qa.mode = true;
         byId('qa').innerHTML = 'Leave QA';
         byId('qa').style.backgroundColor = 'black';
         byId('qa').style.color = 'white';
@@ -65,8 +65,6 @@ osmly.qa = (function () {
     }
 
     function unsetInterface() {
-        qa.mode = false;
-
         byTag('body')[0].removeChild(byId('qa-block'));
         byId('qa').innerHTML = 'QA';
         byId('qa').style.backgroundColor = 'white';
@@ -96,7 +94,7 @@ osmly.qa = (function () {
             cache: false,
             dataType: 'json',
             success: function(item){
-                q.data = {
+                data = {
                     id: item[0],
                     geo: JSON.parse(item[1]),
                     problem: item[2],
@@ -105,7 +103,7 @@ osmly.qa = (function () {
                     time: item[5],
                 };
 
-                if (q.data.geo.properties.name) q.data.name = q.data.geo.properties.name;
+                if (data.geo.properties.name) data.name = data.geo.properties.name;
                 if (callback) callback();
             }
         });
@@ -120,16 +118,16 @@ osmly.qa = (function () {
         var tbody = createE('tbody');
 
         // columns = 'id, geo, problem, submit, user, time'
-        for (var item in q.data) {
+        for (var item in data) {
             var tr = createE('tr');
-            if (item == 'id') tr.innerHTML = '<td>id</td><td>' + q.data.id + '</td>';
-            if (item == 'user') tr.innerHTML = '<td>who</td><td>' + q.data.user + '</td>';
-            if (item == 'time') tr.innerHTML = '<td>when</td><td>' + format_date(q.data.time) + '</td>';
-            if (item == 'problem' && q.data.problem !== '') tr.innerHTML = '<td>problem</td><td class="k">' + q.data.problem + '</td>';
-            if (item == 'submit' && q.data.submit != 1){
-                tr.innerHTML = '<td>via</td><td>' + q.data.submit + '</td>';
+            if (item == 'id') tr.innerHTML = '<td>id</td><td>' + data.id + '</td>';
+            if (item == 'user') tr.innerHTML = '<td>who</td><td>' + data.user + '</td>';
+            if (item == 'time') tr.innerHTML = '<td>when</td><td>' + format_date(data.time) + '</td>';
+            if (item == 'problem' && data.problem !== '') tr.innerHTML = '<td>problem</td><td class="k">' + data.problem + '</td>';
+            if (item == 'submit' && data.submit != 1){
+                tr.innerHTML = '<td>via</td><td>' + data.submit + '</td>';
             }
-            if (item == 'name') tr.innerHTML = '<td>name</td><td>' + q.data.name + '</td>';
+            if (item == 'name') tr.innerHTML = '<td>name</td><td>' + data.name + '</td>';
             if (tr.innerHTML !== '') tbody.appendChild(tr);
         }
 
@@ -148,14 +146,14 @@ osmly.qa = (function () {
 
     function reset() {
         if (osmly.import.contextLayer) osmly.map.removeLayer(osmly.import.contextLayer);
-        if (q.oGeometry) osmly.map.removeLayer(q.oGeometry);
+        if (data.oGeometry) osmly.map.removeLayer(data.oGeometry);
         byId('toggleLayers').innerHTML = '[w] see original feature';
         $('#qa-block').hide();
         $('#osmlink').hide();
     }
 
     function setContext() {
-        var bounds = q.data.geo.properties.bounds,
+        var bounds = data.geo.properties.bounds,
             buffered = [
                 bounds[0] - 0.002,
                 bounds[1] - 0.002,
@@ -170,7 +168,7 @@ osmly.qa = (function () {
 
         osmly.import.getOsm(buffered, function(){
             byId('notify').style.display = 'none';
-            osmly.map.removeLayer(q.oGeometry);
+            osmly.map.removeLayer(data.oGeometry);
             osmly.import.contextLayer.addTo(osmly.map);
             osmly.import.contextLayer.bringToFront();
             byId('qa-block').style.display = 'block';
@@ -180,29 +178,29 @@ osmly.qa = (function () {
     }
 
     function setGeometry() {
-        q.oGeometry = L.geoJson(q.data.geo, {
+        data.oGeometry = L.geoJson(data.geo, {
             style: osmly.settings.featureStyle,
         });
-        q.oGeometry.addTo(osmly.map);
-        q.oGeometry.bringToFront();
+        data.oGeometry.addTo(osmly.map);
+        data.oGeometry.bringToFront();
     }
 
     function confirm() {
-        osmly.connect.updateItem('confirm', false, false, q.data.id);
+        osmly.connect.updateItem('confirm', false, false, data.id);
         next();
     }
 
     function toggleLayers() {
-        if (osmly.map.hasLayer(q.oGeometry)) {
+        if (osmly.map.hasLayer(data.oGeometry)) {
             byId('toggleLayers').innerHTML = '[w] see original feature';
-            osmly.map.removeLayer(q.oGeometry);
+            osmly.map.removeLayer(data.oGeometry);
             osmly.import.contextLayer.addTo(osmly.map);
             osmly.import.contextLayer.bringToFront();
         } else {
             byId('toggleLayers').innerHTML = '[w] see OSM data';
             osmly.map.removeLayer(osmly.import.contextLayer);
-            q.oGeometry.addTo(osmly.map);
-            q.oGeometry.bringToFront();
+            data.oGeometry.addTo(osmly.map);
+            data.oGeometry.bringToFront();
         }
     }
 

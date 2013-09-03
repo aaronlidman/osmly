@@ -148,7 +148,7 @@ osmly.import = (function() {
         }
     }
 
-    imp.hideItem = function(callback) {
+    function hideItem(callback) {
         $('#bottom-right, #action-block, #tags').fadeOut(250, function(){
             if (callback) callback();
         });
@@ -158,18 +158,18 @@ osmly.import = (function() {
     };
 
     function skip() {
-        imp.hideItem();
+        hideItem();
         $('#tags tr').remove();
         leftToRight($('.foundicon-right-arrow'));
         imp.next();
     }
 
     function submit() {
-        imp.hideItem();
+        hideItem();
 
         if (osmly.auth.authenticated() && token('user')) {
             osmly.connect.updateItem('submit');
-            osmly.connect.openChangeset(osmly.connect.submitToOSM);
+            osmly.connect.openChangeset(submitToOSM);
         } else {
             $('#tags tr').remove();
             imp.next();
@@ -178,7 +178,7 @@ osmly.import = (function() {
     }
 
     function problem() {
-        imp.hideItem();
+        hideItem();
 
         if (osmly.auth.authenticated() && token('user')) {
             osmly.connect.updateItem('problem', {
@@ -202,7 +202,7 @@ osmly.import = (function() {
 
     function reset() {
         $('#tags tr').remove();
-        imp.hideItem(displayItem);
+        hideItem(displayItem);
         setItemLayer();
         populateTags();
     }
@@ -251,9 +251,7 @@ osmly.import = (function() {
             imp.bbox[3] + 0.001
         ];
 
-        // this is here and not elsewhere because of timing issues
         setItemLayer();
-
         imp.prepTags();
 
         if (imp.isEditable) {
@@ -280,7 +278,7 @@ osmly.import = (function() {
     }
 
     imp.prepTags = function(tags) {
-        // this needs to be used for overview -> josm stuff too
+        // this needs to be used for editInJosm in .connect
         // bound to data.properties right now
         renameProperties();
         usePropertiesAsTag();
@@ -398,6 +396,39 @@ osmly.import = (function() {
 
         return tags;
     };
+
+    function submitToOSM() {
+        var id = token('changeset_id');
+        $('#changeset').fadeIn();
+        byId('changeset-link').innerHTML = '<a href="' + osmly.settings.writeApi +
+        '/browse/changeset/' + id + '" target="_blank">Details on osm.org »</a>';
+
+        var geojson = osmly.import.layer.toGeoJSON();
+        geojson['features'][0]['properties'] = osmly.import.tags();
+            // this is sketchy but works for single items
+        var osmChange = toOsmChange(geojson, token('changeset_id'));
+
+        osmly.ui.notify('uploading to OSM');
+
+        osmly.auth.xhr({
+            method: 'POST',
+            path: '/api/0.6/changeset/' + id + '/upload',
+            content: osmChange,
+            options: {header: {'Content-Type': 'text/xml'}}
+        }, postOSM);
+    }
+
+    function postOSM(err, res) {
+        if (res && !err) {
+            // do some kind of special green checkmark
+            // can we double notify?
+        } else {
+            console.log(err);
+            // :/
+        }
+        $('#tags tr').remove();
+        osmly.import.next();
+    }
 
     return imp;
 }());
