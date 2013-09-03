@@ -88,16 +88,12 @@ osmly.import = (function() {
         $('#tags, #action-block, #bottom-right, #flash').remove();
         osmly.map.closePopup();
         if (imp.layer) osmly.map.removeLayer(imp.layer);
-        if (imp.contextLayer) osmly.map.removeLayer(imp.contextLayer);
+        osmly.map.removeContext();
     }
 
     function displayItem() {
         imp.layer.addTo(osmly.map);
-
-        if (imp.contextLayer) {
-            imp.contextLayer.addTo(osmly.map);
-            imp.contextLayer.bringToFront();
-        }
+        osmly.map.showContext();
 
         $('#notify').hide();
         $('#hold-problem, #submit, #bottom-right, #action-block').fadeIn(250);
@@ -156,8 +152,8 @@ osmly.import = (function() {
         });
         osmly.map.closePopup();
         if (imp.layer) osmly.map.removeLayer(imp.layer);
-        if (imp.contextLayer) osmly.map.removeLayer(imp.contextLayer);
-    };
+        osmly.map.removeContext();
+    }
 
     function skip() {
         hideItem();
@@ -257,7 +253,7 @@ osmly.import = (function() {
         imp.prepTags();
 
         if (imp.isEditable) {
-            imp.getOsm(imp.bbox, function() {
+            osmly.map.context(imp.bbox, function() {
                 populateTags();
                 displayItem();
             });
@@ -309,78 +305,6 @@ osmly.import = (function() {
         for (var append in osmly.settings.appendTag) {
             imp.data.properties[append] = osmly.settings.appendTag[append];
         }
-    }
-
-    // these might go in osmly.map as more refined functions
-    imp.getOsm = function(bbox, callback) {
-        osmly.ui.notify('getting nearby OSM data');
-        bbox = 'bbox=' + bbox.join(',');
-
-        $.ajax({
-            url: osmly.settings.readApi + bbox,
-            dataType: 'xml',
-            success: function(xml) {
-                osmly.ui.notify('rendering OSM data');
-                imp.context = osm_geojson.osm2geojson(xml);
-                imp.cleanContext = filterContext(imp.context);
-                setContext(imp.cleanContext);
-                callback();
-            }
-        });
-    };
-
-    function filterContext(osmGeoJson) {
-        var geo = {
-                'type' : 'FeatureCollection',
-                'features' : []};
-
-        for (var i = 0; i < osmGeoJson.features.length; i++) {
-            var feature = osmGeoJson.features[i],
-                match = false;
-
-            for (var key in feature.properties) {
-                if (key in osmly.settings.context &&
-                    osmly.settings.context[key].indexOf(feature.properties[key]) > -1 &&
-                    !match) {
-                    match = true;
-                }
-            }
-
-            if (match || !Object.keys(osmly.settings.context).length) {
-                geo.features.push(feature);
-            }
-        }
-        return geo;
-    }
-
-    function setContext(osmjson) {
-        imp.contextLayer = L.geoJson(osmjson, {
-            style: osmly.settings.contextStyle,
-            onEachFeature: function(feature, layer) {
-                var popup = '',
-                    label = 'NO NAME, click for tags',
-                    t = 0,
-                    tagKeys = Object.keys(feature.properties);
-
-                if (feature.properties) {
-                    if (feature.properties.name) label = feature.properties.name;
-                    while (t < tagKeys.length) {
-                        popup += '<li><span class="k">' + tagKeys[t] +
-                        '</span>: ' + feature.properties[tagKeys[t]] + '</li>';
-                        t++;
-                    }
-                    layer.bindPopup(popup);
-                    layer.bindLabel(label);
-                }
-            },
-            pointToLayer: function(feature, latlng) {
-                return L.circleMarker(latlng, {
-                    radius: 6,
-                    opacity: 1,
-                    fillOpacity: 0.33
-                });
-            }
-        });
     }
 
     imp.tags = function(){

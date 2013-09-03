@@ -138,13 +138,13 @@ osmly.qa = (function () {
         request(function(){
             fillReport();
             setGeometry();
-            if (osmly.import.contextLayer) setContext();
+            setContext();
         });
     }
 
     function reset() {
-        if (osmly.import.contextLayer) osmly.map.removeLayer(osmly.import.contextLayer);
-        if (data.oGeometry) osmly.map.removeLayer(data.oGeometry);
+        osmly.map.removeContext();
+        if (data.layer) osmly.map.removeLayer(data.layer);
         byId('toggleLayers').innerHTML = '[w] see original feature';
         $('#qa-block').hide();
         $('#osmlink').hide();
@@ -164,23 +164,21 @@ osmly.qa = (function () {
             [bounds[3], bounds[2]]
         ]);
 
-        osmly.import.getOsm(buffered, function(){
+        osmly.map.context(buffered, function(){
+            osmly.map.removeLayer(data.layer);
             byId('notify').style.display = 'none';
-            osmly.map.removeLayer(data.oGeometry);
-            osmly.import.contextLayer.addTo(osmly.map);
-            osmly.import.contextLayer.bringToFront();
             byId('qa-block').style.display = 'block';
-            byId('osmlink').style.display = 'block';
+            // byId('osmlink').style.display = 'block';
         });
 
     }
 
     function setGeometry() {
-        data.oGeometry = L.geoJson(data.geo, {
+        data.layer = L.geoJson(data.geo, {
             style: osmly.settings.featureStyle,
         });
-        data.oGeometry.addTo(osmly.map);
-        data.oGeometry.bringToFront();
+        data.layer.addTo(osmly.map);
+        data.layer.bringToFront();
     }
 
     function confirm() {
@@ -189,16 +187,15 @@ osmly.qa = (function () {
     }
 
     function toggleLayers() {
-        if (osmly.map.hasLayer(data.oGeometry)) {
+        if (osmly.map.hasLayer(data.layer)) {
             byId('toggleLayers').innerHTML = '[w] see original feature';
-            osmly.map.removeLayer(data.oGeometry);
-            osmly.import.contextLayer.addTo(osmly.map);
-            osmly.import.contextLayer.bringToFront();
+            osmly.map.removeLayer(data.layer);
+            osmly.map.showContext();
         } else {
             byId('toggleLayers').innerHTML = '[w] see OSM data';
-            osmly.map.removeLayer(osmly.import.contextLayer);
-            data.oGeometry.addTo(osmly.map);
-            data.oGeometry.bringToFront();
+            osmly.map.removeContext();
+            data.layer.addTo(osmly.map);
+            data.layer.bringToFront();
         }
     }
 

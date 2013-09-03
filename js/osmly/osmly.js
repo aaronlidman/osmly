@@ -3,18 +3,18 @@ window.osmly = (function () {
         settings: settings
     };
 
-    osmly.initialize = function(settings) {
-        if (typeof settings === 'object') {
-            for (var obj in settings) {
-                osmly.settings[obj] = settings[obj];
+    osmly.go = function(settings) {
+        $(function(){
+            if (typeof settings === 'object') {
+                for (var obj in settings) {
+                    osmly.settings[obj] = settings[obj];
+                }
+            } else {
+                alert('need some settings');
             }
-        } else {
-            alert('need some settings');
-        }
-
-        osmly.map = osmly.map();
-        if (settings.db) osmly.ui.go();
-            // allows for lazy no UI mode used on dist/index.html
+            osmly.map = osmly.map();
+            osmly.ui.go();
+        });
     };
 
     osmly.auth = osmAuth({
