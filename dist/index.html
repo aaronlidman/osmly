@@ -3,161 +3,79 @@
     <head>
         <title>OSMLY</title>
         <meta charset='utf-8'>
-        <link rel="stylesheet" href="osmly.min.css" />
-        <script src="libs.min.js"></script>
-        <script src="osmly.min.js"></script>
         <style type="text/css">
-            * {padding: 0; margin: 0; color: #222;}
-            #map {
-                height: 100%;
-                width: 100%;
+            * {padding: 0; margin: 0; color: #333;}
+            body {
+                font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+                font-size: 18px;
+                line-height: 1.6em;
+                margin: 25px auto;
+                max-width: 960px;
             }
 
-            a {
-                pointer-events: auto;
-            }
-
-            .leaflet-control-container {
-                visibility: hidden !important;
-            }
-
-            #above {
-                pointer-events: none;
-                width: 100%;
-                height: 100%;
-                position: absolute;
-                top: 0;
-                left: 0;
-            }
-            #osmly {
-                pointer-events: none;
-                padding-left: 20px;
-                color: white;
-                font-weight: bold;
-                font-size: 200px;
-            }
-
-            #description {
-                width: 640px;
-                position: absolute;
-                left: 30px;
-                bottom: 30px;
-                padding: 15px 20px;
-                font-size: 16px;
-                background-color: white;
-                line-height: 1.5;
-            }
+            #main-img { max-width: 960px; }
 
             #available {
-                position: absolute;
-                right: 30px;
-                bottom: 10px;
-                    /* coincides with ul margin */
-                width: 660px;
-                font-weight: bold;
-                color: #222;
-                text-transform: lowercase;
-                max-height: 100%;
-            }
-
-            #available ul {
-                float: right;
-                list-style-type: none;
-                margin: 20px;
-                width: 200px;
-            }
-
-            #available ul li {
-                padding: 5px 15px;
-                background-color: white;
-                pointer-events: auto;
-            }
-
-            #available ul a li:hover {
+                color: #666;
+                position: fixed;
+                bottom: 0;
+                right: 0;
+                font-size: 14px;
+                max-width: 200px;
+                line-height: 1.5em;
+                padding: 20px;
                 background-color: #eee;
             }
 
-            #available .group {
-                background-color: #222;
-                color: white;
-                text-transform: capitalize;
-                padding: 10px 15px;
+            a:hover { text-decoration: underline;}
+
+            ul {
+                margin-top: 10px;
             }
 
-            #available ul li span {
-                /* used for some kind of simple descriptor */
-                font-weight: normal;
-                padding-right: 5px;
+            ul li {
+                list-style: none;
+                margin-left: 20px;
+            }
+
+            a {
+                text-decoration: none;
+            }
+
+            .group {
+                margin-left: 0;
             }
         </style>
     </head>
     <body>
-        <div id="map"></div>
-        <div id="above">
-            <span id="osmly">OSMLY</span>
-            <div id="description"><p>OSMLY is a simple importer for OpenStreetMap. It makes importing basic features simple by presenting them one-by-one, allowing you to make any necessary adjustment to positions or tags, flag problems, or upload directly to OSM. Other users can also edit simultaneously from the same pool of features. The aim is to make importing basic features quick, easy, and cooperative.</p>
+        <div id="description">
+            <img id="main-img" src="https://raw.github.com/aaronlidman/parks-project/master/example.jpg">
+            <p>OSMLY is a simple import editor for OpenStreetMap. It makes importing simple by presenting features one-by-one, allowing you to make any necessary adjustment to positions or tags, flag problems, or upload directly to OSM. Other users can also edit simultaneously from the same pool of features. The aim is to make importing basic features quick, easy, and cooperative.</p>
             <br/>
             <p>blah blah blah, tutorial, screenshots, etc...</p>
             <br/>
-            <p><a style="border-bottom: 1px solid #aaa;" href="https://github.com/aaronlidman/osmly">check out the code for more or to report bugs</a></p></div>
-            <div id="available">
-                <ul>
-                    </a><li class="group">Los Angeles County</li>
-                    <a href="/la-parks.html"><li><span>demo</span>parks</li></a>
-                    <a><li><span>demo</span>schools</li></a>
-                    <a><li><span>demo</span>gold courses</li></a>
-                    <a><li><span>demo</span>cemeteries</li></a>
-                    <a><li><span>demo</span>retail landuse</li></a>
-                    <a><li><span>demo</span>libraries</li></a>
-                </ul>
-            </div>
+            <a style="text-decoration: none; color: rgba(67,127,190,1); font-weight: bold;" href="https://github.com/aaronlidman/osmly">Check out the code for more.</a>
         </div>
-        <script type="text/javascript">
-        var places = [
-            [-21.815289, 114.164930, 15],
-            [-22.7667, 113.680, 17],
-            [-26.6922, 113.6009, 17],
-            [-31.61751, 131.5492, 17],
-            [29.17023, -118.32509, 16],
-            [48.38595, -124.72506, 17],
-            [29.99712, 48.1951332, 14],
-            [5.283854, 100.310164, 17],
-            [37.27266, -112.945032, 16],
-            [38.23988, -111.03021, 17],
-            [38.35783, -111.0064280, 17],
-            [37.810945, -111.409413, 18],
-            [48.16474, -116.295604, 15],
-            [48.11478, -121.1146545, 16],
-            [-21.93253, 128.1610, 11],
-            [-22.62036, 128.02964, 15],
-            [-17.55526, 128.479421, 16],
-            [-24.61546, 153.251767, 17],
-            [32.292513, -64.884969, 18],
-            [29.002282, -81.941249, 18],
-            [53.218085, 5.0984287, 14],
-            [28.87337, -118.295094, 17],
-            [37.748338, 53.83595, 17],
-            [45.464465, 54.38301, 15],
-            [45.510527, 53.031649, 15],
-            [46.394327, 9.9549221, 18],
-            [46.4163, 5.66604, 16],
-            [63.7885, -17.5566, 16],
-            [64.21821, -15.58278, 17],
-            [-20.357049, 44.247779, 16],
-            [-19.8053, 44.63157, 16],
-            [-19.6383, 44.38731, 17],
-            [35.93251, -111.18917, 17],
-            [29.180859, -81.56099, 18],
-            [29.67158, -85.174727, 18],
-            [18.37585, -14.56712, 18]
-        ], num = Math.floor((Math.random()*places.length)),
-        place = places[num];
-
-            var CONFIG = {
-                origin: [place[0],place[1]],
-                zoom: place[2]
-            };
-            osmly.initialize(CONFIG);
-        </script>
+        <div id="available">
+            <span style="font-size: 15px; font-weight: bold;">Available Imports</span>
+            <ul>
+                <li class="group">Los Angeles County</li>
+                <li><a href="/la-parks.html">parks</a></li>
+                <a><li>schools</li></a>
+                <a><li>gold courses</li></a>
+                <a><li>cemeteries</li></a>
+                <a><li>retail landuse</li></a>
+                <a><li>libraries</li></a>
+            </ul>
+            <ul>
+                <li class="group">Los Angeles County</li>
+                <li><a href="/la-parks.html">parks</a></li>
+                <a><li>schools</li></a>
+                <a><li>gold courses</li></a>
+                <a><li>cemeteries</li></a>
+                <a><li>retail landuse</li></a>
+                <a><li>libraries</li></a>
+            </ul>
+        </div>
     </body>
 </html>
