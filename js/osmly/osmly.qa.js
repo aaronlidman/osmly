@@ -8,7 +8,6 @@ osmly.qa = (function () {
         if (!qa.live) {
             if (osmly.import.live) osmly.import.go();
             setInterface();
-            bind();
             next();
             qa.live = true;
         } else {
@@ -133,8 +132,6 @@ osmly.qa = (function () {
             fillReport();
             setGeometry();
             setContext();
-            setTimeout(bind, 1000);
-                // it can be too quick
         });
     }
 
@@ -155,12 +152,15 @@ osmly.qa = (function () {
             [bounds[3], bounds[2]]
         ]);
 
-        osmly.map.context(bounds, 0.002, function(){
-            osmly.map.removeLayer(osmly.map.featureLayer);
-            $('#qa-block, #bottom-right').fadeIn(250);
-            $('#notify').fadeOut(250);
-        });
+        osmly.map.context(bounds, 0.002, show);
 
+    }
+
+    function show() {
+        osmly.map.removeLayer(osmly.map.featureLayer);
+        $('#qa-block, #bottom-right').fadeIn(250);
+        $('#notify').fadeOut(250);
+        bind();
     }
 
     function setGeometry() {
