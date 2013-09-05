@@ -9,9 +9,13 @@ osmly.ui = (function() {
         $('#title').html(osmly.settings.title);
         $('#title, #top-bar').fadeIn(250);
 
-        if (osmly.auth.authenticated() && token('user')) {
-            ui.setUserDetails();
-            osmly.mode.import();
+        if (osmly.auth.authenticated()) {
+            if (userAllowed()) {
+                ui.setUserDetails();
+                osmly.mode.import();
+            } else {
+                notAllowed();
+            }
         } else {
             $('#login, #demo').fadeIn(250);
         }
@@ -130,7 +134,7 @@ osmly.ui = (function() {
             var id = osmly.imp.id;
             if (this.getAttribute('data-id')) id = this.getAttribute('data-id');
 
-            if (osmly.auth.authenticated() && token('user')) {
+            if (osmly.auth.authenticated() && userAllowed()) {
                 osmly.connect.updateItem('submit', {submit: 'JOSM'}, function(){
                     CSSModal.close();
                     if (id == osmly.imp.id) {
@@ -166,11 +170,29 @@ osmly.ui = (function() {
     function login() {
         ui.notify('');
         osmly.auth.authenticate(function(){
-            $('#login, #demo').fadeOut(250);
-            CSSModal.open('instruction-modal');
-            osmly.connect.getDetails();
-            osmly.mode.import();
+            if (userAllowed) {
+                $('#login, #demo').fadeOut(250);
+                CSSModal.open('instruction-modal');
+                osmly.connect.getDetails();
+                osmly.mode.import();
+            } else {
+                notAllowed();
+            }
         });
+    }
+
+    function userAllowed() {
+        // by default (empty list) everyone is allowed
+        if (!osmly.settings.users.length) return true;
+        if (osmly.settings.users.indexOf(token('user')) > -1) return true;
+        if (osmly.settings.admins.indexOf(token('user')) > -1) return true;
+        return false;
+    }
+
+    function notAllowed() {
+        // we don't implicitly logout, this allows some users to do some imports and not others
+        $('#reusable-modal .modal-content').html('<h3>You aren\'t on the list of allowed users.</h3>');
+        CSSModal.open('reusable-modal');
     }
 
     function demo() {
@@ -188,6 +210,14 @@ osmly.ui = (function() {
             .append('<a href="' + osmly.settings.writeApi + '/user/' +
                 token('user') + '" target="_blank">' + token('user') + '</a>')
             .fadeIn(250);
+
+        if (ui.adminAllowed()) $('#qa').fadeIn(250);
+    };
+
+    ui.adminAllowed = function () {
+        if (osmly.settings.admins.indexOf(token('user')) > -1) return true;
+        if (!osmly.settings.admins.length) return true;
+        return false;
     };
 
     return ui;

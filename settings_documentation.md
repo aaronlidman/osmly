@@ -142,3 +142,16 @@ but other key/values should also be included for items that are often near schoo
     opacity: 1
 }
 ```
+
+###users
+- object
+- a list of OSM users that are allowed on this import
+- if no one is specified, any OSM user is allowed
+- eg. `['Aaron Lidman', 'psapp', 'Archive']`
+
+###admins
+- object
+- a list of OSM users that have admin access
+    - currently just QA mode, which allows for reviewing and confirming what all users have submitted to OSM
+- if no one is specified, everyone has admin access
+- eg. `['Hot Chip', 'Ladytron', 'grimes']`

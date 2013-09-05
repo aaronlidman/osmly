@@ -29,5 +29,7 @@ var settings = {
         fillOpacity: 0.3,
         weight: 3,
         opacity: 1
-    }
+    },
+    users: [],
+    admins: [],
 };
