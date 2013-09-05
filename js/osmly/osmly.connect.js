@@ -154,7 +154,7 @@ osmly.connect = (function() {
             url = osmly.settings.db + '&id=' + id + '&action=remote';
 
         if (id === osmly.import.id) {
-            osm = toOsm(osmly.import.layer.toGeoJSON());
+            osm = toOsm(osmly.map.featureLayer.toGeoJSON());
             connect.updateItem('remote', {remote: osm}, callback, id);
         } else {
             $.ajax({

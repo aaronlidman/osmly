@@ -99,9 +99,7 @@ osmly.import = (function() {
 
         $('#notify').hide();
         $('#hold-problem, #submit, #bottom-right, #action-block').fadeIn(250);
-        setTimeout(bind, 250);
-            // might needs to throttle this more significantly
-
+        
         if (imp.isEditable) {
             $('#tags').fadeIn(250);
         } else {
@@ -209,7 +207,6 @@ osmly.import = (function() {
     }
 
     function next() {
-        unbind();
         osmly.map.removeOSM();
         osmly.ui.notify('getting next item');
 
@@ -307,7 +304,7 @@ osmly.import = (function() {
         byId('changeset-link').innerHTML = '<a href="' + osmly.settings.writeApi +
         '/browse/changeset/' + id + '" target="_blank">Details on osm.org »</a>';
 
-        var geojson = osmly.import.layer.toGeoJSON();
+        var geojson = osmly.map.featureLayer.toGeoJSON();
         geojson['features'][0]['properties'] = osmly.import.tags();
             // this is sketchy but works for single items
         var osmChange = toOsmChange(geojson, token('changeset_id'));
