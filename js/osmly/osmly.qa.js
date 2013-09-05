@@ -4,25 +4,20 @@ osmly.qa = (function () {
         data = {};
 
     qa.go = function(){
-        // toggle qa mode
-        if (!qa.live) {
-            if (osmly.import.live) osmly.import.go();
-            setInterface();
-            next();
-            qa.live = true;
-        } else {
-            reset();
-            unbind();
-            unsetInterface();
-            qa.live = false;
-            osmly.import.go();
-        }
+        setInterface();
+        next();
+    };
+
+    qa.stop = function() {
+        reset();
+        unsetInterface();
     };
 
     function setInterface() {
         byId('qa').innerHTML = 'Leave QA';
         byId('qa').style.backgroundColor = 'black';
         byId('qa').style.color = 'white';
+        $('#qa').one('click', osmly.mode.import);
 
         var body = byTag('body')[0],
             qablock = createId('div', 'qa-block');
@@ -77,6 +72,7 @@ osmly.qa = (function () {
         byId('qa').innerHTML = 'QA';
         byId('qa').style.backgroundColor = 'white';
         byId('qa').style.color = 'black';
+        $('#qa').one('click', osmly.mode.qa);
     }
 
     function request(callback) {

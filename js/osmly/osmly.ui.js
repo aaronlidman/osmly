@@ -11,7 +11,7 @@ osmly.ui = (function() {
 
         if (osmly.auth.authenticated() && token('user')) {
             ui.setUserDetails();
-            osmly.import.go();
+            osmly.mode.import();
         } else {
             $('#login, #demo').fadeIn(250);
         }
@@ -115,11 +115,11 @@ osmly.ui = (function() {
     function bind() {
         $('#demo').on('click', demo);
         $('#login').on('click', login);
-        $('#qa').on('click', osmly.qa.go);
+        $('#qa').one('click', osmly.mode.qa);
             // QA shouldn't be turned on until the user is logged in
             // eventually there needs to be another level of auth for use level
             // OR all it, and have QA put up a modal about auth level/admins
-        $('#overview').on('click', osmly.overview.go);
+        $('#overview').on('click', osmly.mode.overview);
         $('#update-change').on('click', changeset);
         $('#remote-edit-modal').on('click', remoteEdit);
     }
@@ -169,7 +169,7 @@ osmly.ui = (function() {
             $('#login, #demo').fadeOut(250);
             CSSModal.open('instruction-modal');
             osmly.connect.getDetails();
-            osmly.import.go();
+            osmly.mode.import();
         });
     }
 
@@ -177,7 +177,7 @@ osmly.ui = (function() {
         $('#login, #demo').fadeOut(250);
         CSSModal.open('demo-modal');
         $('#demo-mode').show();
-        osmly.import.go();
+        osmly.mode.import();
     }
 
     ui.setUserDetails = function() {

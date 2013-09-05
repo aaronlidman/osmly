@@ -10,11 +10,11 @@ osmly.overview = (function () {
         bind();
     };
 
-    function close() {
+    overview.stop = function() {
         ov = {};
         $('#markdone, #overview_block, #overview_bg, #overview-controls').remove();
         unbind();
-    }
+    };
 
     function setInterface() {
         $('body').append('\
@@ -82,9 +82,8 @@ osmly.overview = (function () {
             }
         });
 
-        $('#overview_bg').on('click', function(){
-            $('#overview_bg, #overview-controls, #overview_block').hide();
-            close();
+        $('#overview_bg').on('click', function() {
+            osmly.mode.set(osmly.mode.last);
         });
 
         $('#everything').on('click', everything);
@@ -96,7 +95,6 @@ osmly.overview = (function () {
         $('#problems').on('click', function(){ drop_selection('problems-select'); });
         $('#problems-select').on('change', function(){ drop_selection('problems-select'); });
         $('#markdone-modal').on('click', 'button', markDone);
-
     }
 
     function unbind() {

@@ -1,19 +1,17 @@
 /* jshint multistr:true */
 // import is a reserved word but it doesn't apply to properties
 osmly.import = (function() {
-    var imp = {live: false};
+    var imp = {};
 
     imp.go = function(){
-        if (!imp.live) {
-            imp.live = true;
-            setInterface();
-            bind();
-            next();
-        } else {
-            unbind();
-            unsetInterface();
-            imp.live = false;
-        }
+        setInterface();
+        bind();
+        next();
+    };
+
+    imp.stop = function() {
+       unbind();
+       unsetInterface();
     };
 
     function bind() {

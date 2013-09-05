@@ -3,6 +3,7 @@ OSMLY_JS = \
 	js/osmly/osmly.js \
 	js/osmly/osmly.map.js \
 	js/osmly/osmly.ui.js \
+	js/osmly/osmly.mode.js \
 	js/osmly/osmly.connect.js \
 	js/osmly/osmly.import.js \
 	js/osmly/osmly.overview.js \
