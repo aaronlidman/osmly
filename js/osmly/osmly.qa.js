@@ -68,11 +68,13 @@ osmly.qa = (function () {
     }
 
     function unsetInterface() {
-        byTag('body')[0].removeChild(byId('qa-block'));
-        byId('qa').innerHTML = 'QA';
-        byId('qa').style.backgroundColor = 'white';
-        byId('qa').style.color = 'black';
+        var qa = byId('qa');
+        qa.innerHTML = 'QA';
+        qa.style.backgroundColor = 'white';
+        qa.style.color = 'black';
         $('#qa').one('click', osmly.mode.qa);
+
+        $('#qa-block, #bottom-right').remove();
     }
 
     function request(callback) {

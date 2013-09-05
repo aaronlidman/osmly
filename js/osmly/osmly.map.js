@@ -16,9 +16,12 @@ osmly.map = function() {
     });
 
     map.attributionControl.setPrefix(false);
-    if (osmly.settings.writeApi.split('dev').length > 1) map.attributionControl.setPrefix('on the DEV SERVER');
+    if (osmly.settings.writeApi.split('dev').length > 1) map.attributionControl.setPrefix('DEV SERVER');
 
-    map.osmTiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png');
+    map.osmTiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        maxZoom: 20,
+        maxNativeZoom: 18
+    });
 
     map.context = function(bbox, buffer, callback){
         // gets, filters, sets, and shows context
@@ -40,6 +43,13 @@ osmly.map = function() {
             map.showContext();
             callback();
         });
+
+        // for offline usage
+        // setTimeout(function() {
+        //     setContext('');
+        //     map.showContext();
+        //     callback();
+        // }, 555);
     };
 
     map.toggleOSM = function() {
@@ -50,7 +60,11 @@ osmly.map = function() {
         }
     };
 
-    map.showOSM = function() { map.osmTiles.addTo(map); };
+    map.showOSM = function() {
+        map.osmTiles.addTo(map);
+        map.osmTiles.bringToFront();
+    };
+
     map.removeOSM = function () { map.removeLayer(map.osmTiles); };
 
     map.removeContext = function() {
