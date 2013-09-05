@@ -12,7 +12,7 @@ OSMLY_JS = \
 	js/osmly/animations.js
 
 CSS = \
-	js/lib/leaflet-0.6.4/leaflet.css \
+	js/lib/leaflet-0.7dev/leaflet.css \
 	css/leaflet.label.css \
 	css/general_foundicons.css \
 	css/css.css \
@@ -21,7 +21,7 @@ CSS = \
 	css/modal.css
 
 JS_LIBS = \
-	js/lib/leaflet-0.6.4/leaflet.js \
+	js/lib/leaflet-0.7dev/leaflet.js \
 	js/lib/Bing.js \
 	js/lib/leaflet.draw.js \
 	js/lib/leaflet.label.js \
