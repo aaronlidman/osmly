@@ -74,9 +74,13 @@ osmly.overview = (function () {
         });
 
         $('#main_table').on('click', '.markdone', function(){
-            if (osmly.auth.authenticated() && token('user')) {
-                $('#markdone-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
-                CSSModal.open('markdone-modal');
+            if (osmly.auth.authenticated()) {
+                if (osmly.auth.userAllowed()) {
+                    $('#markdone-modal button')[1].setAttribute('data-id', this.getAttribute('data-id'));
+                    CSSModal.open('markdone-modal');
+                } else {
+                    osmly.auth.notAllowed();
+                }
             } else {
                 osmly.ui.pleaseLogin();
             }

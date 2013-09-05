@@ -146,7 +146,7 @@ osmly.import = (function() {
     function submit() {
         hideItem();
 
-        if (osmly.auth.authenticated() && token('user')) {
+        if (osmly.auth.authenticated() && osmly.auth.userAllowed()) {
             osmly.connect.updateItem('submit');
             osmly.connect.openChangeset(submitToOSM);
         } else {
@@ -159,7 +159,7 @@ osmly.import = (function() {
     function problem() {
         hideItem();
 
-        if (osmly.auth.authenticated() && token('user')) {
+        if (osmly.auth.authenticated() && osmly.auth.userAllowed()) {
             osmly.connect.updateItem('problem', {
                 problem: $('#problem').val()
             });

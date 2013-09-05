@@ -145,46 +145,50 @@ osmly.connect = (function() {
     }
 
     connect.editInJosm = function(id) {
-        if (!osmly.auth.authenticated() || !token('user')) {
+        if (osmly.auth.authenticated()) {
+            if (osmly.auth.userAllowed()) {
+                var osm,
+                    url = osmly.settings.db + '&id=' + id + '&action=remote';
+
+                if (id === osmly.import.id) {
+                    osm = toOsm(osmly.map.featureLayer.toGeoJSON());
+                    connect.updateItem('remote', {remote: osm}, callback, id);
+                } else {
+                    $.ajax({
+                        url: osmly.settings.db + '&id=' + id,
+                        dataType: 'json',
+                        success: function(geo) {
+                            // should just use the same path as we use for the map
+
+                            // from osmly.import.js, renameProperties()
+                            for (var prop in osmly.settings.renameProperty) {
+                                var change = osmly.settings.renameProperty[prop];
+                                geo.properties[change] = geo.properties[prop];
+                            }
+
+                            // from osmly.import.js, usePropertiesAsTag()
+                            for (var poop in geo.properties) {
+                                if (osmly.settings.usePropertyAsTag.indexOf(poop) === -1) {
+                                    geo.properties[poop] = null;
+                                }
+                            }
+
+                            // from osmly.import.js, append()
+                            for (var append in osmly.settings.appendTag) {
+                                geo.properties[append] = osmly.settings.appendTag[append];
+                            }
+
+                            osm = toOsm(geo);
+                            connect.updateItem('remote', {remote: osm}, callback, id);
+                        }
+                    });
+                }
+            } else {
+                osmly.auth.notAllowed();
+            }
+        } else {
             osmly.ui.pleaseLogin();
             return false;
-        }
-
-        var osm,
-            url = osmly.settings.db + '&id=' + id + '&action=remote';
-
-        if (id === osmly.import.id) {
-            osm = toOsm(osmly.map.featureLayer.toGeoJSON());
-            connect.updateItem('remote', {remote: osm}, callback, id);
-        } else {
-            $.ajax({
-                url: osmly.settings.db + '&id=' + id,
-                dataType: 'json',
-                success: function(geo) {
-                    // should just use the same path as we use for the map
-
-                    // from osmly.import.js, renameProperties()
-                    for (var prop in osmly.settings.renameProperty) {
-                        var change = osmly.settings.renameProperty[prop];
-                        geo.properties[change] = geo.properties[prop];
-                    }
-
-                    // from osmly.import.js, usePropertiesAsTag()
-                    for (var poop in geo.properties) {
-                        if (osmly.settings.usePropertyAsTag.indexOf(poop) === -1) {
-                            geo.properties[poop] = null;
-                        }
-                    }
-
-                    // from osmly.import.js, append()
-                    for (var append in osmly.settings.appendTag) {
-                        geo.properties[append] = osmly.settings.appendTag[append];
-                    }
-
-                    osm = toOsm(geo);
-                    connect.updateItem('remote', {remote: osm}, callback, id);
-                }
-            });
         }
 
         function callback() {

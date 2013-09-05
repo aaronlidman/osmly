@@ -17,13 +17,5 @@ window.osmly = (function () {
         });
     };
 
-    osmly.auth = osmAuth({
-        oauth_secret: osmly.settings.oauth_secret,
-        oauth_consumer_key: osmly.settings.consumerKey,
-        auto: false,
-        url: osmly.settings.writeApi,
-        landing: location.protocol + "//" + location.host + '/land.html'
-    });
-
     return osmly;
 }());
