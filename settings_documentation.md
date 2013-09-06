@@ -5,6 +5,14 @@ types and uses of osmly.settings properties
 - very basic description of what needs to be done
 - eg. 'Outline the park', 'Locate the library'
 
+### instructions (required)
+- html string
+- a basic set of instructions
+- max width of the element is 640px
+- don't forget to escape quotes with a slash \
+- if your using multiple lines end each line with a slash \, it's valid js
+- eg. `'<ul><li>Don't forget the tags</li><li>Watch out for other parks</li></ul>'`
+
 ### db (required)
 - string
 - full url of the database location

@@ -2,7 +2,7 @@
 
 ![OSMLY screenshot](https://raw.github.com/aaronlidman/parks-project/master/example.jpg)
 
-OSMLY is a browser based importer for collaborative item-by-item reviewing, editting, and uploading to OpenStreetMap. It aims to make simple imports easier, more cooperative, and less error prone, from shapefile (or whatever) to upload.
+OSMLY is a browser based importer for collaborative item-by-item reviewing, editing, and uploading to OpenStreetMap. It aims to make simple imports easier, more cooperative, and less error prone, from shapefile (or whatever) to upload.
 
 ###Libraries that make this possbile
 - [Leaflet](leafletjs.com) for the map

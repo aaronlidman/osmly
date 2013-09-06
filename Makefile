@@ -1,6 +1,7 @@
 OSMLY_JS = \
 	js/osmly/settings.js \
 	js/osmly/osmly.js \
+	js/osmly/osmly.auth.js \
 	js/osmly/osmly.map.js \
 	js/osmly/osmly.ui.js \
 	js/osmly/osmly.mode.js \

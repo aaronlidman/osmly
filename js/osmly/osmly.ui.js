@@ -14,7 +14,9 @@ osmly.ui = (function() {
                 ui.setUserDetails();
                 osmly.mode.import();
             } else {
-                osmly.auth.notAllowed();
+                setTimeout(osmly.auth.notAllowed, 500);
+                // for dom
+                $('#demo').fadeIn(250);
             }
         } else {
             $('#login, #demo').fadeIn(250);
@@ -31,6 +33,8 @@ osmly.ui = (function() {
                 <div id="login">Login with your OSM account »</div>\
             </div>\
         ');
+
+        if (osmly.settings.writeApi.split('dev').length > 1) $('#login').text('Login with your OSM dev server account »');
 
         $('body').append('\
             <span id="title"></span>\
@@ -80,12 +84,7 @@ osmly.ui = (function() {
                 <div class="modal-inner">\
                     <header id="modal-label"><h2>Instructions</h2></header>\
                     <div class="modal-content">\
-                        <ul>\
-                            <li>Outline the nearby park.</li>\
-                            <li>Pay attention to the tags, especially the \'name\' tag.</li>\
-                            <li>It\'s possible the data is out of date or just wrong; report problems accordingly.</li>\
-                            <li>Yellow features are other OSM features there to help you. You can\'t edit them here but clicking them provides more information. If you know they\'re wrong, go to osm.org and fix them.</li>\
-                        </ul>\
+                    ' + osmly.settings.instructions + '\
                     </div>\
                 </div>\
                 <a href="#!" class="modal-close" title="Close this modal" data-close="Close" data-dismiss="modal"></a>\
@@ -120,9 +119,6 @@ osmly.ui = (function() {
         $('#demo').on('click', demo);
         $('#login').on('click', login);
         $('#qa').one('click', osmly.mode.qa);
-            // QA shouldn't be turned on until the user is logged in
-            // eventually there needs to be another level of auth for use level
-            // OR all it, and have QA put up a modal about auth level/admins
         $('#overview').on('click', osmly.mode.overview);
         $('#update-change').on('click', changeset);
         $('#remote-edit-modal').on('click', remoteEdit);
