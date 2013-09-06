@@ -211,9 +211,5 @@ osmly.connect = (function() {
         return osm_geojson.geojson2osm(geojson);
     }
 
-    function toOsmChange(geojson, changesetId) {
-        return osm_geojson.geojson2osm(geojson, changesetId, true);
-    }
-
     return connect;
 }());

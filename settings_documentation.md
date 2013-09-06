@@ -62,6 +62,11 @@ but other key/values should also be included for items that are often near schoo
 }
 ```
 
+### problems (required)
+- object
+- a list of options for the 'Problem' dropdown
+- eg. `['no library here', 'library already there', 'imagery is too poor', 'not enough info']`
+
 ### origin
 - array
 - coordinates to center the map on load

@@ -53,16 +53,16 @@ osmly.import = (function() {
                 <li id="hold-problem" style="margin-left: 0;">\
                     <select name="problem" id="problem">\
                         <option value="problem" disabled selected>Problem</option>\
-                        <option value="no_park_here">no park here</option>\
-                        <option value="already_mapped">already mapped</option>\
-                        <option value="poor_imagery">poor imagery</option>\
-                        <option value="too_difficult">too difficult</option>\
                     </select>\
                 </li>\
                 <li id="skip">Skip</li>\
                 <li id="submit">Submit</li>\
             </div>\
         ');
+        var problem = $('#problem');
+        for (var p = 0; p < osmly.settings.problems.length; p++) {
+            problem.append('<option value="'+[p]+'">'+osmly.settings.problems[p]+'</option>');
+        }
 
         $('body').append('\
             <ul id="bottom-right">\
@@ -160,8 +160,9 @@ osmly.import = (function() {
         hideItem();
 
         if (osmly.auth.authenticated() && osmly.auth.userAllowed()) {
+            var pro = parseInt($('#problem').val()) + 1;
             osmly.connect.updateItem('problem', {
-                problem: $('#problem').val()
+                problem: $('#problem option')[pro].text
             });
         }
         $('.foundicon-remove').show(function(){
@@ -305,7 +306,7 @@ osmly.import = (function() {
         var geojson = osmly.map.featureLayer.toGeoJSON();
         geojson['features'][0]['properties'] = osmly.import.tags();
             // this is sketchy but works for single items
-        var osmChange = toOsmChange(geojson, token('changeset_id'));
+        var osmChange = osm_geojson.geojson2osm(geojson, token('changeset_id'), true);
 
         osmly.ui.notify('uploading to OSM');
 

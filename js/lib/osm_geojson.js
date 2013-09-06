@@ -101,6 +101,7 @@ osm_geojson.geojson2osm = function(geo, changeset, osmchange) {
                 nodes += coords.nodes;
                 ways += coords.nds;
                 ways += '</way>';
+                coords = [];
             }
 
             if (!multipolygon) {
