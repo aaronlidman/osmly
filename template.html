@@ -37,6 +37,43 @@
     <body>
         <div id="map"></div>
         <script type="text/javascript">
+            var region = {
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -119.080810546875,
+              33.669496972795535
+            ],
+            [
+              -119.080810546875,
+              34.858890491257824
+            ],
+            [
+              -117.630615234375,
+              34.858890491257824
+            ],
+            [
+              -117.630615234375,
+              33.669496972795535
+            ],
+            [
+              -119.080810546875,
+              33.669496972795535
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+};
+
             var config = {
                 title: 'Outline the park',
                 instructions: '\
@@ -56,7 +93,8 @@
                     landuse: ['cemetery', 'farm', 'farmland', 'recreation_ground'],
                     amenity: ['college', 'kindergarten', 'school', 'university', 'grave_yard', 'library', 'town_hall']
                 },
-                problems: ['no park here', 'already mapped', 'imagery too poor', 'too difficult']
+                problems: ['no park here', 'already mapped', 'imagery too poor', 'too difficult'],
+                region: region
             };
             osmly.go(config);
         </script>        

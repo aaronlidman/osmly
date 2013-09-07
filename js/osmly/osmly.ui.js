@@ -17,9 +17,11 @@ osmly.ui = (function() {
                 setTimeout(osmly.auth.notAllowed, 500);
                 // for dom
                 $('#demo').fadeIn(250);
+                setRegion();
             }
         } else {
             $('#login, #demo').fadeIn(250);
+            setRegion();
         }
 
         if (!osmly.settings.demo) $('#demo').fadeOut(250);
@@ -115,6 +117,24 @@ osmly.ui = (function() {
         ');
     }
 
+    function setRegion() {
+        if (!osmly.settings.region) return false;
+        ui.region = L.geoJson(osmly.settings.region, {
+            style: {
+                color: '#fff',
+                fill: false,
+                clickable: false,
+                weight: 3,
+                opacity: 1
+            }
+        });
+
+        osmly.map.fitBounds(ui.region.getBounds());
+
+        ui.region.addTo(osmly.map);
+        ui.region.bringToFront();
+    }
+
     function bind() {
         $('#demo').on('click', demo);
         $('#login').on('click', login);
@@ -171,6 +191,7 @@ osmly.ui = (function() {
         ui.notify('');
         osmly.auth.authenticate(function(){
             if (osmly.auth.userAllowed) {
+                if (ui.region) osmly.map.removeLayer(ui.region);
                 $('#login, #demo').fadeOut(250);
                 CSSModal.open('instruction-modal');
                 osmly.connect.getDetails();
@@ -182,6 +203,7 @@ osmly.ui = (function() {
     }
 
     function demo() {
+        if (ui.region) osmly.map.removeLayer(ui.region);
         $('#login, #demo').fadeOut(250);
         CSSModal.open('demo-modal');
         $('#demo-mode').show();

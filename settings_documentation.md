@@ -77,6 +77,12 @@ but other key/values should also be included for items that are often near schoo
 - zoom level for the map on load
 - default: `2`
 
+### region
+- geojson object
+- a geojson outline of the region that the import is taking place in
+- serves as a general overview before login, give users something to look at
+- use geojson.io to generate something, paste it here
+
 ### demo
 - bool
 - allows a demonstration mode, setting to `false` doesn't allow it
