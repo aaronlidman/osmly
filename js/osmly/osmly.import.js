@@ -193,14 +193,6 @@ osmly.import = (function() {
         populateTags();
     }
 
-    function changeset() {
-        osmly.settings.changesetTags['comment'] = $('#changeset-form').text();
-        osmly.connect.updateComment(function(){
-            CSSModal.close();
-            $('#notify').hide();
-        });
-    }
-
     function addTag() {
         $('#tags tbody').append('\
             <tr>\
@@ -314,9 +306,10 @@ osmly.import = (function() {
 
     function submitToOSM() {
         var id = token('changeset_id');
-        $('#changeset').fadeIn();
-        byId('changeset-link').innerHTML = '<a href="' + osmly.settings.writeApi +
-        '/browse/changeset/' + id + '" target="_blank">Details on osm.org »</a>';
+
+        $('#changeset-link').html('<a href="' + osmly.settings.writeApi +
+            '/browse/changeset/' + id + '" target="_blank">Details on osm.org »</a>');
+        $('#changeset').show();
 
         var geojson = osmly.map.featureLayer.toGeoJSON();
         geojson['features'][0]['properties'] = osmly.import.tags();

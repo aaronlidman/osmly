@@ -46,9 +46,8 @@ osmly.ui = (function() {
                 </a>\
                 <li id="overview">Overview</li>\
                 <li id="qa" alt="Quality Assurance">QA</li>\
-                <li id="user"></li>\
-                <a href="#changeset-modal">\
-                    <li id="changeset">Changeset</li>\
+                <a href="#user-modal">\
+                    <li id="user"></li>\
                 </a>\
                 <a href="#demo-modal">\
                     <li id="demo-mode">DEMO MODE</li>\
@@ -58,18 +57,6 @@ osmly.ui = (function() {
         ');
 
         $('body').append('\
-            <div class="semantic-content" id="changeset-modal">\
-                <!-- eventually, prefill comment with existing comment -->\
-                <div class="modal-inner">\
-                    <header id="modal-label"><h2>Changeset</h2></header>\
-                    <div class="modal-content">\
-                        <div id="changeset-form" contenteditable="true"></div>\
-                        <span id="changeset-link"></span>\
-                        <span id="update-change">update</span>\
-                    </div>\
-                </div>\
-                <a href="#!" class="modal-close" title="Close this modal" data-close="Close" data-dismiss="modal"></a>\
-            </div>\
             <div class="semantic-content" id="demo-modal" style="text-align: center;">\
                 <div class="modal-inner">\
                     <header id="modal-label">\
@@ -114,6 +101,21 @@ osmly.ui = (function() {
                 </div>\
                 <a href="#!" class="modal-close" title="Close this modal" data-close="Close" data-dismiss="modal"></a>\
             </div>\
+            <div class="semantic-content" id="user-modal">\
+                <div class="modal-inner">\
+                    <div class="modal-content">\
+                        <div id="changeset" style="display: none;">\
+                            <h2>Changeset</h2>\
+                            <div id="changeset-form" contenteditable="true"></div>\
+                            <span id="changeset-link"></span>\
+                            <span id="update-change">update</span>\
+                            <hr style="margin-top: 50px;">\
+                        </div>\
+                        <div id="logout" style="text-align: center; margin: 50px 0;">Logout »</div>\
+                    </div>\
+                </div>\
+                <a href="#!" class="modal-close" title="Close this modal" data-close="Close" data-dismiss="modal"></a>\
+            </div>\
         ');
     }
 
@@ -142,6 +144,18 @@ osmly.ui = (function() {
         $('#overview').on('click', osmly.mode.overview);
         $('#update-change').on('click', changeset);
         $('#remote-edit-modal').on('click', remoteEdit);
+        $('#logout').on('click', function() {
+            osmly.auth.logout();
+            location.reload();
+        });
+    }
+
+    function changeset() {
+        osmly.settings.changesetTags.comment = $('#changeset-form').text();
+        osmly.connect.updateComment(function(){
+            CSSModal.close();
+            $('#notify').hide();
+        });
     }
 
     function remoteEdit() {
@@ -215,8 +229,7 @@ osmly.ui = (function() {
         if (token('avatar')) $('#user').append('<img height="25px" src="' + token('avatar') + '"/>');
 
         $('#user')
-            .append('<a href="' + osmly.settings.writeApi + '/user/' +
-                token('user') + '" target="_blank">' + token('user') + '</a>')
+            .append('<span style="padding-left: 30px;">' + token('user') + '</span>')
             .fadeIn(250);
 
         if (osmly.auth.adminAllowed()) $('#qa').fadeIn(250);

@@ -358,7 +358,7 @@ button:hover {
     transition: all 200ms ease;
     background-color: #333;
 }
-.markdone, .editjosm {    cursor: pointer }
+.markdone, .editjosm, #logout {cursor: pointer;}
 .wide800 {
     width: 800px !important;
     margin-left: -400px !important;
@@ -407,7 +407,6 @@ button:hover {
 #report tr td:last-child {
     border-left: 1px solid #ccc;
     text-align: left;
-    font-weight: bold;
 }
 
 #report tr:last-child {
