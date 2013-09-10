@@ -73,7 +73,10 @@ def random():
     row = row.fetchone()
     db['conn'].commit()
     db['conn'].close()
-    return row[0]
+    if row:
+        return row[0]
+    else:
+        return '0';
 
 
 def specific():
@@ -107,7 +110,7 @@ def qa():
     db = DB()
     columns = 'id, geo, problem, submit, user, time'
     row = db['c'].execute(
-        'SELECT ' + columns + ' FROM osmly WHERE submit != "" AND done = 0 ORDER BY RANDOM() LIMIT 1')
+        'SELECT ' + columns + ' FROM osmly WHERE submit != "" AND problem != "too large" AND done = 0 ORDER BY RANDOM() LIMIT 1')
     row = row.fetchone()
     db['conn'].commit()
     db['conn'].close()
