@@ -34,47 +34,31 @@ osmly.map = function() {
             ];
         }
 
-        map.removeContext();
+        if (map.hasLayer(map.contextLayer))
+            map.removeLayer(map.contextLayer);
+
         osmly.ui.notify('getting nearby OSM data');
         getOsm(bbox, function(xml) {
             osmly.ui.notify('rendering OSM data');
             context = filterContext(osm_geojson.osm2geojson(xml));
             setContext(context);
-            map.showContext();
+            map.addLayer(map.contextLayer);
             callback();
         });
 
         // for offline usage
         // setTimeout(function() {
         //     setContext('');
-        //     map.showContext();
+        //     map.addLayer(map.contextLayer);
         //     callback();
         // }, 555);
     };
 
-    map.toggleOSM = function() {
-        if (map.hasLayer(map.osmTiles)) {
-            map.removeOSM();
+    map.toggleLayer = function(layer) {
+        if (map.hasLayer(layer)) {
+            map.removeLayer(layer);
         } else {
-            map.showOSM();
-        }
-    };
-
-    map.showOSM = function() {
-        map.osmTiles.addTo(map);
-        map.osmTiles.bringToFront();
-    };
-
-    map.removeOSM = function () { map.removeLayer(map.osmTiles); };
-
-    map.removeContext = function() {
-        if (map.hasLayer(map.contextLayer)) map.removeLayer(map.contextLayer);
-    };
-
-    map.showContext = function() {
-        if (!map.hasLayer(map.contextLayer)) {
-            map.contextLayer.addTo(map);
-            map.contextLayer.bringToFront();
+            map.addLayer(layer);
         }
     };
 
@@ -158,7 +142,7 @@ osmly.map = function() {
             }
         });
 
-        osmly.map.fitBounds(map.featureLayer.getBounds());
+        map.fitBounds(map.featureLayer.getBounds());
 
         if (show) {
             map.featureLayer.addTo(osmly.map);

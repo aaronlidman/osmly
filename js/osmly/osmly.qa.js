@@ -53,7 +53,9 @@ osmly.qa = (function () {
         $('#osmlink').on('click', function(){
             window.open(osmly.osmlink);
         });
-        $('#osmtiles').on('click', osmly.map.toggleOSM);
+        $('#osmtiles').on('click', function(){
+            osmly.map.toggleLayer(osmly.map.osmTiles);
+        });
 
         $('body').on('keydown', function(that){
             if (that.keyCode === 87) toggleLayers(); //w
@@ -135,11 +137,11 @@ osmly.qa = (function () {
 
     function reset() {
         unbind();
-        osmly.map.removeContext();
+        osmly.map.removeLayer(osmly.map.contextLayer);
         if (osmly.map.featureLayer) osmly.map.removeLayer(osmly.map.featureLayer);
         byId('toggleLayers').innerHTML = '[w] see original feature';
         $('#qa-block, #bottom-right').hide();
-        osmly.map.removeOSM();
+        osmly.map.removeLayer(osmly.map.featureLayer);
     }
 
     function setContext() {
@@ -174,12 +176,11 @@ osmly.qa = (function () {
         if (osmly.map.hasLayer(osmly.map.featureLayer)) {
             byId('toggleLayers').innerHTML = '[w] see original feature';
             osmly.map.removeLayer(osmly.map.featureLayer);
-            osmly.map.showContext();
+            osmly.map.addLayer(osmly.map.contextLayer);
         } else {
             byId('toggleLayers').innerHTML = '[w] see OSM data';
-            osmly.map.removeContext();
-            osmly.map.featureLayer.addTo(osmly.map);
-            osmly.map.featureLayer.bringToFront();
+            osmly.map.removeLayer(osmly.map.contextLayer);
+            osmly.map.addLayer(osmly.map.featureLayer);
         }
     }
 

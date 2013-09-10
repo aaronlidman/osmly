@@ -21,7 +21,6 @@ osmly.import = (function() {
         $('#osmlink').on('click', function(){
             window.open(osmly.osmlink);
         });
-        $('#osmtiles').on('click', osmly.map.toggleOSM);
         // botton-left buttons
         $('#skip').on('click', skip);
         $('#problem').on('change', problem);
@@ -29,6 +28,14 @@ osmly.import = (function() {
         $('#add-new-tag').on('click', addTag);
         $('#tags').on('click', '.minus', function(){
             if ($('#tags tr').length > 1) this.parentNode.remove();
+        });
+
+        $('#osmtiles').on('click', function(){
+            $('#tags').toggle();
+            $('#action-block').toggle();
+            osmly.map.toggleLayer(osmly.map.osmTiles);
+            osmly.map.toggleLayer(osmly.map.contextLayer);
+            osmly.map.toggleLayer(osmly.map.featureLayer);
         });
     }
 
@@ -88,12 +95,12 @@ osmly.import = (function() {
         $('#tags, #action-block, #bottom-right, #flash').remove();
         osmly.map.closePopup();
         if (osmly.map.featureLayer) osmly.map.removeLayer(osmly.map.featureLayer);
-        osmly.map.removeContext();
+        osmly.map.removeLayer(osmly.map.contextLayer);
     }
 
     function displayItem() {
-        osmly.map.featureLayer.addTo(osmly.map);
-        osmly.map.showContext();
+        osmly.map.addLayer(osmly.map.featureLayer);
+        osmly.map.addLayer(osmly.map.contextLayer);
 
         $('#notify').hide();
         $('#hold-problem, #submit, #bottom-right, #action-block').fadeIn(250);
@@ -133,7 +140,7 @@ osmly.import = (function() {
         });
         osmly.map.closePopup();
         if (osmly.map.featureLayer) osmly.map.removeLayer(osmly.map.featureLayer);
-        osmly.map.removeContext();
+        osmly.map.removeLayer(osmly.map.contextLayer);
     }
 
     function skip() {
@@ -145,7 +152,6 @@ osmly.import = (function() {
 
     function submit() {
         hideItem();
-
         if (osmly.auth.authenticated() && osmly.auth.userAllowed()) {
             osmly.connect.updateItem('submit');
             osmly.connect.openChangeset(submitToOSM);
@@ -206,7 +212,9 @@ osmly.import = (function() {
     }
 
     function next() {
-        osmly.map.removeOSM();
+        if (osmly.map.hasLayer(osmly.map.featureLayer))
+            osmly.map.removeLayer(osmly.map.featureLayer);
+
         osmly.ui.notify('getting next item');
 
         $.ajax({
