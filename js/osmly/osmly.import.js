@@ -94,8 +94,8 @@ osmly.import = (function() {
     function unsetInterface() {
         $('#tags, #action-block, #bottom-right, #flash').remove();
         osmly.map.closePopup();
-        if (osmly.map.featureLayer) osmly.map.removeLayer(osmly.map.featureLayer);
-        osmly.map.removeLayer(osmly.map.contextLayer);
+        if (osmly.map.hasLayer(osmly.map.featureLayer)) osmly.map.removeLayer(osmly.map.featureLayer);
+        if (osmly.map.hasLayer(osmly.map.contextLayer)) osmly.map.removeLayer(osmly.map.contextLayer);
     }
 
     function displayItem() {
@@ -221,7 +221,8 @@ osmly.import = (function() {
             url: osmly.settings.db,
             dataType: 'json',
             success: function(data) {
-                nextPrep(data);
+                if (data) nextPrep(data);
+                else none();
             }
         });
     }
@@ -243,6 +244,12 @@ osmly.import = (function() {
             populateTags();
             displayItem();
         }
+    }
+
+    function none() {
+        $('#notify').hide();
+        $('#reusable-modal .modal-content').html('<h3>Nothing left, checkout Overview.</h3>');
+        CSSModal.open('reusable-modal');
     }
 
     function isEditable(geo) {

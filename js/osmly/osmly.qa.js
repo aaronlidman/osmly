@@ -143,11 +143,10 @@ osmly.qa = (function () {
 
     function reset() {
         unbind();
-        osmly.map.removeLayer(osmly.map.contextLayer);
-        if (osmly.map.featureLayer) osmly.map.removeLayer(osmly.map.featureLayer);
+        if (osmly.map.hasLayer(osmly.map.contextLayer)) osmly.map.removeLayer(osmly.map.contextLayer);
+        if (osmly.map.hasLayer(osmly.map.featureLayer)) osmly.map.removeLayer(osmly.map.featureLayer);
         byId('toggleLayers').innerHTML = '[w] see original feature';
         $('#qa-block, #bottom-right').hide();
-        osmly.map.removeLayer(osmly.map.featureLayer);
     }
 
     function setContext() {

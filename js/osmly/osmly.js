@@ -4,6 +4,7 @@ window.osmly = (function () {
     };
 
     osmly.go = function(settings) {
+        window.location.hash = '';
         $(function(){
             if (typeof settings === 'object') {
                 for (var obj in settings) {

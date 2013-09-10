@@ -101,12 +101,6 @@
 	};
 
 	modal._addEventListener(window, 'hashchange', modal.mainHandler);
-	modal._addEventListener(window, 'load', function(){
-		// prevents linking others to pages with open modals
-		// not great but better than nothing...
-		window.location.hash = '#!';
-		modal.mainHandler();
-	});
 
 	/*
 	 * Accessibility
@@ -139,7 +133,7 @@
 	};
 
 	modal.close = function() {
-		window.location.hash = '#!';
+		window.location.hash = '';
 	};
 
 	// Export CSSModal into global space
