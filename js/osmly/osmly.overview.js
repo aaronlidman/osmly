@@ -86,9 +86,7 @@ osmly.overview = (function () {
             }
         });
 
-        $('#overview_bg').on('click', function() {
-            osmly.mode.set(osmly.mode.last);
-        });
+        $('#overview_bg').on('click', osmly.mode.toLast);
 
         $('#everything').on('click', everything);
         $('#red').on('click', red);

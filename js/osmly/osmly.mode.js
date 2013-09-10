@@ -20,6 +20,13 @@ osmly.mode = (function() {
     mode.import = function() { mode.set('import'); };
     mode.qa = function() { mode.set('qa'); };
     mode.overview = function() { mode.set('overview'); };
+    mode.toLast = function() {
+        if (mode.last) {
+            mode.set(mode.last);
+        } else {
+            osmly[mode.now].stop();
+        }
+    };
     // convenience
 
     return mode;
