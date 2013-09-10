@@ -85,6 +85,7 @@ osmly.qa = (function () {
             cache: false,
             dataType: 'json',
             success: function(item){
+                if (!item) return none();
                 data = {
                     id: item[0],
                     geo: JSON.parse(item[1]),
@@ -133,6 +134,11 @@ osmly.qa = (function () {
             setGeometry();
             setContext();
         });
+    }
+
+    function none() {
+        $('#reusable-modal .modal-content').html('<h3>Nothing to check right now</h3>');
+        CSSModal.open('reusable-modal');
     }
 
     function reset() {

@@ -303,14 +303,20 @@ osmly.overview = (function () {
 
     function drop_selection(select) {
         var selector = byId(select),
-            value = selector.options[selector.selectedIndex].value,
+            value,
             dict = {};
-        value = value.split(':');
-        dict[value[0]] = value[1];
-            // dict is necessary because literal value = {value[0]: value[1]} didn't work
-                // why doesn't that work?
-        if (value[0] == 'problem') dict['submit'] = '';
-            // only want un-submitted problems, not strictly true but more useful
+        
+        if (selector.options[selector.selectedIndex]) {
+            value = selector.options[selector.selectedIndex].value;
+            value = value.split(':');
+            dict[value[0]] = value[1];
+                // dict is necessary because literal value = {value[0]: value[1]} didn't work
+                    // why doesn't that work?
+            if (value[0] == 'problem') dict['submit'] = '';
+                // only want un-submitted problems, not strictly true but more useful
+        } else {
+            dict = {problem: '-1'};
+        }
 
         filter(dict);
         buildTable();
