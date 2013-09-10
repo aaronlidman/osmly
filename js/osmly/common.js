@@ -16,39 +16,52 @@ function createId(element, id) {
     return elm;
 }
 
-// http://markroberthenderson.com/2011/08/28/javascript-minutes-hours-seconds-time-ago-function.html
-function format_date(unix_timestamp) {
-  var difference_in_seconds = (Math.round((new Date()).getTime() / 1000)) - unix_timestamp,
-      current_date = new Date(unix_timestamp * 1000), minutes, hours,
-      months = new Array(
-        'January','February','March','April','May',
-        'June','July','August','September','October',
-        'November','December');
-  
-  if(difference_in_seconds < 60) {
-    return difference_in_seconds + " second" + _plural(difference_in_seconds) + " ago";
-  } else if (difference_in_seconds < 60*60) {
-    minutes = Math.floor(difference_in_seconds/60);
-    return minutes + " minute" + _plural(minutes) + " ago";
-  } else if (difference_in_seconds < 60*60*24) {
-    hours = Math.floor(difference_in_seconds/60/60);
-    return hours + " hour" + _plural(hours) + " ago";
-  } else if (difference_in_seconds > 60*60*24){
-    if(current_date.getYear() !== new Date().getYear())
-      return months[current_date.getMonth()] + ' ' + current_date.getDay() + ', ' + _fourdigits(current_date.getYear());
-    
-    return months[current_date.getMonth()] + ' ' + current_date.getDay();
-  }
-  
-  return difference_in_seconds;
-  
-  function _fourdigits(number)  {
-        return (number < 1000) ? number + 1900 : number;}
+// https://coderwall.com/p/uub3pw
+function timeAgo(selector) {
 
-  function _plural(number) {
-    if(parseInt(number) === 1) {
-      return "";
+    var templates = {
+        prefix: "",
+        suffix: " ago",
+        seconds: "less than a minute",
+        minute: "about a minute",
+        minutes: "%d minutes",
+        hour: "about an hour",
+        hours: "about %d hours",
+        day: "a day",
+        days: "%d days",
+        month: "about a month",
+        months: "%d months",
+        year: "about a year",
+        years: "%d years"
+    };
+    var template = function (t, n) {
+        return templates[t] && templates[t].replace(/%d/i, Math.abs(Math.round(n)));
+    };
+
+    var timer = function (time) {
+        if (!time) return;
+        time = time.replace(/\.\d+/, ""); // remove milliseconds
+        time = time.replace(/-/, "/").replace(/-/, "/");
+        time = time.replace(/T/, " ").replace(/Z/, " UTC");
+        time = time.replace(/([\+\-]\d\d)\:?(\d\d)/, " $1$2"); // -04:00 -> -0400
+        time = new Date(time * 1000 || time);
+
+        var now = new Date();
+        var seconds = ((now.getTime() - time) * 0.001) >> 0;
+        var minutes = seconds / 60;
+        var hours = minutes / 60;
+        var days = hours / 24;
+        var years = days / 365;
+
+        return templates.prefix + (
+        seconds < 45 && template('seconds', seconds) || seconds < 90 && template('minute', 1) || minutes < 45 && template('minutes', minutes) || minutes < 90 && template('hour', 1) || hours < 24 && template('hours', hours) || hours < 42 && template('day', 1) || days < 30 && template('days', days) || days < 45 && template('month', 1) || days < 365 && template('months', days / 30) || years < 1.5 && template('year', 1) || template('years', years)) + templates.suffix;
+    };
+
+    var elements = document.getElementsByClassName('timeago');
+    for (var i in elements) {
+        var $this = elements[i];
+        if (typeof $this === 'object') {
+            $this.innerHTML = timer($this.getAttribute('title') || $this.getAttribute('datetime'));
+        }
     }
-    return "s";
-  }
 }

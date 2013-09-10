@@ -114,7 +114,7 @@ osmly.qa = (function () {
             var tr = createE('tr');
             if (item == 'id') tr.innerHTML = '<td>id</td><td>' + data.id + '</td>';
             if (item == 'user') tr.innerHTML = '<td>who</td><td>' + data.user + '</td>';
-            if (item == 'time') tr.innerHTML = '<td>when</td><td>' + format_date(data.time) + '</td>';
+            if (item == 'time') tr.innerHTML = '<td>when</td><td class="timeago" title="' + data.time + '">' + data.time + '</td>';
             if (item == 'problem' && data.problem !== '') tr.innerHTML = '<td>problem</td><td class="k">' + data.problem + '</td>';
             if (item == 'submit' && data.submit != 1){
                 tr.innerHTML = '<td>via</td><td>' + data.submit + '</td>';
@@ -125,6 +125,7 @@ osmly.qa = (function () {
 
         table.appendChild(tbody);
         report.appendChild(table);
+        timeAgo();
     }
 
     function next() {
