@@ -1,8 +1,8 @@
-# WORK IN PROGRESS
-
-![OSMLY screenshot](https://raw.github.com/aaronlidman/parks-project/master/example.jpg)
+![OSMLY screenshot](https://raw.github.com/aaronlidman/osmly/master/example.jpg)
 
 OSMLY is a browser based importer for collaborative item-by-item reviewing, editing, and uploading to OpenStreetMap. It aims to make simple imports easier, more cooperative, and less error prone, from shapefile (or whatever) to upload.
+
+These are the clientside components, serverside components are at [osmly-server](http://github.com/aaronlidman/osmly-server).
 
 ###Libraries that make this possbile
 - [Leaflet](leafletjs.com) for the map
@@ -13,5 +13,15 @@ OSMLY is a browser based importer for collaborative item-by-item reviewing, edit
 - [CSS-Modal](http://drublic.github.io/css-modal/) for the modals
 - [Zepto](http://zeptojs.com/) for DOM, events, ajax, and animations
 - [Foundicons](http://zurb.com/playground/foundation-icons) for the icons
+- [osm-and-geojson](http://github.com/aaronlidman/osm-and-geojson) for converting between osm and geojson
+
+###Development
+- `npm install` for build dependencies (not needed if you're not building)
+- `make` to build
+- `python -m SimpleHTTPServer` to get around some local browser restrictions
+- `template.html` is the launching point for most of the action
+    - `template.html` is used for developement `dist/sample-template.html` should be used making new imports
+    - a new template, with it's own settings, is made for each import
+- see and update [settings documentation](settings_documentation.md) as needed
 
 ### BSD License
