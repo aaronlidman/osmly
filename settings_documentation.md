@@ -1,5 +1,14 @@
 types and uses of osmly.settings properties
 
+####required:
+- title
+- instructions
+- db
+- context
+- problems
+- usePropertyAsTag
+
+
 ### title (required)
 - string
 - very basic description of what needs to be done
