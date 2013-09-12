@@ -1,6 +1,6 @@
 ![OSMLY screenshot](https://raw.github.com/aaronlidman/osmly/master/example.jpg)
 
-OSMLY is a browser based importer for collaborative item-by-item reviewing, editing, and uploading to OpenStreetMap. It aims to make simple imports easier, more cooperative, and less error prone, from shapefile (or whatever) to upload.
+OSMLY is a browser based importer for collaborative item-by-item reviewing, editing, and uploading to OpenStreetMap. It aims to make simple imports easier, more cooperative, and less error prone, from source to upload.
 
 These are the clientside components, serverside components are at [osmly-server](http://github.com/aaronlidman/osmly-server).
 
@@ -22,6 +22,5 @@ These are the clientside components, serverside components are at [osmly-server]
 - `template.html` is the launching point for most of the action
     - `template.html` is used for developement `dist/sample-template.html` should be used making new imports
     - a new template, with it's own settings, is made for each import
-- see and update [settings documentation](settings_documentation.md) as needed
-
-### BSD License
+- also see [settings documentation](settings_documentation.md)
+- serverside components are at [osmly-server](http://github.com/aaronlidman/osmly-server)

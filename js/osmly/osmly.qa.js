@@ -57,9 +57,9 @@ osmly.qa = (function () {
             osmly.map.toggleLayer(osmly.map.osmTiles);
         });
 
-        $('body').on('keydown', function(that){
-            if (that.keyCode === 87) toggleLayers(); //w
-            if (that.keyCode === 83) next(); //s
+        $('body').on('keydown', function(k){
+            if (k.keyCode === 87) toggleLayers(); //w
+            if (k.keyCode === 83) next(); //s
         });
     }
 
