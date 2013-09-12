@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-
-# converts a geojson file with polygons to a sqlite database with individuals features as rows
-# run: python build.py file.geojson
-# creates a sqlite database named [file].sqlite
-    # [file] is taken from the source file
 import json
 import sqlite3
 from shapely.geometry import asShape, mapping
@@ -22,12 +16,12 @@ parser.add_argument(
     help='Source geojson file to parse')
 parser.add_argument(
     '--simplify',
-    help='Simplification tolerance.',
+    help='Simplification tolerance for Shapely\'s simplify function',
     type=float,
     default=0.0001)
 parser.add_argument(
     '--names',
-    help='The name column (or technically property)',
+    help='The name property',
     type=str)
 
 args = vars(parser.parse_args())

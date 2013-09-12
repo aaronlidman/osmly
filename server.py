@@ -102,7 +102,7 @@ def specific():
 
 def overview():
     db = DB()
-    db['c'].execute('SELECT id, problem, submit, user FROM osmly ORDER BY id')
+    db['c'].execute('SELECT id, name, problem, submit, user FROM osmly ORDER BY id')
     return json.dumps(db['c'].fetchall());
 
 
