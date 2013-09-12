@@ -49,24 +49,33 @@ osmly.connect = (function() {
         });
     }
 
-    connect.openChangeset = function(callback) {
+    connect.openChangeset = function(callback, forceCheck) {
         if (!token('changeset_id')) {
             createChangeset(callback);
         } else {
-            osmly.ui.notify('checking changeset status');
-
-            $.ajax({
-                url: osmly.settings.writeApi + '/api/0.6/changeset/' + token('changeset_id'),
-                dataType: 'xml',
-                success: function(xml) {
-                    var cs = xml.getElementsByTagName('changeset');
-                    if (cs[0].getAttribute('open') === 'true') {
-                        callback();
-                    } else {
-                        createChangeset(callback);
-                    }
+            if (!forceCheck && token('changeset_created')) {
+                if ((token('changeset_created') - parseInt(new Date()/1000)) > -3500) {
+                    console.log('skipped check');
+                    callback();
                 }
-            });
+            } else {
+                osmly.ui.notify('checking changeset status');
+                console.log('checked');
+
+                $.ajax({
+                    url: osmly.settings.writeApi + '/api/0.6/changeset/' + token('changeset_id'),
+                    dataType: 'xml',
+                    success: function(xml) {
+                        var cs = xml.getElementsByTagName('changeset');
+                        if (cs[0].getAttribute('open') === 'true') {
+                            token('changeset_created', parseInt(new Date()/1000));
+                            if (callback) callback();
+                        } else {
+                            createChangeset(callback);
+                        }
+                    }
+                });
+            }
         }
     };
 
@@ -87,6 +96,7 @@ osmly.connect = (function() {
 
             if (response) {
                 token('changeset_id', response);
+                token('changeset_created', parseInt(new Date()/1000));
                 callback();
             }
         });
@@ -101,12 +111,9 @@ osmly.connect = (function() {
     }
 
     connect.updateComment = function(callback) {
-        // the actual comment is kept in osmly.settings.changesetTags.comment
-        // we have no way of knowing if openChangeset created a new changeset just before this
-            // it would have the new comment in it, making this unnecessary
-            // we just do it twice, this update option is only available for existing changesets
-            // worse case senario: we do two almost identical requests instead of one
-        connect.openChangeset(function() {
+        connect.openChangeset(update);
+
+        function update() {
             osmly.ui.notify('updating changeset');
             osmly.auth.xhr({
                 method: 'PUT',
@@ -115,13 +122,16 @@ osmly.connect = (function() {
                 options: {header: {'Content-Type': 'text/xml'}}
             }, function(err, response){
                 if (err) {
-                    // notify('changeset update failed, try again')?
+                    forceUpdate();
                 } else {
                     callback();
                 }
             });
-        });
+        }
 
+        function forceUpdate() {
+            connect.openChangeset(update, true);
+        }
     };
 
     connect.getDetails = function() {

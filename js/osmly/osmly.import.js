@@ -329,10 +329,8 @@ osmly.import = (function() {
     function postOSM(err, res) {
         if (res && !err) {
             // do some kind of special green checkmark
-            // can we double notify?
         } else {
-            console.log(err);
-            // :/
+            osmly.connect.openChangeset(submitToOSM, true);
         }
         $('#tags tr').remove();
         next();
