@@ -1,8 +1,6 @@
 var osm_geojson = {};
 
-osm_geojson.geojson2osm = function(geo, changeset, osmchange) {
-    osmchange = osmchange || false;
-
+osm_geojson.geojson2osm = function(geo, changeset, osmChange) {
     function togeojson(geo, properties) {
         var nodes = '',
             ways = '',
@@ -56,11 +54,10 @@ osm_geojson.geojson2osm = function(geo, changeset, osmchange) {
             relations += obj.relations;
         }
 
-        osm = '<?xml version="1.0" encoding="UTF-8"?><osm version="0.6" generator="geo2osm.js">' +
+        osm = '<?xml version="1.0" encoding="UTF-8"?><osm version="0.6" generator="github.com/aaronlidman/osm-and-geojson">' +
         nodes + ways + relations + '</osm>';
-
-        if (osmchange) {
-            osm = '<osmChange version="0.6" generator="geo2osm.js"><create>' +
+        if (osmChange) {
+            osm = '<osmChange version="0.6" generator="github.com/aaronlidman/osm-and-geojson"><create>' +
             nodes + ways + relations + '</create></osmChange>';
         }
 
@@ -170,6 +167,8 @@ osm_geojson.geojson2osm = function(geo, changeset, osmchange) {
         return {'nds': nds, 'nodes': nodes};
     }
 
+    if (typeof geo === 'string') geo = JSON.parse(geo);
+
     var obj,
         count = -1;
     changeset = changeset || false;
@@ -185,15 +184,15 @@ osm_geojson.geojson2osm = function(geo, changeset, osmchange) {
             for (var i = 0; i < geo.features.length; i++){
                 obj.push(togeojson(geo.features[i].geometry, geo.features[i].properties));
             }
-            temp.osm = '<?xml version="1.0" encoding="UTF-8"?><osm version="0.6" generator="geo2osm.js">';
-            if (osmchange) temp.osm = '<osmChange version="0.6" generator="geo2osm.js"><create>';
+            temp.osm = '<?xml version="1.0" encoding="UTF-8"?><osm version="0.6" generator="github.com/aaronlidman/osm-and-geojson">';
+            if (osmChange) temp.osm = '<osmChange version="0.6" generator="github.com/aaronlidman/osm-and-geojson"><create>';
             for (var n = 0; n < obj.length; n++) {
                 temp.nodes += obj[n].nodes;
                 temp.ways += obj[n].ways;
                 temp.relations += obj[n].relations;
             }
             temp.osm += temp.nodes + temp.ways + temp.relations;
-            if (osmchange) {
+            if (osmChange) {
                 temp.osm += '</create></osmChange>';
             } else {
                 temp.osm += '</osm>';
@@ -224,7 +223,7 @@ osm_geojson.geojson2osm = function(geo, changeset, osmchange) {
             break;
 
         default:
-            if (console) console.log('Invalid GeoJSON object: GeoJSON object must be one of \"Point\", \"LineString\",' +
+            if (console) console.log('Invalid GeoJSON object: GeoJSON object must be one of \"Point\", \"LineString\", ' +
                 '\"Polygon\", \"MultiPolygon\", \"Feature\", \"FeatureCollection\" or \"GeometryCollection\".');
     }
 
@@ -234,21 +233,21 @@ osm_geojson.geojson2osm = function(geo, changeset, osmchange) {
 osm_geojson.osm2geojson = function(osm, metaProperties) {
 
     var xml = parse(osm),
+        usedCoords = {},
         nodeCache = cacheNodes(),
         wayCache = cacheWays();
 
     return Bounds({
         type : 'FeatureCollection',
         features : []
-            .concat(Points(nodeCache))
             .concat(Ways(wayCache))
             .concat(Ways(Relations))
+            .concat(Points(nodeCache))
     }, xml);
 
     function parse(xml) {
         if (typeof xml !== 'string') return xml;
-        return (new DOMParser()).parseFromString(
-            new XMLSerializer().serializeToString(xml), 'text/xml');
+        return (new DOMParser()).parseFromString(xml, 'text/xml');
     }
 
     function Bounds(geo, xml) {
@@ -264,6 +263,8 @@ osm_geojson.osm2geojson = function(osm, metaProperties) {
     }
 
     function setProperties(element) {
+        if (!element) return {};
+
         var props = {},
             tags = element.getElementsByTagName('tag'),
             tags_length = tags.length;
@@ -297,28 +298,23 @@ osm_geojson.osm2geojson = function(osm, metaProperties) {
 
     function cacheNodes() {
         var nodes = getBy(xml, 'node'),
-            coords = {},
-            withTags = [];
+            coords = {};
 
         for (var n = 0; n < nodes.length; n++) {
-            var tags = getBy(nodes[n], 'tag');
-            coords[attr(nodes[n], 'id')] = lonLat(nodes[n]);
-            if (tags.length) withTags.push(nodes[n]);
+            coords[attr(nodes[n], 'id')] = nodes[n];
         }
 
-        return {
-            coords: coords,
-            withTags: withTags
-        };
+        return coords;
     }
 
     function Points(nodeCache) {
-        var points = nodeCache.withTags,
+        var points = nodeCache,
             features = [];
 
-        for (var p = 0, r = points.length; p < r; p++) {
-            var feature = getFeature(points[p], 'Point', lonLat(points[p]));
-            features.push(feature);
+        for (var node in nodeCache) {
+            var tags = getBy(nodeCache[node], 'tag');
+            if (!usedCoords[node] || tags.length)
+                features.push(getFeature(nodeCache[node], 'Point', lonLat(nodeCache[node])));
         }
 
         return features;
@@ -339,11 +335,15 @@ osm_geojson.osm2geojson = function(osm, metaProperties) {
             }
 
             for (var n = 0; n < nds.length; n++) {
-                var cords = nodeCache.coords[attr(nds[n], 'ref')];
-                if (feature.geometry.type === 'Polygon') {
-                    feature.geometry.coordinates[0].push(cords);
-                } else {
-                    feature.geometry.coordinates.push(cords);
+                var node = nodeCache[attr(nds[n], 'ref')];
+                if (node) {
+                    var cords = lonLat(node);
+                    usedCoords[attr(nds[n], 'ref')] = true;
+                    if (feature.geometry.type === 'Polygon') {
+                        feature.geometry.coordinates[0].push(cords);
+                    } else {
+                        feature.geometry.coordinates.push(cords);
+                    }
                 }
             }
 
