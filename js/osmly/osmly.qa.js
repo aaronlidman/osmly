@@ -165,7 +165,7 @@ osmly.qa = (function () {
     function show() {
         osmly.map.removeLayer(osmly.map.featureLayer);
         $('#qa-block, #bottom-right').fadeIn(250);
-        $('#notify').fadeOut(250);
+        $('#notify').hide();
         bind();
     }
 

@@ -50,25 +50,23 @@ osmly.connect = (function() {
     }
 
     connect.openChangeset = function(callback, forceCheck) {
-        if (!token('changeset_id')) {
+        if (!token(osmly.settings.db + 'changeset_id')) {
             createChangeset(callback);
         } else {
-            if (!forceCheck && token('changeset_created')) {
-                if ((token('changeset_created') - parseInt(new Date()/1000)) > -3500) {
-                    console.log('skipped check');
+            if (!forceCheck &&
+                token(osmly.settings.db + 'changeset_created') &&
+                (token(osmly.settings.db + 'changeset_created') - parseInt(new Date()/1000)) > -3500) {
                     callback();
-                }
             } else {
                 osmly.ui.notify('checking changeset status');
-                console.log('checked');
 
                 $.ajax({
-                    url: osmly.settings.writeApi + '/api/0.6/changeset/' + token('changeset_id'),
+                    url: osmly.settings.writeApi + '/api/0.6/changeset/' + token(osmly.settings.db + 'changeset_id'),
                     dataType: 'xml',
                     success: function(xml) {
                         var cs = xml.getElementsByTagName('changeset');
                         if (cs[0].getAttribute('open') === 'true') {
-                            token('changeset_created', parseInt(new Date()/1000));
+                            token(osmly.settings.db + 'changeset_created', parseInt(new Date()/1000));
                             if (callback) callback();
                         } else {
                             createChangeset(callback);
@@ -95,8 +93,8 @@ osmly.connect = (function() {
             }
 
             if (response) {
-                token('changeset_id', response);
-                token('changeset_created', parseInt(new Date()/1000));
+                token(osmly.settings.db + 'changeset_id', response);
+                token(osmly.settings.db + 'changeset_created', parseInt(new Date()/1000));
                 callback();
             }
         });
@@ -117,7 +115,7 @@ osmly.connect = (function() {
             osmly.ui.notify('updating changeset');
             osmly.auth.xhr({
                 method: 'PUT',
-                path: '/api/0.6/changeset/' + token('changeset_id'),
+                path: '/api/0.6/changeset/' + token(osmly.settings.db + 'changeset_id'),
                 content: newChangesetXml(),
                 options: {header: {'Content-Type': 'text/xml'}}
             }, function(err, response){

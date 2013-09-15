@@ -305,7 +305,7 @@ osmly.import = (function() {
     };
 
     function submitToOSM() {
-        var id = token('changeset_id');
+        var id = token(osmly.settings.db + 'changeset_id');
 
         $('#changeset-link').html('<a href="' + osmly.settings.writeApi +
             '/browse/changeset/' + id + '" target="_blank">Details on osm.org »</a>');
@@ -314,7 +314,7 @@ osmly.import = (function() {
         var geojson = osmly.map.featureLayer.toGeoJSON();
         geojson['features'][0]['properties'] = osmly.import.tags();
             // this is sketchy but works for single items
-        var osmChange = osm_geojson.geojson2osm(geojson, token('changeset_id'), true);
+        var osmChange = osm_geojson.geojson2osm(geojson, token(osmly.settings.db + 'changeset_id'), true);
 
         osmly.ui.notify('uploading to OSM');
 
