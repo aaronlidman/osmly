@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+    <head>
+        <title>OSMLY</title>
+        <meta charset='utf-8'>
+        <style type="text/css">
+            * {padding: 0; margin: 0; color: #333;}
+            body {
+                font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+                font-size: 16px;
+                line-height: 1.6em;
+                margin: 25px auto;
+                max-width: 960px;
+            }
+
+            #main-img { max-width: 960px; }
+
+            #description {
+                width: 720px;
+                margin: 25px auto;
+            }
+
+            #available {
+                width: 720px;
+                margin: 0 auto;
+                margin-bottom: 50px;
+            }
+
+            a:hover { text-decoration: underline;}
+
+            ul {
+                margin-top: 10px;
+            }
+
+            ul li {
+                list-style: none;
+                margin-left: 20px;
+            }
+
+            a {
+                text-decoration: none;
+            }
+
+            #available a {
+                padding: 5px 15px;
+                background-color: #eee;
+            }
+
+            #available div {
+                margin-bottom: 6px;
+            }
+
+            .group {
+                font-weight: bold;
+                margin-right: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="main">
+            <img id="main-img" src="../example.jpg">
+            <div id="description">
+                <p>OSMLY is a simple import editor for OpenStreetMap. It makes importing simple by presenting features one at a time, allowing you to manually review each object and make any necessary adjustment to positions or tags, flag problems, or upload directly to OSM. Other users can also edit simultaneously from the same pool of features. The aim is to make importing basic features quick, easy, and cooperative.</p>
+                <br/>
+                <p>blah blah blah, tutorial, screenshots, etc...</p>
+                <br/>
+                <a style="text-decoration: none; color: rgba(67,127,190,1); font-weight: bold;" href="https://github.com/aaronlidman/osmly">Source code @ github</a>
+            </div>
+            <div id="available">
+                <div style="margin: 20px auto; font-weight: bold; width: 100%; font-size: 20px; padding-top: 20px;">Available Imports</div>
+                <div>
+                    <span class="group">Los Angeles County</span>
+                    <a href="">parks</a>
+                    <a href="">schools</a>
+                    <a href="">golf_courses</a>
+                    <a href="">retail landuse</a>
+                    <a href="">libraries</a>
+                </div>
+                <div>
+                    <span class="group">United States</span>
+                    <a href="">TIGER 2013 parks</a>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
