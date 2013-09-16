@@ -1,2 +1,2 @@
 ##This branch is for osmly.com.
-- new imports go in root, `cp dist/sample-template.html NEW_IMPORT.html` then edit it
+- starting in the master branch, run `make` then switch to this branch (gh-pages) and run `make` again, that should be it
