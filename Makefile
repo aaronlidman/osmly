@@ -33,11 +33,14 @@ JS_LIBS = \
 	js/lib/zepto.js
 
 all: \
+	test \
 	dist/osmly.min.js \
 	dist/libs.min.js \
 	dist/osmly.min.css \
-	dist/static \
 	move
+
+test:
+	test -d dist || mkdir dist
 
 dist/osmly.js: $(OSMLY_JS) Makefile
 	@rm -f $@
@@ -66,13 +69,11 @@ dist/osmly.min.css: dist/osmly.css Makefile
 	node_modules/.bin/uglifycss $< > $@
 	rm -f dist/osmly.css
 
-dist/static:
-	cp -R -f static dist/static
-
 move:
 	cp index.html dist/index.html
 	cp land.html dist/land.html
 	cp sample-template.html dist/sample-template.html
+	cp -R -f static dist/static
 
 clean:
 	rm -f -R dist/*

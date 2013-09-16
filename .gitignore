@@ -1,6 +1,3 @@
-dist/osmly*
-dist/libs*
-dist/static/
-parks/
+dist/*
 *.geojson
 *.sqlite
