@@ -32,7 +32,12 @@ JS_LIBS = \
 	js/lib/modal.js \
 	js/lib/zepto.js
 
-all: dist/osmly.min.js  dist/libs.min.js dist/osmly.min.css dist/static
+all: \
+	dist/osmly.min.js \
+	dist/libs.min.js \
+	dist/osmly.min.css \
+	dist/static \
+	move
 
 dist/osmly.js: $(OSMLY_JS) Makefile
 	@rm -f $@
@@ -64,7 +69,10 @@ dist/osmly.min.css: dist/osmly.css Makefile
 dist/static:
 	cp -R -f static dist/static
 
+move:
+	cp index.html dist/index.html
+	cp land.html dist/land.html
+	cp sample-template.html dist/sample-template.html
+
 clean:
-	rm -f dist/osmly*
-	rm -f dist/libs*
-	rm -f -R dist/static
+	rm -f -R dist/*

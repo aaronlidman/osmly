@@ -16,11 +16,12 @@ These are the clientside components, serverside components are at [osmly-server]
 - [osm-and-geojson](http://github.com/aaronlidman/osm-and-geojson) for converting between osm and geojson
 
 ###Development
-- `npm install` for build dependencies (not needed if you're not building)
-- `make` to build
-- `python -m SimpleHTTPServer` to get around some local browser restrictions
+- get [osmly-server](http://github.com/aaronlidman/osmly-server), run `python server.py`
+- while in the root run `python -m SimpleHTTPServer` to get around some local browser restrictions
 - `template.html` is the launching point for most of the action
     - `template.html` is used for developement `dist/sample-template.html` should be used making new imports
     - a new template, with it's own settings, is made for each import
+- `npm install` for build dependencies (not needed if you're not building)
+- `make` to build
 - also see [settings documentation](settings_documentation.md)
-- serverside components are at [osmly-server](http://github.com/aaronlidman/osmly-server)
+- see serverside components at [osmly-server](http://github.com/aaronlidman/osmly-server) for more
