@@ -1,6 +1,6 @@
 ![OSMLY screenshot](https://raw.github.com/aaronlidman/osmly/master/example.jpg)
 
-OSMLY is a browser based importer for collaborative item-by-item reviewing, editing, and uploading to OpenStreetMap. It aims to make simple imports easier, more cooperative, and less error prone, from source to upload.
+OSMLY is a browser based importer for collaborative item-by-item reviewing, editing, and uploading to OpenStreetMap. It aims to make simple imports easier, more cooperative, and less error prone, from source to upload and beyond.
 
 These are the clientside components, serverside components are at [osmly-server](http://github.com/aaronlidman/osmly-server).
 
@@ -16,10 +16,10 @@ These are the clientside components, serverside components are at [osmly-server]
 - [osm-and-geojson](http://github.com/aaronlidman/osm-and-geojson) for converting between osm and geojson
 
 ###Development
-- get [osmly-server](http://github.com/aaronlidman/osmly-server), run `python server.py`
-- while in the root run `python -m SimpleHTTPServer` to get around some local browser restrictions
-- `template.html` is the launching point for most of the action
-    - `template.html` is used for developement `dist/sample-template.html` should be used making new imports
+- get [osmly-server](http://github.com/aaronlidman/osmly-server), in the osmly-server directory run `python server.py`
+- in this directory (osmly) run `python -m SimpleHTTPServer` to get around some local browser restrictions
+- `dev-template.html` is the launching point for most of the action
+    - `dev-template.html` is used for developement while `sample-template.html` should be used making new imports
     - a new template, with it's own settings, is made for each import
 - `npm install` for build dependencies (not needed if you're not building)
 - `make` to build
