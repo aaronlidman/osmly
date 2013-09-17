@@ -6,81 +6,110 @@
         <style type="text/css">
             * {padding: 0; margin: 0; color: #333;}
             body {
+                background-color: #ddd;
                 font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
-                font-size: 16px;
-                line-height: 1.6em;
-                margin: 25px auto;
-                max-width: 960px;
-            }
-
-            #main-img { max-width: 960px; }
-
-            #description {
-                width: 720px;
-                margin: 25px auto;
-            }
-
-            #available {
-                width: 720px;
                 margin: 0 auto;
-                margin-bottom: 50px;
+                width: 960px;
+                font-size: 18px;
+                line-height: 1.6em;
             }
 
-            a:hover { text-decoration: underline;}
+            img { box-shadow: 0 0 15px rgba(0,0,0,0.75); }
 
-            ul {
-                margin-top: 10px;
+            .large-img { width: 960px; }
+            .medium-img {
+                width: 960px;
+                margin: 0 auto;
             }
 
-            ul li {
-                list-style: none;
-                margin-left: 20px;
+            .center { margin: 0 auto; }
+            .left { margin: 0 auto 0 0; }
+            .right { margin: 0 0 0 auto; }
+
+            .medium { width: 720px; }
+            .small { width: 480px; }
+
+            .big {
+                font-size: 30px;
+                font-weight: bold;
             }
+
+            .pad { margin: 50px auto; }
+            .small-pad { margin: 25px auto; }
 
             a {
+                color: black;
                 text-decoration: none;
             }
 
-            #available a {
-                padding: 5px 15px;
-                background-color: #eee;
-            }
+            a:hover { text-decoration: none; }
 
-            #available div {
-                margin-bottom: 6px;
-            }
+            ul { margin-left: 50px; }
+            li { margin-bottom: 20px; }
 
-            .group {
-                font-weight: bold;
-                margin-right: 20px;
+            .bold { font-weight: bold; }
+
+            @media all and (min-width: 1281px) {
+                body {
+                    width: 1280px;
+                    font-size: 22px;
+                    line-height: 1.75em;
+                }
+                .large-img { width: 1280px; }
+                .pad { margin: 100px auto; }
+                .small-pad { margin: 50px auto; }
             }
         </style>
     </head>
     <body>
-        <div id="main">
-            <img id="main-img" src="../example.jpg">
-            <div id="description">
-                <p>OSMLY is a simple import editor for OpenStreetMap. It makes importing simple by presenting features one at a time, allowing you to manually review each object and make any necessary adjustment to positions or tags, flag problems, or upload directly to OSM. Other users can also edit simultaneously from the same pool of features. The aim is to make importing basic features quick, easy, and cooperative.</p>
-                <br/>
-                <p>blah blah blah, tutorial, screenshots, etc...</p>
-                <br/>
-                <a style="text-decoration: none; color: rgba(67,127,190,1); font-weight: bold;" href="https://github.com/aaronlidman/osmly">Source code @ github</a>
-            </div>
-            <div id="available">
-                <div style="margin: 20px auto; font-weight: bold; width: 100%; font-size: 20px; padding-top: 20px;">Available Imports</div>
-                <div>
-                    <span class="group">Los Angeles County</span>
-                    <a href="">parks</a>
-                    <a href="">schools</a>
-                    <a href="">golf_courses</a>
-                    <a href="">retail landuse</a>
-                    <a href="">libraries</a>
-                </div>
-                <div>
-                    <span class="group">United States</span>
-                    <a href="">TIGER 2013 parks</a>
-                </div>
-            </div>
+        <p class="medium center pad"><span style="font-size: 75px; font-weight: bold; color: black;">OSMLY</span> is a simple browser based importer for OpenStreetMap. It makes importing easy by presenting each feature one at a time, allowing users to manually review the item, make any needed adjustments to positions or tags, and upload directly to OSM. It also allows for reporting problems that other users can look over and a quality assurance mode where administrative users can confirm everything that has been uploaded. The aim is to make simple imports easier, more cooperative, and less error prone.</p>
+
+        <img class="large-img" src="screenshots/example.jpg">
+
+        <div class="pad" style="text-align: center; font-size: 50px; font-weight: bold;"><a href="http://osmly.com/la-parks.html">Demo »</a></div>
+
+        <p class="medium center small-pad">OSMLY was born out of a frustration with the way imports are organized. I was preparing some imports for Los Angeles County and read up on past imports and organized things according to how I see they are being done today (wiki, spreadsheets, large .osm files, JOSM). I wasn't into it. The organization and tools involved seems too complicated and clunky for getting more than a small number of people involved.</p>
+
+        <p class="medium center small-pad">Even with very simple data we would have to deal with many .osm files each containing many features themselves, a central spreadsheet for tracking who is doing what and the status of each group of items, and everyone would have to use JOSM. Then editing involves managing multiple layers in JOSM, downloading the area around each feature, looking around and resolving any conflicts, uploading in a small batch, and making sure to tag changesets correctly. Ideally, someone would then go back, search for the changesets and confirm everything was done correctly.</p>
+
+        <img class="large-img" src="screenshots/overview.jpg">
+
+        <p class="medium center small-pad">That's too complicated for my liking and the pool of users who know how to do all this without making mistakes is too small. On the other hand, most of that complexity is necessary for organizing the people involved and maintaining some quality to the data going into OSM. I want a simpler and more automated way of handling the most manual and repetitive parts for really basic imports. I just want a simple way for someone with OSM experience and knowledge but not necessarily a GIS data or programming background to help out with basic tasks and share their knowledge to get more data on the map.</p>
+
+        <img class="large-img" src="screenshots/QA.jpg">
+
+        <p class="medium center small-pad">I built OSMLY to reduce the complexity of dealing with many items and many people for importing simple geometry. It's just the essentials: editing geometry, fixing tags, displaying relevant nearby features from OSM, flagging problems and uploading to OSM. Features are served from a simple database to keep track of everything/everyone and different actions are allowed based on an feature's status. Once an item is submitted it's available for Quality Assurance where other users can confirm everything was done correctly and flagged results can get attention from more experienced users in JOSM.</p>
+
+        <div class="medium-img">
+            <img src="screenshots/geojson.png">
         </div>
+
+        <p class="medium center small-pad">Technically, OSMLY takes in GeoJSON data and makes sure geometry is valid, simplifies, flags obviously difficult items, adds bounds for each item, and converts everything to a sqlite database ready to be served up to the world. A simple server takes care of mapping requests from the browser to database queries and returning results. Once the user has recieved a new feature the surrounding area is download from an OSM server and those results are then filtered for relevant geometry. It's all then displayed on the map. From there it gets a bit more complex depending on the user's actions.</p>
+
+        <img class="large-img" src="screenshots/basic.jpg">
+
+        <div class="medium center small-pad">
+            <span class="big">Some key features:</span>
+            <ul style="margin-top: 20px;">
+                <li><span class="bold">Context</span> - nearby relevant features that may conflict are shown alongside the item being edited along with complete tags<img style="margin-top: 20px;" src="screenshots/context.png"></li>
+                
+                <li><span class="bold">Quality Assurance</span> - administrative users, specified in the settings, can review everything that has been submitted and confirm each item has been done correctly</li>
+                
+                <li><span class="bold">Edit in JSOM</span> - every item can be remotely opened and completed in JOSM if you prefer <img style="margin-top: 20px;" src="screenshots/inJOSM.png"></li>
+
+                <li><span class="bold">Tag Manipulation</span> - depending on your data source, you might not have to do any tag manipulation before OSMLY. Tag keys can be renamed, added, and removed.</li>
+
+                <li><span class="bold">User Whitelist</span> - specify exactly which users are allowed on an import or allow everyone (default)</li>
+            </ul>
+        </div>
+
+        <div class="medium center pad">
+            <span class="big">Limitations:</span><p>Currently OSMLY only works with polygons. Eventually, time allowing, I'd like to expand to other GeoJSON feature types (points and linestrings). OSMLY is only ment for simple imports so there aren't plans for implementing multipolygons or anything else too complex. Some of this is technical but mostly it comes down to ease of use. Right now if a complex item is found OSMLY pushes the user to edit in JOSM.</p>
+        </div>
+
+        <div class="medium center pad">
+            <p style="margin-top: 20px;">Source code @ <a href="http://github.com/aaronlidman/osmly">github.com/aaronlidman/osmly</a></p>
+        </div>
+        
     </body>
 </html>
