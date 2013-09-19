@@ -1,2 +1,2 @@
-all: cp -R -f dist/* .
-
+all:
+	cp -R -f dist/* .
