@@ -25,6 +25,7 @@ osmly.mode = (function() {
             mode.set(mode.last);
         } else {
             osmly[mode.now].stop();
+            mode.now = false;
         }
     };
     // convenience
