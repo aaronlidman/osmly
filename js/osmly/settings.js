@@ -11,8 +11,8 @@ var settings = {
     zoom: 2,
     demo: true,
     changesetTags: {
-        'created_by': 'osmly',
-        'osmly:version': '0',
+        'created_by': 'OSMLY',
+        'osmly:version': '1.0.0',
         'imagery_used': 'Bing'
     },
     renameProperty: {},

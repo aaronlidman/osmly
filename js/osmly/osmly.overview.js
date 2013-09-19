@@ -51,7 +51,7 @@ osmly.overview = (function () {
                             <th>#</th>\
                             <th>Name</th>\
                             <th>Problem</th>\
-                            <th>Submitted</th>\
+                            <th>Uploaded</th>\
                             <th>User</th>\
                             <th>Mark as Done</th>\
                             <th>Edit in JOSM</th>\
@@ -149,7 +149,7 @@ osmly.overview = (function () {
                 if (_column == 'name') {
                     column.style.textAlign = 'left';
                     column.style.textOverflow = 'ellipsis';
-                    column.style.width = '250px';
+                    column.style.width = '200px';
                     column.whiteSpace = 'nowrap';
                     column.overflow = 'hidden';
                 }
@@ -160,13 +160,13 @@ osmly.overview = (function () {
 
             var markdone = createE('td');
             if (items[a][ov.index['submit']] === '') {
-                markdone.innerHTML = '<span data-id="' + items[a][ov.index['id']] + '" class="markdone">mark as done?</span>';
+                markdone.innerHTML = '<span data-id="' + items[a][ov.index['id']] + '" class="markdone">done?</span>';
             }
             tr.appendChild(markdone);
 
             var editjosm = createE('td');
             if (items[a][ov.index['submit']] === '') {
-                editjosm.innerHTML = '<span data-id="' + items[a][ov.index['id']] + '" class="editjosm">edit in JOSM</span>';
+                editjosm.innerHTML = '<span data-id="' + items[a][ov.index['id']] + '" class="editjosm">JOSM?</span>';
             }
             tr.appendChild(editjosm);
 

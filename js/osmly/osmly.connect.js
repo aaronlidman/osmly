@@ -85,7 +85,6 @@ osmly.connect = (function() {
             path: '/api/0.6/changeset/create',
             content: newChangesetXml(),
             options: {header: {'Content-Type': 'text/xml'}}
-                // fails without correct content type header
         }, function(err, response){
             if (err) {
                 // idk, something
@@ -105,6 +104,7 @@ osmly.connect = (function() {
         for (var key in osmly.settings.changesetTags) {
             tags += '<tag k="' + key + '" v="' + osmly.settings.changesetTags[key] + '"/>';
         }
+        tags += '<tag k="osmly:import" v="' + osmly.settings.db.split('?')[1].split('=')[1] + '"/>';
         return '<osm><changeset>' + tags + '<\/changeset><\/osm>';
     }
 
