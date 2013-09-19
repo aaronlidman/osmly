@@ -83,9 +83,9 @@ osmly.import = (function() {
         $('body').append('\
             <div id="flash">\
                 <div style="position: relative">\
-                    <img class="problem hidden flash" src="/static/problem.svg" />\
-                    <img class="right-arrow hidden flash" src="/static/right-arrow.svg" />\
-                    <img class="up-arrow hidden flash" src="/static/up-arrow.svg" />\
+                    <img class="problem hidden flash" src="static/problem.svg" />\
+                    <img class="right-arrow hidden flash" src="static/right-arrow.svg" />\
+                    <img class="up-arrow hidden flash" src="static/up-arrow.svg" />\
                 </div>\
             </div>\
         ');
