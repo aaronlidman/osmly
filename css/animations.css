@@ -2,28 +2,28 @@
     http://daneden.me/animate/
 */
 @-webkit-keyframes fadeInLefttoRight { 
-    0% { opacity: 0; -webkit-transform: translateX(-45px); }
-    25% { opacity: 1; -webkit-transform: translateX(-15px); }
-    75% { opacity: 1; -webkit-transform: translateX(15px); }
-    100% { opacity: 0; -webkit-transform: translateX(75px); }
+    0% { opacity: 0; -webkit-transform: translateX(-100px); }
+    25% { opacity: 1; -webkit-transform: translateX(-50px); }
+    75% { opacity: 1; -webkit-transform: translateX(50px); }
+    100% { opacity: 0; -webkit-transform: translateX(100px); }
 }
 @-moz-keyframes fadeInLefttoRight { 
-    0% { opacity: 0; -moz-transform: translateX(-45px); }
-    25% { opacity: 1; -moz-transform: translateX(-15px); }
-    75% { opacity: 1; -moz-transform: translateX(15px); }
-    100% { opacity: 0; -moz-transform: translateX(75px); }
+    0% { opacity: 0; -moz-transform: translateX(-100px); }
+    25% { opacity: 1; -moz-transform: translateX(-50px); }
+    75% { opacity: 1; -moz-transform: translateX(50px); }
+    100% { opacity: 0; -moz-transform: translateX(100px); }
 }
 @-o-keyframes fadeInLefttoRight { 
-    0% { opacity: 0; -o-transform: translateX(-45px); }
-    25% { opacity: 1; -o-transform: translateX(-15px); }
-    75% { opacity: 1; -o-transform: translateX(15px); }
-    100% { opacity: 0; -o-transform: translateX(75px); }
+    0% { opacity: 0; -o-transform: translateX(-100px); }
+    25% { opacity: 1; -o-transform: translateX(-50px); }
+    75% { opacity: 1; -o-transform: translateX(50px); }
+    100% { opacity: 0; -o-transform: translateX(100px); }
 }
 @keyframes fadeInLefttoRight { 
-    0% { opacity: 0; transform: translateX(-45px); }
-    25% { opacity: 1; transform: translateX(-15px); }
-    75% { opacity: 1; transform: translateX(15px); }
-    100% { opacity: 0; transform: translateX(75px); }
+    0% { opacity: 0; transform: translateX(-100px); }
+    25% { opacity: 1; transform: translateX(-50px); }
+    75% { opacity: 1; transform: translateX(50px); }
+    100% { opacity: 0; transform: translateX(100px); }
 }
 .fadeLefttoRight {
     -moz-animation-timing-function: linear;
@@ -47,31 +47,31 @@
 }
 
 @-webkit-keyframes fadeInUpBig {
-    0% { opacity: 0; -webkit-transform: translateY(45px); }
-    25% { opacity: 1; -webkit-transform: translateY(15px); }
-    75% { opacity: 1; -webkit-transform: translateY(-15px); }
-    100% { opacity: 0; -webkit-transform: translateY(-75px); }
+    0% { opacity: 0; -webkit-transform: translateY(100px); }
+    25% { opacity: 1; -webkit-transform: translateY(50px); }
+    75% { opacity: 1; -webkit-transform: translateY(-50px); }
+    100% { opacity: 0; -webkit-transform: translateY(-100px); }
 }
 
 @-moz-keyframes fadeInUpBig {
-    0% { opacity: 0; -moz-transform: translateY(45px); }
-    25% { opacity: 1; -moz-transform: translateY(15px); }
-    75% { opacity: 1; -moz-transform: translateY(-15px); }
-    100% { opacity: 0; -moz-transform: translateY(-75px); }
+    0% { opacity: 0; -moz-transform: translateY(100px); }
+    25% { opacity: 1; -moz-transform: translateY(50px); }
+    75% { opacity: 1; -moz-transform: translateY(-50px); }
+    100% { opacity: 0; -moz-transform: translateY(-100px); }
 }
 
 @-o-keyframes fadeInUpBig {
-    0% { opacity: 0; -o-transform: translateY(45px); }
-    25% { opacity: 1; -o-transform: translateY(15px); }
-    75% { opacity: 1; -o-transform: translateY(-15px); }
-    100% { opacity: 0; -o-transform: translateY(-75px); }
+    0% { opacity: 0; -o-transform: translateY(100px); }
+    25% { opacity: 1; -o-transform: translateY(50px); }
+    75% { opacity: 1; -o-transform: translateY(-50px); }
+    100% { opacity: 0; -o-transform: translateY(-100px); }
 }
 
 @keyframes fadeInUpBig {
-    0% { opacity: 0; transform: translateY(45px); }
-    25% { opacity: 1; transform: translateY(15px); }
-    75% { opacity: 1; transform: translateY(-15px); }
-    100% { opacity: 0; transform: translateY(-75px); }
+    0% { opacity: 0; transform: translateY(100px); }
+    25% { opacity: 1; transform: translateY(50px); }
+    75% { opacity: 1; transform: translateY(-50px); }
+    100% { opacity: 0; transform: translateY(-100px); }
 }
 .fadeInUpBig {
     -moz-animation-timing-function: linear;

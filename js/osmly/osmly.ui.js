@@ -104,14 +104,14 @@ osmly.ui = (function() {
             <div class="semantic-content" id="user-modal">\
                 <div class="modal-inner">\
                     <div class="modal-content">\
+                        <div id="logout" style="text-align: center; margin: 50px 0;">Logout »</div>\
                         <div id="changeset" style="display: none;">\
-                            <h2>Changeset</h2>\
+                            <hr style="margin-top: 50px;">\
+                            <h2 style="margin-top: 50px;">Changeset</h2>\
                             <div id="changeset-form" contenteditable="true"></div>\
                             <span id="changeset-link"></span>\
                             <span id="update-change">update</span>\
-                            <hr style="margin-top: 50px;">\
                         </div>\
-                        <div id="logout" style="text-align: center; margin: 50px 0;">Logout »</div>\
                     </div>\
                 </div>\
                 <a href="#!" class="modal-close" title="Close this modal" data-close="Close" data-dismiss="modal"></a>\
