@@ -25,5 +25,8 @@ These are the server components to [osmly](http://github.com/aaronlidman/osmly).
     - `sh setup.sh` will install all necessary dependencies and run the server
     - __BEWARE__: this is ment for a dedicated ubuntu server, it doesn't play nice with any existing nginx, uwsgi, or flask instances that might be running
 - once running, requests are made against `http://your-ip-address/?db=YOURFILE`
+    - try the included sample database: `http://your-ip-address/?db=sample`
+    - going to root, http://ip-address/, should show an index of available .sqlite databases
     - no sqlite extension needed on the db query
     - this entry point is used by the osmly client, see the `db` setting in the osmly [settings documentation](https://github.com/aaronlidman/osmly/blob/master/settings_documentation.md).
+    - if you have any problems getting flask or uwsgi working with nginx refer to this: https://gist.github.com/mplewis/6076082 it's what I've been using. The process can be a bit finiky, `apt-get purge nginx` and reinstalling has saved me a few times.
