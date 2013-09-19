@@ -70,7 +70,6 @@ dist/osmly.min.css: dist/osmly.css Makefile
 	rm -f dist/osmly.css
 
 move:
-	cp index.html dist/index.html
 	cp land.html dist/land.html
 	cp sample-template.html dist/sample-template.html
 	cp -R -f static dist/static
