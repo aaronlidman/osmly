@@ -4,17 +4,16 @@
         <title>OSMLY</title>
         <meta charset='utf-8'>
         <style type="text/css">
-            * {padding: 0; margin: 0; color: #333;}
+            * { padding: 0; margin: 0; }
             body {
-                background-color: #ddd;
+                color: #222;
+                background-color: white;
                 font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
                 margin: 0 auto;
                 width: 960px;
                 font-size: 18px;
                 line-height: 1.6em;
             }
-
-            img { box-shadow: 0 0 15px rgba(0,0,0,0.75); }
 
             .large-img { width: 960px; }
             .medium-img {
@@ -68,7 +67,7 @@
 
         <div class="pad" style="text-align: center; font-size: 50px; font-weight: bold;"><a href="http://osmly.com/la-parks.html">Demo »</a></div>
 
-        <p class="medium center small-pad">OSMLY was born out of a frustration with the way imports are organized. I was preparing some imports for Los Angeles County and read up on past imports and organized things according to how I see they are being done today (wiki, spreadsheets, large .osm files, JOSM). I wasn't into it. The organization and tools involved seems too complicated and clunky for getting more than a small number of people involved.</p>
+        <p class="medium center small-pad">OSMLY was born out of a frustration with the way imports are organized. I was preparing some imports for Los Angeles County, reading up on past imports and organized things according to how I see they are being done today (wiki, spreadsheets, many .osm files, JOSM). I wasn't into it. The organization and tools involved seems too complicated and clunky for getting more than a small number of people involved.</p>
 
         <p class="medium center small-pad">Even with very simple data we would have to deal with many .osm files each containing many features themselves, a central spreadsheet for tracking who is doing what and the status of each group of items, and everyone would have to use JOSM. Then editing involves managing multiple layers in JOSM, downloading the area around each feature, looking around and resolving any conflicts, uploading in a small batch, and making sure to tag changesets correctly. Ideally, someone would then go back, search for the changesets and confirm everything was done correctly.</p>
 
@@ -78,20 +77,20 @@
 
         <img class="large-img" src="screenshots/QA.jpg">
 
-        <p class="medium center small-pad">I built OSMLY to reduce the complexity of dealing with many items and many people for importing simple geometry. It's just the essentials: editing geometry, fixing tags, displaying relevant nearby features from OSM, flagging problems and uploading to OSM. Features are served from a simple database to keep track of everything/everyone and different actions are allowed based on an feature's status. Once an item is submitted it's available for Quality Assurance where other users can confirm everything was done correctly and flagged results can get attention from more experienced users in JOSM.</p>
+        <p class="medium center small-pad">I built OSMLY to reduce the complexity of doing simple imports with many people and many features. It's just the essentials: editing geometry, fixing tags, displaying relevant nearby features from OSM, flagging problems and uploading to OSM. Features are served from a simple database to keep track of everything/everyone and different actions are allowed based on an feature's status. Once an item is submitted it's available for Quality Assurance where other users can confirm everything was done correctly and flagged results can get attention from more experienced users in JOSM.</p>
 
         <div class="medium-img">
             <img src="screenshots/geojson.png">
         </div>
 
-        <p class="medium center small-pad">Technically, OSMLY takes in GeoJSON data and makes sure geometry is valid, simplifies, flags obviously difficult items, adds bounds for each item, and converts everything to a sqlite database ready to be served up to the world. A simple server takes care of mapping requests from the browser to database queries and returning results. Once the user has recieved a new feature the surrounding area is download from an OSM server and those results are then filtered for relevant geometry. It's all then displayed on the map. From there it gets a bit more complex depending on the user's actions.</p>
+        <p class="medium center small-pad">Technically, OSMLY takes in GeoJSON data and makes sure geometry is valid, simplifies, flags obviously difficult items, adds bounds for each item, and converts everything to a sqlite database ready to be served up to the world. A simple server takes care of routing requests from the browser to database queries and returning results. Once the user has received a new feature the surrounding area is download from an OSM server and those results are filtered for relevant geometry. Then it's all displayed on the map. From there it gets a bit more complex depending on the user's actions.</p>
 
         <img class="large-img" src="screenshots/basic.jpg">
 
         <div class="medium center small-pad">
             <span class="big">Some key features:</span>
             <ul style="margin-top: 20px;">
-                <li><span class="bold">Context</span> - nearby relevant features that may conflict are shown alongside the item being edited along with complete tags<img style="margin-top: 20px;" src="screenshots/context.png"></li>
+                <li><span class="bold">Context</span> - nearby relevant features that may conflict are shown alongside the item being edited along with complete tags. Context filtering can be set using regular OSM tags.<img style="margin-top: 20px;" src="screenshots/context.png"></li>
                 
                 <li><span class="bold">Quality Assurance</span> - administrative users, specified in the settings, can review everything that has been submitted and confirm each item has been done correctly</li>
                 
