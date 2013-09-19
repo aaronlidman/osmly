@@ -10,9 +10,24 @@
     <body>
         <div id="map"></div>
         <script type="text/javascript">
+            /* required settings (see settings_documentation.md):
+                - title
+                - instructions
+                - db
+                - context
+                - problems
+                - usePropertyAsTag
+            */
+
             var config = {
-                // settings here, see settings_documentation.md
+                title: '',
+                instructions: '',
+                db: '',
+                usePropertyAsTag: [],
+                context: {},
+                problems: [],
             };
+
             osmly.go(config);
         </script>        
     </body>
