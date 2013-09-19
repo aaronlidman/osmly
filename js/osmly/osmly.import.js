@@ -83,9 +83,9 @@ osmly.import = (function() {
         $('body').append('\
             <div id="flash">\
                 <div style="position: relative">\
-                    <i class="foundicon-remove hidden display"></i>\
-                    <i class="foundicon-right-arrow hidden display"></i>\
-                    <i class="foundicon-up-arrow hidden display"></i>\
+                    <img class="problem hidden flash" src="/static/problem.svg" />\
+                    <img class="right-arrow hidden flash" src="/static/right-arrow.svg" />\
+                    <img class="up-arrow hidden flash" src="/static/up-arrow.svg" />\
                 </div>\
             </div>\
         ');
@@ -146,7 +146,7 @@ osmly.import = (function() {
     function skip() {
         hideItem();
         $('#tags tr').remove();
-        leftToRight($('.foundicon-right-arrow'));
+        leftToRight($('.right-arrow'));
         next();
     }
 
@@ -159,7 +159,7 @@ osmly.import = (function() {
             $('#tags tr').remove();
             next();
         }
-        bigUp($('.foundicon-up-arrow'));
+        bigUp($('.up-arrow'));
     }
 
     function problem() {
@@ -171,9 +171,9 @@ osmly.import = (function() {
                 problem: $('#problem option')[pro].text
             });
         }
-        $('.foundicon-remove').show(function(){
+        $('.problem').show(function(){
             setTimeout(function(){
-                $('.foundicon-remove').fadeOut(250);
+                $('.problem').fadeOut(250);
             }, 250);
         });
         $('#problem').val('problem');

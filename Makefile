@@ -15,7 +15,6 @@ OSMLY_JS = \
 CSS = \
 	js/lib/leaflet-0.7dev/leaflet.css \
 	css/leaflet.label.css \
-	css/general_foundicons.css \
 	css/css.css \
 	css/leaflet-overwrite.css \
 	css/animations.css \
