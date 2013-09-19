@@ -62,53 +62,45 @@
     </head>
     <body>
         <p class="medium center pad"><span style="font-size: 75px; font-weight: bold; color: black;">OSMLY</span> is a simple browser based importer for OpenStreetMap. It makes importing easy by presenting each feature one at a time, allowing users to manually review the item, make any needed adjustments to positions or tags, and upload directly to OSM. It also allows for reporting problems that other users can look over and a quality assurance mode where administrative users can confirm everything that has been uploaded. The aim is to make simple imports easier, more cooperative, and less error prone.</p>
-
         <img class="large-img" src="screenshots/example.jpg">
-
         <div class="pad" style="text-align: center; font-size: 50px; font-weight: bold;"><a href="http://osmly.com/la-parks.html">Demo »</a></div>
-
         <p class="medium center small-pad">OSMLY was born out of a frustration with the way imports are organized. I was preparing some imports for Los Angeles County, reading up on past imports and organized things according to how I see they are being done today (wiki, spreadsheets, many .osm files, JOSM). I wasn't into it. The organization and tools involved seems too complicated and clunky for getting more than a small number of people involved.</p>
-
         <p class="medium center small-pad">Even with very simple data we would have to deal with many .osm files each containing many features themselves, a central spreadsheet for tracking who is doing what and the status of each group of items, and everyone would have to use JOSM. Then editing involves managing multiple layers in JOSM, downloading the area around each feature, looking around and resolving any conflicts, uploading in a small batch, and making sure to tag changesets correctly. Ideally, someone would then go back, search for the changesets and confirm everything was done correctly.</p>
-
         <img class="large-img" src="screenshots/overview.jpg">
-
         <p class="medium center small-pad">That's too complicated for my liking and the pool of users who know how to do all this without making mistakes is too small. On the other hand, most of that complexity is necessary for organizing the people involved and maintaining some quality to the data going into OSM. I want a simpler and more automated way of handling the most manual and repetitive parts for really basic imports. I just want a simple way for someone with OSM experience and knowledge but not necessarily a GIS data or programming background to help out with basic tasks and share their knowledge to get more data on the map.</p>
-
         <img class="large-img" src="screenshots/QA.jpg">
-
         <p class="medium center small-pad">I built OSMLY to reduce the complexity of doing simple imports with many people and many features. It's just the essentials: editing geometry, fixing tags, displaying relevant nearby features from OSM, flagging problems and uploading to OSM. Features are served from a simple database to keep track of everything/everyone and different actions are allowed based on an feature's status. Once an item is submitted it's available for Quality Assurance where other users can confirm everything was done correctly and flagged results can get attention from more experienced users in JOSM.</p>
-
         <div class="medium-img">
             <img src="screenshots/geojson.png">
         </div>
-
         <p class="medium center small-pad">Technically, OSMLY takes in GeoJSON data and makes sure geometry is valid, simplifies, flags obviously difficult items, adds bounds for each item, and converts everything to a sqlite database ready to be served up to the world. A simple server takes care of routing requests from the browser to database queries and returning results. Once the user has received a new feature the surrounding area is download from an OSM server and those results are filtered for relevant geometry. Then it's all displayed on the map. From there it gets a bit more complex depending on the user's actions.</p>
-
         <img class="large-img" src="screenshots/basic.jpg">
-
         <div class="medium center small-pad">
             <span class="big">Some key features:</span>
             <ul style="margin-top: 20px;">
                 <li><span class="bold">Context</span> - nearby relevant features that may conflict are shown alongside the item being edited along with complete tags. Context filtering can be set using regular OSM tags.<img style="margin-top: 20px;" src="screenshots/context.png"></li>
-                
                 <li><span class="bold">Quality Assurance</span> - administrative users, specified in the settings, can review everything that has been submitted and confirm each item has been done correctly</li>
-                
                 <li><span class="bold">Edit in JSOM</span> - every item can be remotely opened and completed in JOSM if you prefer <img style="margin-top: 20px;" src="screenshots/inJOSM.png"></li>
-
                 <li><span class="bold">Tag Manipulation</span> - depending on your data source, you might not have to do any tag manipulation before OSMLY. Tag keys can be renamed, added, and removed.</li>
-
                 <li><span class="bold">User Whitelist</span> - specify exactly which users are allowed on an import or allow everyone (default)</li>
             </ul>
         </div>
-
         <div class="medium center pad">
             <span class="big">Limitations:</span><p>Currently OSMLY only works with polygons. Eventually, time allowing, I'd like to expand to other GeoJSON feature types (points and linestrings). OSMLY is only ment for simple imports so there aren't plans for implementing multipolygons or anything else too complex. Some of this is technical but mostly it comes down to ease of use. Right now if a complex item is found OSMLY pushes the user to edit in JOSM.</p>
         </div>
-
         <div class="medium center pad">
             <p style="margin-top: 20px;">Source code @ <a href="http://github.com/aaronlidman/osmly">github.com/aaronlidman/osmly</a></p>
         </div>
-        
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-44161212-1']);
+            _gaq.push(['_trackPageview']);
+
+            (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            })();
+        </script>
     </body>
 </html>
