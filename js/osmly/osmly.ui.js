@@ -143,7 +143,7 @@ osmly.ui = (function() {
         $('#qa').one('click', osmly.mode.qa);
         $('#overview').on('click', osmly.mode.overview);
         $('#update-change').on('click', changeset);
-        $('#remote-edit-modal').on('click', remoteEdit);
+        $('#remote-edit-modal').on('click', 'button', remoteEdit);
         $('#logout').on('click', function() {
             osmly.auth.logout();
             location.reload();
@@ -159,17 +159,16 @@ osmly.ui = (function() {
     }
 
     function remoteEdit() {
-        var result = this.getAttribute('data-type');
-        if (result == 'yes') {
-            var id = osmly.imp.id;
-            if (this.getAttribute('data-id')) id = this.getAttribute('data-id');
+        console.log(this);
+        if (this.getAttribute('data-type') == 'yes') {
+            var id = this.getAttribute('data-id');
 
             if (osmly.auth.authenticated()) {
                 if (osmly.auth.userAllowed()) {
                     osmly.connect.updateItem('submit', {submit: 'JOSM'}, function(){
                         CSSModal.close();
-                        if (id == osmly.imp.id) {
-                            skip();
+                        if (osmly.mode.now == 'import') {
+                            osmly.import.skip();
                         } else {
                             osmly.overview.modalDone();
                         }

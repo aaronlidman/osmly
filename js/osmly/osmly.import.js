@@ -22,7 +22,7 @@ osmly.import = (function() {
             window.open(osmly.osmlink);
         });
         // botton-left buttons
-        $('#skip').on('click', skip);
+        $('#skip').on('click', imp.skip);
         $('#problem').on('change', problem);
         $('#submit').on('click', submit);
         $('#add-new-tag').on('click', addTag);
@@ -143,12 +143,12 @@ osmly.import = (function() {
         osmly.map.removeLayer(osmly.map.contextLayer);
     }
 
-    function skip() {
+    imp.skip = function() {
         hideItem();
         $('#tags tr').remove();
         leftToRight($('.right-arrow'));
         next();
-    }
+    };
 
     function submit() {
         hideItem();
