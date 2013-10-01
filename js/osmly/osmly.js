@@ -8,7 +8,14 @@ window.osmly = (function () {
         $(function(){
             if (typeof settings === 'object') {
                 for (var obj in settings) {
-                    osmly.settings[obj] = settings[obj];
+                    if (Object.prototype.toString.call(settings[obj]).slice(8, -1) == 'Object' &&
+                        (obj === 'contextStyle' || obj === 'featureStyle' || obj === 'changesetTags')) {
+                        // for each item in the object we append to the current setting
+                        // append/not overwrite the setting, there are useful default settings in there
+                        for (var setting in settings[obj]) {
+                            osmly.settings[obj][setting] = settings[obj][setting];
+                        }
+                    } else { osmly.settings[obj] = settings[obj]; }
                 }
             } else {
                 alert('need some settings');
