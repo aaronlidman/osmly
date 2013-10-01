@@ -22,7 +22,8 @@ var settings = {
         color: '#00FF00',
         weight: 3,
         opacity: 1,
-        clickable: false
+        clickable: false,
+        dashArray: '5, 10'
     },
     contextStyle: {
         color: '#FFFF00',
