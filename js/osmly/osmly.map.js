@@ -1,3 +1,4 @@
+/* jshint multistr:true */
 osmly.map = function() {
     var map = L.map('map', {
         center: osmly.settings.origin,
@@ -40,7 +41,7 @@ osmly.map = function() {
         osmly.ui.notify('getting nearby OSM data');
         getOsm(bbox, function(xml) {
             osmly.ui.notify('rendering OSM data');
-            context = filterContext(osm_geojson.osm2geojson(xml));
+            context = filterContext(osm_geojson.osm2geojson(xml, true));
             setContext(context);
             map.addLayer(map.contextLayer);
             callback();
@@ -108,9 +109,22 @@ osmly.map = function() {
                 if (feature.properties) {
                     if (feature.properties.name) label = feature.properties.name;
                     while (t < tagKeys.length) {
-                        popup += '<li><span class="k">' + tagKeys[t] +
-                        '</span>: ' + feature.properties[tagKeys[t]] + '</li>';
+                        // we don't display osm_* tags but they're used for merging
+                        if (tagKeys[t].split('osm_').length === 1) {
+                            popup += '<li><span class="k">' + tagKeys[t] +
+                            '</span>: ' + feature.properties[tagKeys[t]] + '</li>';
+                        }
                         t++;
+                    }
+                    if (feature.geometry.type == 'Point' && osmly.mode.now == 'import') {
+                        popup += '<li id="merge" data-id="' + feature.properties.osm_id + '" style="\
+                            margin-top: 10px;\
+                            text-align: center;\
+                            padding: 10px 0;\
+                            border: 1px solid #aaa;\
+                            background-color: #eee;\
+                            cursor: pointer;\
+                            ">Merge with import data</li>';
                     }
                     layer.bindPopup(popup);
                     layer.bindLabel(label);
