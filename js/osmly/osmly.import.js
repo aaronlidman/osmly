@@ -37,6 +37,14 @@ osmly.import = (function() {
             osmly.map.toggleLayer(osmly.map.contextLayer);
             osmly.map.toggleLayer(osmly.map.featureLayer);
         });
+
+        $(document).on('click', '.merge', function(){
+            // not sure why I can't do $('li').on...
+            var osm = this.getAttribute('data-id'),
+                layer = this.getAttribute('data-layer'),
+                tags = this.getAttribute('data-tags');
+            imp.merge(osm, layer, tags);
+        });
     }
 
     function unbind() {
@@ -335,6 +343,15 @@ osmly.import = (function() {
         $('#tags tr').remove();
         next();
     }
+
+    imp.merge = function(osm_id, layer_id, tags) {
+        // TODO
+            // delete osm_id in OSMChange
+                // going to be pretty involved
+            // osmly.map.layerRemove(osmly.map._layer[layer_id]);
+            // filter tags, remove osm_*
+            // append tags to osmly.import.data.properties
+    };
 
     return imp;
 }());

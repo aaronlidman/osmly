@@ -107,6 +107,10 @@ osmly.map = function() {
                     tagKeys = Object.keys(feature.properties);
 
                 if (feature.properties) {
+                    layer.bindPopup(popup);
+                        // popup is bound upfront so we can get a leaflet layer id
+                        // this id is included in the 'data-layer' attribute, used for merging
+
                     if (feature.properties.name) label = feature.properties.name;
                     while (t < tagKeys.length) {
                         // we don't display osm_* tags but they're used for merging
@@ -117,7 +121,11 @@ osmly.map = function() {
                         t++;
                     }
                     if (feature.geometry.type == 'Point' && osmly.mode.now == 'import') {
-                        popup += '<li id="merge" data-id="' + feature.properties.osm_id + '" style="\
+                        popup += '<li class="merge"\
+                            data-id="' + feature.properties.osm_id + '" \
+                            data-layer="' + layer._leaflet_id + '"\
+                            data-tags=\'' + JSON.stringify(feature.properties) + '\'\
+                            style="\
                             margin-top: 10px;\
                             text-align: center;\
                             padding: 10px 0;\
@@ -126,7 +134,7 @@ osmly.map = function() {
                             cursor: pointer;\
                             ">Merge with import data</li>';
                     }
-                    layer.bindPopup(popup);
+                    layer._popup._content = popup;
                     layer.bindLabel(label);
                 }
             },
