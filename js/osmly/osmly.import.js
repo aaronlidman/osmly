@@ -40,17 +40,32 @@ osmly.import = (function() {
 
         $(document).on('click', '.merge', function(){
             // not sure why I can't do $('li').on...
-            // the osm id is contained in the tags
+            imp.mergeTags = JSON.parse(this.getAttribute('data-tags'));
             var layer = this.getAttribute('data-layer'),
-                tags = this.getAttribute('data-tags');
-            imp.merge(layer, tags);
+                conflicts = compareTags(imp.mergeTags);
+            if (conflicts) {
+                conflictModal(conflicts);
+            } else {
+                merge();
+            }
         });
 
         $('#reusable-modal').on('click', 'button', function(){
             $('[data-tag="' + this.getAttribute('data-tag') +'"]').removeAttr('style');
             $('[data-tag="' + this.getAttribute('data-tag') +'"]').removeAttr('data-selected');
-            this.setAttribute('style', 'background: yellow;');
+            this.setAttribute('style', 'background: #7EEE7A');
             this.setAttribute('data-selected', 'true');
+        });
+
+        $('#reusable-modal').on('click', '#merge', function() {
+            // turn the selected buttons into tags
+            var selected = $('[data-selected]');
+            if (selected.length == this.getAttribute('data-count')) {
+                for (var a = 0; a < selected.length; a++) {
+                    imp.mergeTags[selected[a].getAttribute('data-tag')] = selected[a].textContent;
+                }
+            }
+            merge();
         });
     }
 
@@ -133,16 +148,16 @@ osmly.import = (function() {
         }
     }
 
-    function populateTags() {
-        var properties = imp.data.properties;
-        for (var tag in properties) {
-            if (properties[tag] !== null && properties[tag] !== 'null') {
+    function populateTags(tags) {
+        $('#tags tr').remove();
+        for (var tag in tags) {
+            if (tags[tag] !== null && tags[tag] !== 'null') {
                 $('#tags tbody').append(
                     '<tr>' +
                     '<td class="k" spellcheck="false" contenteditable="true">' +
                     tag + '</td>' +
                     '<td class="v" spellcheck="false" contenteditable="true">' +
-                    properties[tag] + '</td>' +
+                    tags[tag] + '</td>' +
                     '<td class="minus">-</td>' +
                     '</tr>');
             }
@@ -160,7 +175,6 @@ osmly.import = (function() {
 
     imp.skip = function() {
         hideItem();
-        $('#tags tr').remove();
         leftToRight($('.right-arrow'));
         next();
     };
@@ -205,7 +219,7 @@ osmly.import = (function() {
         $('#tags tr').remove();
         hideItem(displayItem);
         osmly.map.setFeature(imp.data, imp.isEditable);
-        populateTags();
+        populateTags(imp.data.properties);
     }
 
     function addTag() {
@@ -244,11 +258,11 @@ osmly.import = (function() {
 
         if (imp.isEditable) {
             osmly.map.context(imp.bbox, 0.001, function() {
-                populateTags();
+                populateTags(imp.data.properties);
                 displayItem();
             });
         } else {
-            populateTags();
+            populateTags(imp.data.properties);
             displayItem();
         }
     }
@@ -351,20 +365,6 @@ osmly.import = (function() {
         next();
     }
 
-    imp.merge = function(layer_id, tags) {
-        tags = JSON.parse(tags);
-        var id = tags.osm_id,
-            conflicts = compareTags(tags);
-
-        if (conflicts) conflictModal(conflicts);
-
-        // user can bail right up until submitting the modal, after that it requires a reset
-        // delete osm_id in OSMChange
-            // going to be pretty involved
-        // append tags to osmly.import.data.properties
-        // osmly.map.layerRemove(osmly.map._layer[layer_id]);
-    };
-
     function compareTags(tags) {
         var conflicts = {},
             count = 0,
@@ -383,7 +383,8 @@ osmly.import = (function() {
         $('#reusable-modal #modal-label').html('<h2>Tag Conflict</h2>');
 
         var html = '',
-            importTags = osmly.import.tags();
+            importTags = osmly.import.tags(),
+            count = 0;
 
         for (var conflict in conflicts) {
             html += '<div class="conflict">' +
@@ -391,12 +392,23 @@ osmly.import = (function() {
                 '<button class="eee" data-tag="' + conflict + '" data-source="import">' + importTags[conflict] + '</button> or ' +
                 '<button class="eee" data-tag="' + conflict + '" data-source="osm">' + conflicts[conflict] + '</button> ?' +
                 '</div>';
+            count++;
         }
 
-        html += '<span id="merge" style="cursor: pointer; text-decoration: underline;">Merge</span>';
+        html += '<span id="merge" data-count="' + count + '" style="cursor: pointer; text-decoration: underline;">Merge</span>';
 
         $('#reusable-modal .modal-content').html(html);
         CSSModal.open('reusable-modal');
+    }
+
+    function merge() {
+        var tags = {};
+        for (var tag in imp.mergeTags) {
+            if (tag.split('osm_').length === 1) {
+                tags[tag] = imp.mergeTags[tag];
+            }
+        }
+        populateTags(tags);
     }
 
     return imp;
