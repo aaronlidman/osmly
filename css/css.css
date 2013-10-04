@@ -350,13 +350,25 @@ button {
     background-color: black;
     font-size: 14px;
     padding: 7px 10px;
-    margin-left: 20px;
     cursor: pointer;
 }
 button:hover {
     transition: all 200ms ease;
     background-color: #333;
 }
+.eee {
+    background: #eee;
+    border: 1px solid #aaa;
+    color: black;
+}
+.eee:hover {
+    background-color: #ddd;
+    color: black;
+}
+.selected {
+    background-color: yellow;
+}
+
 .markdone, .editjosm, #logout {cursor: pointer;}
 .wide800 {
     width: 800px !important;
@@ -411,4 +423,21 @@ button:hover {
 
 #report tr:last-child {
     border-bottom: none;
+}
+
+.conflict {
+    padding: 10px 0;
+    font-size: 14px;
+    border-top: 1px dashed #ccc;
+}
+
+.conflict:first-child {
+    border-top: none;
+}
+
+.available-value {
+    cursor: pointer;
+    border: 1px solid #aaa;
+    background: #eee;
+    padding: 3px 7px;
 }

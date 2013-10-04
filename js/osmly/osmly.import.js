@@ -45,6 +45,13 @@ osmly.import = (function() {
                 tags = this.getAttribute('data-tags');
             imp.merge(layer, tags);
         });
+
+        $('#reusable-modal').on('click', 'button', function(){
+            $('[data-tag=' + this.getAttribute('data-tag') +']').removeAttr('style');
+            $('[data-tag=' + this.getAttribute('data-tag') +']').removeAttr('data-selected');
+            this.setAttribute('style', 'background: yellow;');
+            this.setAttribute('data-selected', 'true');
+        });
     }
 
     function unbind() {
@@ -349,11 +356,9 @@ osmly.import = (function() {
         var id = tags.osm_id,
             conflicts = compareTags(tags);
 
-        if (conflicts) {
-            // show the modal laying out the tag problems
-        }
+        if (conflicts) conflictModal(conflicts);
 
-        // user can bail right up until the modal
+        // user can bail right up until submitting the modal, after that it requires a reset
         // delete osm_id in OSMChange
             // going to be pretty involved
         // append tags to osmly.import.data.properties
@@ -371,6 +376,24 @@ osmly.import = (function() {
         }
         if (count) return conflicts;
         return false;
+    }
+
+    function conflictModal(conflicts) {
+        $('#reusable-modal #modal-label').html('<h2>Tag Conflict</h2>');
+
+        var html = '';
+        for (var conflict in conflicts) {
+            html += '<div class="conflict">' +
+                '\'' + conflict + '\' is ' +
+                '<button class="eee" data-tag="' + conflict + '" data-source="import">' + imp.data.properties[conflict] + '</button> or ' +
+                '<button class="eee" data-tag="' + conflict + '" data-source="osm">' + conflicts[conflict] + '</button> ?' +
+                '</div>';
+        }
+
+        html += '<span id="merge" style="cursor: pointer;">Merge</span>';
+
+        $('#reusable-modal .modal-content').html(html);
+        CSSModal.open('reusable-modal');
     }
 
     return imp;

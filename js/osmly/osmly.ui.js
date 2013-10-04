@@ -96,6 +96,7 @@ osmly.ui = (function() {
             </div>\
             <div class="semantic-content" id="reusable-modal">\
                 <div class="modal-inner wide800">\
+                    <header id="modal-label"></header>\
                     <div class="modal-content">\
                     </div>\
                 </div>\
