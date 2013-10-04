@@ -47,8 +47,8 @@ osmly.import = (function() {
         });
 
         $('#reusable-modal').on('click', 'button', function(){
-            $('[data-tag=' + this.getAttribute('data-tag') +']').removeAttr('style');
-            $('[data-tag=' + this.getAttribute('data-tag') +']').removeAttr('data-selected');
+            $('[data-tag="' + this.getAttribute('data-tag') +'"]').removeAttr('style');
+            $('[data-tag="' + this.getAttribute('data-tag') +'"]').removeAttr('data-selected');
             this.setAttribute('style', 'background: yellow;');
             this.setAttribute('data-selected', 'true');
         });
@@ -367,9 +367,10 @@ osmly.import = (function() {
 
     function compareTags(tags) {
         var conflicts = {},
-            count = 0;
+            count = 0,
+            importTags = osmly.import.tags();
         for (var tag in tags) {
-            if (imp.data.properties[tag] && (imp.data.properties[tag] != tags[tag])) {
+            if (importTags[tag] && (importTags[tag] != tags[tag])) {
                 conflicts[tag] = tags[tag];
                 count++;
             }
@@ -381,16 +382,18 @@ osmly.import = (function() {
     function conflictModal(conflicts) {
         $('#reusable-modal #modal-label').html('<h2>Tag Conflict</h2>');
 
-        var html = '';
+        var html = '',
+            importTags = osmly.import.tags();
+
         for (var conflict in conflicts) {
             html += '<div class="conflict">' +
                 '\'' + conflict + '\' is ' +
-                '<button class="eee" data-tag="' + conflict + '" data-source="import">' + imp.data.properties[conflict] + '</button> or ' +
+                '<button class="eee" data-tag="' + conflict + '" data-source="import">' + importTags[conflict] + '</button> or ' +
                 '<button class="eee" data-tag="' + conflict + '" data-source="osm">' + conflicts[conflict] + '</button> ?' +
                 '</div>';
         }
 
-        html += '<span id="merge" style="cursor: pointer;">Merge</span>';
+        html += '<span id="merge" style="cursor: pointer; text-decoration: underline;">Merge</span>';
 
         $('#reusable-modal .modal-content').html(html);
         CSSModal.open('reusable-modal');
