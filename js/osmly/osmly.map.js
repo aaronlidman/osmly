@@ -122,7 +122,6 @@ osmly.map = function() {
                     }
                     if (feature.geometry.type == 'Point' && osmly.mode.now == 'import') {
                         popup += '<li class="merge"\
-                            data-id="' + feature.properties.osm_id + '" \
                             data-layer="' + layer._leaflet_id + '"\
                             data-tags=\'' + JSON.stringify(feature.properties) + '\'\
                             style="\

@@ -40,10 +40,10 @@ osmly.import = (function() {
 
         $(document).on('click', '.merge', function(){
             // not sure why I can't do $('li').on...
-            var osm = this.getAttribute('data-id'),
-                layer = this.getAttribute('data-layer'),
+            // the osm id is contained in the tags
+            var layer = this.getAttribute('data-layer'),
                 tags = this.getAttribute('data-tags');
-            imp.merge(osm, layer, tags);
+            imp.merge(layer, tags);
         });
     }
 
@@ -344,14 +344,34 @@ osmly.import = (function() {
         next();
     }
 
-    imp.merge = function(osm_id, layer_id, tags) {
-        // TODO
-            // delete osm_id in OSMChange
-                // going to be pretty involved
-            // osmly.map.layerRemove(osmly.map._layer[layer_id]);
-            // filter tags, remove osm_*
-            // append tags to osmly.import.data.properties
+    imp.merge = function(layer_id, tags) {
+        tags = JSON.parse(tags);
+        var id = tags.osm_id,
+            conflicts = compareTags(tags);
+
+        if (conflicts) {
+            // show the modal laying out the tag problems
+        }
+
+        // user can bail right up until the modal
+        // delete osm_id in OSMChange
+            // going to be pretty involved
+        // append tags to osmly.import.data.properties
+        // osmly.map.layerRemove(osmly.map._layer[layer_id]);
     };
+
+    function compareTags(tags) {
+        var conflicts = {},
+            count = 0;
+        for (var tag in tags) {
+            if (imp.data.properties[tag] && (imp.data.properties[tag] != tags[tag])) {
+                conflicts[tag] = tags[tag];
+                count++;
+            }
+        }
+        if (count) return conflicts;
+        return false;
+    }
 
     return imp;
 }());
