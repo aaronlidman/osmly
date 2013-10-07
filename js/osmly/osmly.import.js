@@ -37,6 +37,36 @@ osmly.import = (function() {
             osmly.map.toggleLayer(osmly.map.contextLayer);
             osmly.map.toggleLayer(osmly.map.featureLayer);
         });
+
+        $(document).on('click', '.merge', function(){
+            // not sure why I can't do $('li').on...
+            imp.mergeTags = JSON.parse(this.getAttribute('data-tags'));
+            imp.mergeLayer = this.getAttribute('data-layer');
+            var conflicts = compareTags(imp.mergeTags);
+            if (conflicts) {
+                conflictModal(conflicts);
+            } else {
+                merge();
+            }
+        });
+
+        $('#reusable-modal').on('click', 'button', function(){
+            $('[data-tag="' + this.getAttribute('data-tag') +'"]').removeAttr('style');
+            $('[data-tag="' + this.getAttribute('data-tag') +'"]').removeAttr('data-selected');
+            this.setAttribute('style', 'background: #7EEE7A');
+            this.setAttribute('data-selected', 'true');
+        });
+
+        $('#reusable-modal').on('click', '#merge', function() {
+            // turn the selected buttons into tags
+            var selected = $('[data-selected]');
+            if (selected.length == this.getAttribute('data-count')) {
+                for (var a = 0; a < selected.length; a++) {
+                    imp.mergeTags[selected[a].getAttribute('data-tag')] = selected[a].textContent;
+                }
+            }
+            merge();
+        });
     }
 
     function unbind() {
@@ -118,16 +148,16 @@ osmly.import = (function() {
         }
     }
 
-    function populateTags() {
-        var properties = imp.data.properties;
-        for (var tag in properties) {
-            if (properties[tag] !== null && properties[tag] !== 'null') {
+    function populateTags(tags) {
+        $('#tags tr').remove();
+        for (var tag in tags) {
+            if (tags[tag] !== null && tags[tag] !== 'null') {
                 $('#tags tbody').append(
                     '<tr>' +
                     '<td class="k" spellcheck="false" contenteditable="true">' +
                     tag + '</td>' +
                     '<td class="v" spellcheck="false" contenteditable="true">' +
-                    properties[tag] + '</td>' +
+                    tags[tag] + '</td>' +
                     '<td class="minus">-</td>' +
                     '</tr>');
             }
@@ -144,8 +174,8 @@ osmly.import = (function() {
     }
 
     imp.skip = function() {
+        imp.deleted = [];
         hideItem();
-        $('#tags tr').remove();
         leftToRight($('.right-arrow'));
         next();
     };
@@ -190,7 +220,8 @@ osmly.import = (function() {
         $('#tags tr').remove();
         hideItem(displayItem);
         osmly.map.setFeature(imp.data, imp.isEditable);
-        populateTags();
+        populateTags(imp.data.properties);
+        imp.deleted = [];
     }
 
     function addTag() {
@@ -229,11 +260,11 @@ osmly.import = (function() {
 
         if (imp.isEditable) {
             osmly.map.context(imp.bbox, 0.001, function() {
-                populateTags();
+                populateTags(imp.data.properties);
                 displayItem();
             });
         } else {
-            populateTags();
+            populateTags(imp.data.properties);
             displayItem();
         }
     }
@@ -313,8 +344,14 @@ osmly.import = (function() {
 
         var geojson = osmly.map.featureLayer.toGeoJSON();
         geojson['features'][0]['properties'] = osmly.import.tags();
-            // this is sketchy but works for single items
-        var osmChange = osm_geojson.geojson2osm(geojson, token(osmly.settings.db + 'changeset_id'), true);
+        var osmChange = osm_geojson.geojson2osm(geojson, token(osmly.settings.db + 'changeset_id'));
+        osmChange = osmChange.split('<osm version="0.6" generator="github.com/aaronlidman/osm-and-geojson">')
+            .join('<osmChange version="0.6" generator="OSMLY"><create>');
+        osmChange = osmChange.split('</osm>')
+            .join('');
+        osmChange += '</create>';
+        osmChange += buildDelete();
+        osmChange += '</osmChange>';
 
         osmly.ui.notify('uploading to OSM');
 
@@ -334,6 +371,71 @@ osmly.import = (function() {
         }
         $('#tags tr').remove();
         next();
+    }
+
+    function compareTags(tags) {
+        var conflicts = {},
+            count = 0,
+            importTags = osmly.import.tags();
+        for (var tag in tags) {
+            if (importTags[tag] && (importTags[tag] != tags[tag])) {
+                conflicts[tag] = tags[tag];
+                count++;
+            }
+        }
+        if (count) return conflicts;
+        return false;
+    }
+
+    function conflictModal(conflicts) {
+        $('#reusable-modal #modal-label').html('<h2>Tag Conflict</h2>');
+
+        var html = '',
+            importTags = osmly.import.tags(),
+            count = 0;
+
+        for (var conflict in conflicts) {
+            html += '<div class="conflict">' +
+                '\'' + conflict + '\' is ' +
+                '<button class="eee" data-tag="' + conflict + '" data-source="import">' + importTags[conflict] + '</button> or ' +
+                '<button class="eee" data-tag="' + conflict + '" data-source="osm">' + conflicts[conflict] + '</button> ?' +
+                '</div>';
+            count++;
+        }
+
+        html += '<span id="merge" data-count="' + count + '" style="cursor: pointer; text-decoration: underline;">Merge</span>';
+
+        $('#reusable-modal .modal-content').html(html);
+        CSSModal.open('reusable-modal');
+    }
+
+    function merge() {
+        var tags = {};
+        if (!imp.deleted) imp.deleted = [];
+        imp.deleted.push(imp.mergeTags.osm_id);
+
+        for (var tag in imp.mergeTags) {
+            if (tag.split('osm_').length === 1) {
+                tags[tag] = imp.mergeTags[tag];
+            }
+        }
+        populateTags(tags);
+        CSSModal.close();
+        osmly.map.removeLayer(osmly.map._layers[imp.mergeLayer]);
+    }
+
+    function buildDelete() {
+        if (!imp.deleted.length) return '';
+        var xml = '<delete if-unused="true">',
+            s = new XMLSerializer();
+        for (var id in imp.deleted) {
+            var element = osmly.map.osmContext.getElementById(imp.deleted[id]);
+            element.setAttribute('changeset', token(osmly.settings.db + 'changeset_id'));
+            xml += s.serializeToString(element);
+        }
+        xml = xml.split('\t').join('');
+        xml = xml.split('\n').join('');
+        return xml + '</delete>';
     }
 
     return imp;

@@ -1,3 +1,4 @@
+/* jshint multistr:true */
 osmly.map = function() {
     var map = L.map('map', {
         center: osmly.settings.origin,
@@ -40,7 +41,7 @@ osmly.map = function() {
         osmly.ui.notify('getting nearby OSM data');
         getOsm(bbox, function(xml) {
             osmly.ui.notify('rendering OSM data');
-            context = filterContext(osm_geojson.osm2geojson(xml));
+            context = filterContext(osm_geojson.osm2geojson(xml, true));
             setContext(context);
             map.addLayer(map.contextLayer);
             callback();
@@ -67,6 +68,7 @@ osmly.map = function() {
             url: osmly.settings.readApi + 'bbox=' + bbox.join(','),
             dataType: 'xml',
             success: function(xml) {
+                map.osmContext = xml;
                 callback(xml);
             }
         });
@@ -106,13 +108,33 @@ osmly.map = function() {
                     tagKeys = Object.keys(feature.properties);
 
                 if (feature.properties) {
+                    layer.bindPopup(popup);
+                        // popup is bound upfront so we can get a leaflet layer id
+                        // this id is included in the 'data-layer' attribute, used for merging
+
                     if (feature.properties.name) label = feature.properties.name;
                     while (t < tagKeys.length) {
-                        popup += '<li><span class="k">' + tagKeys[t] +
-                        '</span>: ' + feature.properties[tagKeys[t]] + '</li>';
+                        // we don't display osm_* tags but they're used for merging
+                        if (tagKeys[t].split('osm_').length === 1) {
+                            popup += '<li><span class="k">' + tagKeys[t] +
+                            '</span>: ' + feature.properties[tagKeys[t]] + '</li>';
+                        }
                         t++;
                     }
-                    layer.bindPopup(popup);
+                    if (feature.geometry.type == 'Point' && osmly.mode.now == 'import') {
+                        popup += '<li class="merge"\
+                            data-layer="' + layer._leaflet_id + '"\
+                            data-tags=\'' + JSON.stringify(feature.properties) + '\'\
+                            style="\
+                            margin-top: 10px;\
+                            text-align: center;\
+                            padding: 10px 0;\
+                            border: 1px solid #aaa;\
+                            background-color: #eee;\
+                            cursor: pointer;\
+                            ">Merge with import data</li>';
+                    }
+                    layer._popup._content = popup;
                     layer.bindLabel(label);
                 }
             },
