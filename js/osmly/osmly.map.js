@@ -68,6 +68,7 @@ osmly.map = function() {
             url: osmly.settings.readApi + 'bbox=' + bbox.join(','),
             dataType: 'xml',
             success: function(xml) {
+                map.osmContext = xml;
                 callback(xml);
             }
         });

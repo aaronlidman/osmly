@@ -42,7 +42,6 @@ osmly.import = (function() {
             // not sure why I can't do $('li').on...
             imp.mergeTags = JSON.parse(this.getAttribute('data-tags'));
             imp.mergeLayer = this.getAttribute('data-layer');
-            console.log(imp.mergeLayer);
             var conflicts = compareTags(imp.mergeTags);
             if (conflicts) {
                 conflictModal(conflicts);
@@ -175,6 +174,7 @@ osmly.import = (function() {
     }
 
     imp.skip = function() {
+        imp.deleted = [];
         hideItem();
         leftToRight($('.right-arrow'));
         next();
@@ -221,6 +221,7 @@ osmly.import = (function() {
         hideItem(displayItem);
         osmly.map.setFeature(imp.data, imp.isEditable);
         populateTags(imp.data.properties);
+        imp.deleted = [];
     }
 
     function addTag() {
@@ -343,8 +344,14 @@ osmly.import = (function() {
 
         var geojson = osmly.map.featureLayer.toGeoJSON();
         geojson['features'][0]['properties'] = osmly.import.tags();
-            // this is sketchy but works for single items
-        var osmChange = osm_geojson.geojson2osm(geojson, token(osmly.settings.db + 'changeset_id'), true);
+        var osmChange = osm_geojson.geojson2osm(geojson, token(osmly.settings.db + 'changeset_id'));
+        osmChange = osmChange.split('<osm version="0.6" generator="github.com/aaronlidman/osm-and-geojson">')
+            .join('<osmChange version="0.6" generator="OSMLY"><create>');
+        osmChange = osmChange.split('</osm>')
+            .join('');
+        osmChange += '</create>';
+        osmChange += buildDelete();
+        osmChange += '</osmChange>';
 
         osmly.ui.notify('uploading to OSM');
 
@@ -404,6 +411,9 @@ osmly.import = (function() {
 
     function merge() {
         var tags = {};
+        if (!imp.deleted) imp.deleted = [];
+        imp.deleted.push(imp.mergeTags.osm_id);
+
         for (var tag in imp.mergeTags) {
             if (tag.split('osm_').length === 1) {
                 tags[tag] = imp.mergeTags[tag];
@@ -412,6 +422,26 @@ osmly.import = (function() {
         populateTags(tags);
         CSSModal.close();
         osmly.map.removeLayer(osmly.map._layers[imp.mergeLayer]);
+    }
+
+    function buildDelete() {
+        if (!imp.deleted.length) return '';
+        var xml = '<delete if-unused="true">',
+            elements = osmly.map.osmContext.getElementsByTagName('node'),
+            s = new XMLSerializer();
+        for (var id in imp.deleted) {
+            xml += s.serializeToString(getElementByAttr(elements, 'id', imp.deleted[id]));
+        }
+        xml = xml.split('\t').join('');
+        xml = xml.split('\n').join('');
+        return xml + '</delete>';
+    }
+
+    function getElementByAttr(elements, attr, attrValue) {
+        // returns the first element
+        for (var a = 0; a < elements.length; a++) {
+            if (elements[a].getAttribute(attr) == attrValue) return elements[a];
+        }
     }
 
     return imp;
