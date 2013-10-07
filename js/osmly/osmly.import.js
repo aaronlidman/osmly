@@ -427,21 +427,15 @@ osmly.import = (function() {
     function buildDelete() {
         if (!imp.deleted.length) return '';
         var xml = '<delete if-unused="true">',
-            elements = osmly.map.osmContext.getElementsByTagName('node'),
             s = new XMLSerializer();
         for (var id in imp.deleted) {
-            xml += s.serializeToString(getElementByAttr(elements, 'id', imp.deleted[id]));
+            var element = osmly.map.osmContext.getElementById(imp.deleted[id]);
+            element.setAttribute('changeset', token(osmly.settings.db + 'changeset_id'));
+            xml += s.serializeToString(element);
         }
         xml = xml.split('\t').join('');
         xml = xml.split('\n').join('');
         return xml + '</delete>';
-    }
-
-    function getElementByAttr(elements, attr, attrValue) {
-        // returns the first element
-        for (var a = 0; a < elements.length; a++) {
-            if (elements[a].getAttribute(attr) == attrValue) return elements[a];
-        }
     }
 
     return imp;
