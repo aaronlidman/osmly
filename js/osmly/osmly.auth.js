@@ -1,9 +1,12 @@
-osmly.auth = (function () {
+osmly.auth = function () {
+    var url = osmly.settings.writeApi;
+    if (url.split('dev').length === 1) url = 'http://www.openstreetmap.org';
+
     var auth = osmAuth({
         oauth_secret: osmly.settings.oauth_secret,
         oauth_consumer_key: osmly.settings.consumerKey,
         auto: false,
-        url: osmly.settings.writeApi,
+        url: url,
         landing: location.protocol + "//" + location.host + '/land.html'
     });
 
@@ -28,4 +31,4 @@ osmly.auth = (function () {
     };
 
     return auth;
-}());
+};

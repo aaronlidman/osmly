@@ -203,7 +203,8 @@ osmly.ui = (function() {
 
     function login() {
         ui.notify('');
-        osmly.auth.authenticate(function(){
+        osmly.auth.authenticate(function(err){
+            if (err) { console.log('auth error'); return; }
             if (osmly.auth.userAllowed) {
                 if (ui.region) osmly.map.removeLayer(ui.region);
                 $('#login, #demo').fadeOut(250);

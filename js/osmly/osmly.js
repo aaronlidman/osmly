@@ -20,6 +20,7 @@ window.osmly = (function () {
             } else {
                 alert('need some settings');
             }
+            osmly.auth = osmly.auth();
             osmly.map = osmly.map();
             osmly.ui.go();
         });

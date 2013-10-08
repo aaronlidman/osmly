@@ -403,7 +403,7 @@ osmly.import = (function() {
             count++;
         }
 
-        html += '<span id="merge" data-count="' + count + '" style="cursor: pointer; text-decoration: underline;">Merge</span>';
+        html += '<span id="merge" data-count="' + count + '" style="cursor: pointer; font-weight: bold;">Merge</span>';
 
         $('#reusable-modal .modal-content').html(html);
         CSSModal.open('reusable-modal');
