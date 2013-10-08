@@ -343,7 +343,7 @@ osmly.import = (function() {
         $('#changeset').show();
 
         var geojson = osmly.map.featureLayer.toGeoJSON();
-        geojson['features'][0]['properties'] = osmly.import.tags();
+        geojson['features'][0]['properties'] = discardTags();
         var osmChange = osm_geojson.geojson2osm(geojson, token(osmly.settings.db + 'changeset_id'));
         osmChange = osmChange.split('<osm version="0.6" generator="github.com/aaronlidman/osm-and-geojson">')
             .join('<osmChange version="0.6" generator="OSMLY"><create>');
@@ -361,6 +361,16 @@ osmly.import = (function() {
             content: osmChange,
             options: {header: {'Content-Type': 'text/xml'}}
         }, postOSM);
+    }
+
+    function discardTags() {
+        var tags = osmly.import.tags();
+        for (var tag in tags) {
+            for (var a = 0; a < osmly.settings.discardTags.length; a++) {
+                if (osmly.settings.discardTags[a] == tag) delete tags[tag];
+            }
+        }
+        return tags;
     }
 
     function postOSM(err, res) {
