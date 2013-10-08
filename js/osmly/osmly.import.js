@@ -436,6 +436,7 @@ osmly.import = (function() {
 
     function buildDelete() {
         if (!imp.deleted.length) return '';
+        if (osmly.settings.writeApi.split('dev').length > 1) return '';
         var xml = '<delete if-unused="true">',
             s = new XMLSerializer();
         for (var id in imp.deleted) {
