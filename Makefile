@@ -33,6 +33,7 @@ JS_LIBS = \
 
 all: \
 	test \
+	clean \
 	dist/osmly.min.js \
 	dist/libs.min.js \
 	dist/osmly.min.css \
@@ -48,7 +49,6 @@ dist/osmly.js: $(OSMLY_JS) Makefile
 dist/osmly.min.js: dist/osmly.js Makefile
 	@rm -f $@
 	node_modules/.bin/uglifyjs $< -c -m -o $@
-	rm -f dist/osmly.js
 
 dist/libs.js: $(JS_LIBS) Makefile
 	@rm -f $@
@@ -57,7 +57,6 @@ dist/libs.js: $(JS_LIBS) Makefile
 dist/libs.min.js: dist/libs.js Makefile
 	@rm -f $@
 	node_modules/.bin/uglifyjs $< -c -m -o $@
-	rm -f dist/libs.js
 
 dist/osmly.css: $(CSS) Makefile
 	@rm -f $@
@@ -66,12 +65,11 @@ dist/osmly.css: $(CSS) Makefile
 dist/osmly.min.css: dist/osmly.css Makefile
 	@rm -f $@
 	node_modules/.bin/uglifycss $< > $@
-	rm -f dist/osmly.css
 
 move:
 	cp land.html dist/land.html
 	cp sample-template.html dist/sample-template.html
-	cp -R -f static dist/static
+	cp -R -f static/ dist/static/
 
 clean:
 	rm -f -R dist/*
