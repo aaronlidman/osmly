@@ -12,7 +12,7 @@ var settings = {
     demo: true,
     changesetTags: {
         'created_by': 'OSMLY',
-        'osmly:version': '1.0.0',
+        'osmly:version': '1.1.0',
         'imagery_used': 'Bing'
     },
     renameProperty: {},

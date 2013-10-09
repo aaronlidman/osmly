@@ -136,9 +136,9 @@ osmly.import = (function() {
         $('#hold-problem, #submit, #bottom-right, #action-block').fadeIn(250);
         
         if (imp.isEditable) {
-            $('#tags').fadeIn(250);
+            $('#tags').fadeIn(100);
         } else {
-            $('#hold-problem, #submit').fadeOut(250);
+            $('#hold-problem, #submit').hide();
             $('#reusable-modal .modal-content').html(
                 '<h3>This feature is too complex. <a>Edit it in JOSM?</a></h3>');
             // put an 'Edit in JOSM' button right there
@@ -165,9 +165,8 @@ osmly.import = (function() {
     }
 
     function hideItem(callback) {
-        $('#bottom-right, #action-block, #tags').fadeOut(250, function(){
-            if (callback) callback();
-        });
+        $('#bottom-right, #action-block, #tags').hide();
+        if (callback) callback();
         osmly.map.closePopup();
         if (osmly.map.featureLayer) osmly.map.removeLayer(osmly.map.featureLayer);
         osmly.map.removeLayer(osmly.map.contextLayer);
