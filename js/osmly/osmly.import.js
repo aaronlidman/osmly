@@ -76,7 +76,8 @@ osmly.import = (function() {
     }
 
     function setInterface() {
-        $('body').append('\
+        var body = $('body');
+        body.append('\
             <div id="tags">\
                 <table>\
                     <tbody></tbody>\
@@ -85,7 +86,7 @@ osmly.import = (function() {
             </div>\
         ');
 
-        $('body').append('\
+        body.append('\
             <div id="action-block">\
                 <li id="hold-problem" style="margin-left: 0;">\
                     <select name="problem" id="problem">\
@@ -96,12 +97,13 @@ osmly.import = (function() {
                 <li id="submit">Submit</li>\
             </div>\
         ');
+
         var problem = $('#problem');
         for (var p = 0; p < osmly.settings.problems.length; p++) {
             problem.append('<option value="'+[p]+'">'+osmly.settings.problems[p]+'</option>');
         }
 
-        $('body').append('\
+        body.append('\
             <ul id="bottom-right">\
                 <li id="reset">reset</li>\
                 <li id="josm">edit in JOSM</li>\
@@ -110,7 +112,7 @@ osmly.import = (function() {
             </ul>\
         ');
 
-        $('body').append('\
+        body.append('\
             <div id="flash">\
                 <div style="position: relative">\
                     <img class="problem hidden flash" src="static/problem.svg" />\
@@ -133,10 +135,10 @@ osmly.import = (function() {
         osmly.map.addLayer(osmly.map.contextLayer);
 
         $('#notify').hide();
-        $('#hold-problem, #submit, #bottom-right, #action-block').fadeIn(250);
+        $('#hold-problem, #submit, #bottom-right, #action-block').fadeIn(200);
         
         if (imp.isEditable) {
-            $('#tags').fadeIn(100);
+            $('#tags').fadeIn(200);
         } else {
             $('#hold-problem, #submit').hide();
             $('#reusable-modal .modal-content').html(
@@ -217,10 +219,11 @@ osmly.import = (function() {
 
     function reset() {
         $('#tags tr').remove();
-        hideItem(displayItem);
+        hideItem();
         osmly.map.setFeature(imp.data, imp.isEditable);
         populateTags(imp.data.properties);
         imp.deleted = [];
+        displayItem();
     }
 
     function addTag() {
