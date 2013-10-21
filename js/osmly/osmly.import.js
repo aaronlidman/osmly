@@ -451,5 +451,20 @@ osmly.import = (function() {
         return xml + '</delete>';
     }
 
+    imp.bindContextNodes = function() {
+        var layers = osmly.map.contextLayer._map._layers;
+        for (var layer in layers) {
+            layer = layers[layer];
+            if (layer._icon && layer.options.opacity && layer.options.opacity === 1) {
+                console.log('bound');
+                layer.on('mouseover', function() {
+                    // do whatever
+                    console.log('sticky door');
+                });
+            }
+        }
+        // need to make context nodes some kind of markers
+    };
+
     return imp;
 }());
