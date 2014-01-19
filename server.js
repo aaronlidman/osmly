@@ -12,39 +12,49 @@ var server = http.createServer(function (request, response) {
         return;
     }
 
-    var resp;
     if (request.method == 'GET') {
-        resp = get(request.args);
+        get(request.args, response);
     } else if (request.method == 'POST') {
-        resp = post(request.args);
+        post(request.args, response);
     }
-
-    response.writeHead(200, {'Content-Type': 'application/json'});
-    response.end(resp);
 });
 
-function DB(file) {
-    return new sqlite.Database(file);
+function respond(str, response) {
+    response.writeHead(200, {'Content-Type': 'application/json'});
+    response.end(str);
 }
 
-function get(args) {
-    var db = DB(args.db);
+function get(args, response) {
+    var db = new sqlite.Database(args.db, function(err) {
+        if (err) console.log(err);
 
-    if (err) return;
-
-    if ('id' in args) {
-
-    } else if ('overview' in args) {
-
-    } else if ('qa' in args) {
-
-    } else {
-
-    }
+        if ('id' in args) {
+            db.get('SELECT geo, remote, submit FROM osmly WHERE id = $id LIMIT 1', {
+                $id: args.id
+            }, function(err, row){
+                console.log(typeof row);
+                respond(JSON.stringify(row), response);
+            });
+        } else if ('overview' in args) {
+            db.all('SELECT id, name, problem, submit, user FROM osmly ORDER BY id', function(err, rows){
+                console.log(rows);
+                respond(JSON.stringify(rows), response);
+            });
+        } else if ('qa' in args) {
+            db.get('SELECT id, geo, problem, submit, user, time FROM osmly WHERE submit != "" AND problem != "too large" AND done = 0 ORDER BY RANDOM() LIMIT 1', function(err, row) {
+                console.log(row);
+                respond(JSON.stringify(row), response);
+            });
+        } else {
+            db.get('SELECT geo FROM osmly WHERE problem = "" AND submit = "" ORDER BY RANDOM() LIMIT 1', function(err, row) {
+                console.log(row);
+                respond(JSON.stringify(row), response);
+            });
+        }
+    });
 }
 
-function post(args) {
-
+function post(args, response) {
 }
 
 server.listen(8000);
