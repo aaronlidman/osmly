@@ -7,10 +7,15 @@ var server = http.createServer(function (request, response) {
     request.args = qs.parse(url.parse(request.url).query);
 
     if (!('db' in request.args)) {
-        response.writeHead(400, {'Content-Type': 'text/plain'});
+        response.writeHead(400, {
+            'Content-Type': 'text/plain',
+            'Access-Control-Allow-Origin': '*'
+        });
         response.end('No database specified\ndb=?');
         return;
     }
+
+    request.args.db = request.args.db + '.sqlite';
 
     if (request.method == 'GET') {
         get(request.args, response);
@@ -20,7 +25,10 @@ var server = http.createServer(function (request, response) {
 });
 
 function respond(str, response) {
-    response.writeHead(200, {'Content-Type': 'application/json'});
+    response.writeHead(200, {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json'
+    });
     response.end(str);
 }
 
@@ -32,23 +40,20 @@ function get(args, response) {
             db.get('SELECT geo, remote, submit FROM osmly WHERE id = $id LIMIT 1', {
                 $id: args.id
             }, function(err, row){
-                console.log(typeof row);
                 respond(JSON.stringify(row), response);
             });
         } else if ('overview' in args) {
-            db.all('SELECT id, name, problem, submit, user FROM osmly ORDER BY id', function(err, rows){
-                console.log(rows);
+            db.all('SELECT id, problem, submit, user FROM osmly ORDER BY id', function(err, rows){
                 respond(JSON.stringify(rows), response);
             });
         } else if ('qa' in args) {
             db.get('SELECT id, geo, problem, submit, user, time FROM osmly WHERE submit != "" AND problem != "too large" AND done = 0 ORDER BY RANDOM() LIMIT 1', function(err, row) {
-                console.log(row);
                 respond(JSON.stringify(row), response);
             });
         } else {
+            // random next available
             db.get('SELECT geo FROM osmly WHERE problem = "" AND submit = "" ORDER BY RANDOM() LIMIT 1', function(err, row) {
-                console.log(row);
-                respond(JSON.stringify(row), response);
+                respond(JSON.stringify(row.geo), response);
             });
         }
     });
