@@ -73,7 +73,7 @@ def random():
     row = row.fetchone()
     db['conn'].commit()
     db['conn'].close()
-    if row:
+    if row:s
         return row[0]
     else:
         return '0';
@@ -157,7 +157,7 @@ def remote():
 def confirm():
     db = DB()
     db['c'].execute(
-        'UPDATE osmly set done = 1 WHERE id = ?',
+        'UPDATE osmly SET done = 1 WHERE id = ?',
         (request.args['id'],)
     )
     db['conn'].commit()

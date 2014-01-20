@@ -20,7 +20,14 @@ var server = http.createServer(function (request, response) {
     if (request.method == 'GET') {
         get(request.args, response);
     } else if (request.method == 'POST') {
-        post(request.args, response);
+        // need to catch too large objects, prevent flood
+        var body = '';
+        request.on('data', function (data) {
+            body += data;
+        });
+        request.on('end', function () {
+            post(request.args, qs.parse(body), response);
+        });
     }
 });
 
@@ -59,7 +66,39 @@ function get(args, response) {
     });
 }
 
-function post(args, response) {
+function post(args, data, response) {
+    var db = new sqlite.Database(args.db, function(err) {
+        if (('action' in args) && ('id' in args)) {
+            switch(args.action) {
+                case 'problem':
+                    db.exec('UPDATE osmly SET problem = $problem, user = $user, time = $time WHERE id = $id', {
+                        $problem: data.problem,
+                        $user: data.user,
+                        $time: args.time,
+                        $id: args.id
+                    });
+                    respond(JSON.stringify({id:args.id}), reponse);
+                    break;
+                case 'remote':
+                    db.exec('UPDATE osmly SET remote = $remote WHERE id = $id', {
+                        $remote: data.remote,
+                        $id: args.id,
+                    });
+                    break;
+                case 'submit':
+                    db.exec('UPDATE osmly SET problem = $problem, user = $user, time = $time WHERE id = $id', {
+                        $problem: data.problem,
+                        $user: data.user,
+                        $time: parseInt(new Date().getTime()/1000),
+                        $id: args.id
+                    });
+                    break;
+                case 'confirm':
+                    db.exec('UPDATE osmly SET done = 1 WHERE id = $id', {$id: args.id});
+                    break;
+            }
+        }
+    });
 }
 
 server.listen(8000);
