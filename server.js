@@ -71,7 +71,7 @@ function post(args, data, response) {
         if (('action' in args) && ('id' in args)) {
             switch(args.action) {
                 case 'problem':
-                    db.exec('UPDATE osmly SET problem = $problem, user = $user, time = $time WHERE id = $id', {
+                    db.run('UPDATE osmly SET problem = $problem, user = $user, time = $time WHERE id = $id', {
                         $problem: data.problem,
                         $user: data.user,
                         $time: args.time,
@@ -80,13 +80,13 @@ function post(args, data, response) {
                     respond(JSON.stringify({id:args.id}), reponse);
                     break;
                 case 'remote':
-                    db.exec('UPDATE osmly SET remote = $remote WHERE id = $id', {
+                    db.run('UPDATE osmly SET remote = $remote WHERE id = $id', {
                         $remote: data.remote,
                         $id: args.id,
                     });
                     break;
                 case 'submit':
-                    db.exec('UPDATE osmly SET problem = $problem, user = $user, time = $time WHERE id = $id', {
+                    db.run('UPDATE osmly SET problem = $problem, user = $user, time = $time WHERE id = $id', {
                         $problem: data.problem,
                         $user: data.user,
                         $time: parseInt(new Date().getTime()/1000),
@@ -94,7 +94,7 @@ function post(args, data, response) {
                     });
                     break;
                 case 'confirm':
-                    db.exec('UPDATE osmly SET done = 1 WHERE id = $id', {$id: args.id});
+                    db.run('UPDATE osmly SET done = 1 WHERE id = $id', {$id: args.id});
                     break;
             }
         }
