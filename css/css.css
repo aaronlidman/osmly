@@ -333,7 +333,10 @@ input[type='radio'] {    margin-right: 5px }
     font-weight: bold;
     line-height: 30px;
 }
-#main_table .table thead th {    vertical-align: bottom }
+#main_table thead th {
+    vertical-align: bottom;
+    min-width: 120px;
+}
 .table tbody tr.success {
     background-color: #ceffce;
     border-top: 1px solid #b4e2b4 !important;

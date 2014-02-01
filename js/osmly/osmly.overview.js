@@ -1,18 +1,7 @@
 /* jshint multistr:true */
 osmly.overview = (function () {
     var overview = {},
-        ov = {
-            // indices for abstraction rather than direct reference 
-            // keep in mind, this is the index of results from overview() in simple.py, not the actual database
-            index: {
-                'id': 0,
-                'name': 1,
-                'problem': 2,
-                'submit': 3,
-                'user': 4
-            },
-            bIndex: ['id', 'name', 'problem', 'submit', 'user']
-        };
+        ov = {};
 
     overview.go = function() {
         setInterface();
@@ -49,7 +38,6 @@ osmly.overview = (function () {
                     <thead>\
                         <tr>\
                             <th>#</th>\
-                            <th>Name</th>\
                             <th>Problem</th>\
                             <th>Uploaded</th>\
                             <th>User</th>\
@@ -129,6 +117,7 @@ osmly.overview = (function () {
         // will probably need to paginate over ~1000 items
             // right now it's pretty quick w/ 1200 on chrome
             // firefox is a bit slow
+
         var items = ov.data,
             table = byId('main_table');
 
@@ -140,13 +129,12 @@ osmly.overview = (function () {
 
         for (var a = 0; a < items.length; a++) {
             var tr = createE('tr');
-            for (var b = 0; b < items[a].length; b++) {
+            for (var b in items[a]) {
                 var column = createE('td'),
-                    _column = ov.bIndex[b],
                     text = items[a][b];
 
-                if (_column == 'submit' && text !== '') text = '&#x2713;';
-                if (_column == 'name') {
+                if (b == 'submit' && text !== '') text = '&#x2713;';
+                if (b == 'name') {
                     column.style.textAlign = 'left';
                     column.style.textOverflow = 'ellipsis';
                     column.style.width = '200px';
@@ -159,20 +147,20 @@ osmly.overview = (function () {
             }
 
             var markdone = createE('td');
-            if (items[a][ov.index['submit']] === '') {
-                markdone.innerHTML = '<span data-id="' + items[a][ov.index['id']] + '" class="markdone">done?</span>';
+            if (items[a]['submit'] === '') {
+                markdone.innerHTML = '<span data-id="' + items[a]['id'] + '" class="markdone">done?</span>';
             }
             tr.appendChild(markdone);
 
             var editjosm = createE('td');
-            if (items[a][ov.index['submit']] === '') {
-                editjosm.innerHTML = '<span data-id="' + items[a][ov.index['id']] + '" class="editjosm">JOSM?</span>';
+            if (items[a]['submit'] === '') {
+                editjosm.innerHTML = '<span data-id="' + items[a]['id'] + '" class="editjosm">JOSM?</span>';
             }
             tr.appendChild(editjosm);
 
-            if (items[a][ov.index['submit']] !== '') {
+            if (items[a]['submit'] !== '') {
                 tr.setAttribute('class', 'success');
-            } else if (items[a][ov.index['problem']] !== '') {
+            } else if (items[a]['problem'] !== '') {
                 tr.setAttribute('class', 'error');
             }
 
@@ -221,10 +209,10 @@ osmly.overview = (function () {
             var keep = [];
             for (var option in options) {
                 if (typeof options[option] == 'object') {
-                    if (options[option].indexOf(items[a][ov.index[option]]) !== -1) {
+                    if (options[option].indexOf(items[a][option]) !== -1) {
                         keep.push(true);
                     }
-                } else if (items[a][ov.index[option]] == options[option]) {
+                } else if (items[a][option] == options[option]) {
                     keep.push(true);
                 }
             }
@@ -243,8 +231,8 @@ osmly.overview = (function () {
             vals = [];
 
         for (var a = 0; a < items.length; a++) {
-            if (items[a][ov.index[column]] && vals.indexOf(items[a][ov.index[column]]) === -1) {
-                vals.push(items[a][ov.index[column]]);
+            if (items[a][column] && vals.indexOf(items[a][column]) === -1) {
+                vals.push(items[a][column]);
             }
         }
 

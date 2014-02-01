@@ -1,5 +1,4 @@
 /* jshint multistr:true */
-// import is a reserved word but it doesn't apply to properties
 osmly.import = (function() {
     var imp = {};
 
@@ -253,7 +252,7 @@ osmly.import = (function() {
     }
 
     function nextPrep(data) {
-        imp.data = data;
+        imp.data = JSON.parse(data);
         imp.id = imp.data.properties.id;
         imp.bbox = imp.data.properties.bounds;
         imp.isEditable = isEditable(imp.data.geometry);
@@ -437,7 +436,7 @@ osmly.import = (function() {
     }
 
     function buildDelete() {
-        if (!imp.deleted.length) return '';
+        if (!('deleted' in imp) || !imp.deleted.length) return '';
         if (osmly.settings.writeApi.split('dev').length > 1) return '';
         var xml = '<delete if-unused="true">',
             s = new XMLSerializer();
