@@ -4,13 +4,13 @@
         <title>osmly</title>
         <meta charset='utf-8'>
 
-        <link rel="stylesheet" href="js/lib/leaflet-0.7dev/leaflet.css" />
+        <link rel="stylesheet" href="js/lib/leaflet-0.7.2/leaflet.css" />
         <link rel="stylesheet" href="css/leaflet.label.css" />
         <link rel="stylesheet" href="css/animations.css" />
         <link rel="stylesheet" href="css/modal.css" />
         <link rel="stylesheet" href="css/leaflet-overwrite.css" />
         <link rel="stylesheet" href="css/css.css" />
-        <script src="js/lib/leaflet-0.7dev/leaflet.js"></script>
+        <script src="js/lib/leaflet-0.7.2/leaflet.js"></script>
         <script src="js/lib/leaflet.label.js"></script>
         <script src="js/lib/leaflet.draw.js"></script>
         <script src="js/lib/sha.js"></script>
@@ -46,12 +46,18 @@
         */
 
             var config = {
-                title: '',
-                instructions: '',
-                db: '',
-                usePropertyAsTag: [],
-                context: {},
-                problems: [],
+                title: 'title',
+                instructions: 'random',
+                db: 'http://localhost:8000/?db=LA',
+                usePropertyAsTag: ['NAME'],
+                context: {
+                    'leisure': ['park', 'playground'],
+                    'amenity': ['school']
+                },
+                problems: [
+                    'idk',
+                    'nothing'
+                ],
             };
 
             osmly.go(config);

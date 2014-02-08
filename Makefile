@@ -13,7 +13,7 @@ OSMLY_JS = \
 	js/osmly/animations.js
 
 CSS = \
-	js/lib/leaflet-0.7dev/leaflet.css \
+	js/lib/leaflet-0.7.2/leaflet.css \
 	css/leaflet.label.css \
 	css/css.css \
 	css/leaflet-overwrite.css \
@@ -21,7 +21,7 @@ CSS = \
 	css/modal.css
 
 JS_LIBS = \
-	js/lib/leaflet-0.7dev/leaflet.js \
+	js/lib/leaflet-0.7.2/leaflet.js \
 	js/lib/Bing.js \
 	js/lib/leaflet.draw.js \
 	js/lib/leaflet.label.js \
