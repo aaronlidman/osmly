@@ -32,44 +32,36 @@ JS_LIBS = \
 	js/lib/zepto.js
 
 all: \
-	test \
 	clean \
-	dist/osmly.min.js \
-	dist/libs.min.js \
-	dist/osmly.min.css \
-	move
+	osmly.min.js \
+	libs.min.js \
+	osmly.min.css
 
-test:
-	test -d dist || mkdir dist
-
-dist/osmly.js: $(OSMLY_JS) Makefile
+osmly.js: $(OSMLY_JS) Makefile
 	@rm -f $@
 	cat $(OSMLY_JS) >> $@
 
-dist/osmly.min.js: dist/osmly.js Makefile
+osmly.min.js: osmly.js Makefile
 	@rm -f $@
 	node_modules/.bin/uglifyjs $< -c -m -o $@
 
-dist/libs.js: $(JS_LIBS) Makefile
+libs.js: $(JS_LIBS) Makefile
 	@rm -f $@
 	cat $(JS_LIBS) >> $@
 
-dist/libs.min.js: dist/libs.js Makefile
+libs.min.js: libs.js Makefile
 	@rm -f $@
 	node_modules/.bin/uglifyjs $< -c -m -o $@
+	rm -f libs.js
 
-dist/osmly.css: $(CSS) Makefile
+osmly.css: $(CSS) Makefile
 	@rm -f $@
 	cat $(CSS) >> $@
 
-dist/osmly.min.css: dist/osmly.css Makefile
+osmly.min.css: osmly.css Makefile
 	@rm -f $@
 	node_modules/.bin/uglifycss $< > $@
-
-move:
-	cp land.html dist/land.html
-	cp sample-template.html dist/sample-template.html
-	cp -R -f static/ dist/static/
+	rm -rf osmly.css
 
 clean:
-	rm -f -R dist/*
+	rm -rf osmly.js osmly.min.js libs.js libs.min.js osmly.css osmly.min.css
