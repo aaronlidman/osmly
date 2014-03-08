@@ -15,6 +15,7 @@ var server = http.createServer(function (request, response) {
         return;
     }
 
+    // need to check if it exists first, if not it gets created
     request.args.db = request.args.db + '.sqlite';
 
     if (request.method == 'GET') {
@@ -101,5 +102,6 @@ function post(args, data, response) {
     });
 }
 
-server.listen(8000);
-console.log("running...");
+var port = 8000;
+server.listen(port);
+console.log('running on port ' + port);

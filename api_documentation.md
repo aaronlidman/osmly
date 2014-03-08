@@ -1,5 +1,5 @@
 #OSMLY-Server API
-REST-ish and JSON. [CORS](http://en.wikipedia.org/wiki/Cross-origin_resource_sharing) is enabled, it's necessary because OSMLY and OSMLY-Server are not on the same server.
+REST-ish and JSON.
 
 ## GET /
 - a list of all sqlite databases in the osmly-server root
