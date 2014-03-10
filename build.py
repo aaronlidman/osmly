@@ -69,31 +69,32 @@ db_c.execute('CREATE TABLE osmly (id INTEGER PRIMARY KEY, name TEXT, geo TEXT, r
 count = 0
 
 for feature in data['features']:
-    geo = asShape(feature['geometry'])
-    bounds = trunc_bounds(geo.bounds)
-    problem = isEditable(geo)
-    name = ''
+    if feature['geometry']:
+        geo = asShape(feature['geometry'])
+        bounds = trunc_bounds(geo.bounds)
+        problem = isEditable(geo)
+        name = ''
 
-    # simplify(x, False) is significantly quicker, turns off preserve_topology
-    # but it occasionally deletes all nodes and that upsets mapping()
-    try:
-        simple = geo.simplify(args['simplify'], False)
-        geo = mapping(simple)
-    except:
-        simple = geo.simplify(args['simplify'], True)
-        geo = mapping(simple)
+        # simplify(x, False) is significantly quicker, turns off preserve_topology
+        # but it occasionally deletes all nodes and that upsets mapping()
+        try:
+            simple = geo.simplify(args['simplify'], False)
+            geo = mapping(simple)
+        except:
+            simple = geo.simplify(args['simplify'], True)
+            geo = mapping(simple)
 
-    if 'names' in args and args['names'] in feature['properties']:
-        name = feature['properties'][args['names']]
+        if 'names' in args and args['names'] in feature['properties']:
+            name = feature['properties'][args['names']]
 
-    feature['properties']['bounds'] = bounds
-    feature['geometry']['coordinates'] = geo['coordinates']
-    feature['properties']['id'] = count
-    statement = 'INSERT INTO osmly VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);'
+        feature['properties']['bounds'] = bounds
+        feature['geometry']['coordinates'] = geo['coordinates']
+        feature['properties']['id'] = count
+        statement = 'INSERT INTO osmly VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);'
 
-    db_c.execute(statement, (
-        count, name, json.dumps(feature), '', problem, '', '', '', 0, 0))
-    count = count + 1
+        db_c.execute(statement, (
+            count, name, json.dumps(feature), '', problem, '', '', '', 0, 0))
+        count = count + 1
 
 print str(count) + ' items'
 db_conn.close()
