@@ -1,20 +1,26 @@
 {
-    "name": "OSMLY",
-    "version": "0.0.0",
-    "description": "A simple import editor for OpenStreetMap",
-    "main": "index.js",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/aaronlidman/osmly.git"
-    },
-    "keywords": ["openstreetmap", "maps"],
-    "author": "Aaron Lidman",
-    "license": "BSD",
-    "bugs": {
-        "url": "https://github.com/aaronlidman/osmly/issues"
-    },
-    "devDependencies": {
-        "uglify-js": "2.x",
-        "uglifycss": "~0.0.5"
-    }
+  "name": "OSMLY",
+  "version": "0.0.0",
+  "description": "A simple import editor for OpenStreetMap",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aaronlidman/osmly.git"
+  },
+  "keywords": [
+    "openstreetmap",
+    "maps"
+  ],
+  "author": "Aaron Lidman",
+  "license": "BSD",
+  "bugs": {
+    "url": "https://github.com/aaronlidman/osmly/issues"
+  },
+  "devDependencies": {
+    "uglify-js": "2.x",
+    "uglifycss": "~0.0.5"
+  },
+  "dependencies": {
+    "sqlite3": "^2.2.0"
+  }
 }
