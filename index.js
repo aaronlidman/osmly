@@ -32,7 +32,13 @@ var server = http.createServer(function (request, response) {
     }
 });
 
-function respond(str, response) {
+function respond(str, response, err) {
+    if (err) {
+        console.log(err);
+        response.writeHead(404);
+        return response.end(JSON.stringify(err));
+    }
+
     response.writeHead(200, {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json'
@@ -48,19 +54,23 @@ function get(args, response) {
             db.get('SELECT geo, remote, submit FROM osmly WHERE id = $id LIMIT 1', {
                 $id: args.id
             }, function(err, row){
+                if (err) return respond(false, response, err);
                 respond(JSON.stringify(row), response);
             });
         } else if ('overview' in args) {
             db.all('SELECT id, problem, submit, user FROM osmly ORDER BY id', function(err, rows){
+                if (err) return respond(false, response, err);
                 respond(JSON.stringify(rows), response);
             });
         } else if ('qa' in args) {
             db.get('SELECT id, geo, problem, submit, user, time FROM osmly WHERE submit != "" AND problem != "too large" AND done = 0 ORDER BY RANDOM() LIMIT 1', function(err, row) {
+                if (err) return respond(false, response, err);
                 respond(JSON.stringify(row), response);
             });
         } else {
             // random next available
             db.get('SELECT geo FROM osmly WHERE problem = "" AND submit = "" ORDER BY RANDOM() LIMIT 1', function(err, row) {
+                if (err) return respond(false, response, err);
                 respond(JSON.stringify(row.geo), response);
             });
         }
