@@ -13,21 +13,22 @@ OSMLY is a browser based importer for collaborative item-by-item reviewing, edit
 - [Foundicons](http://zurb.com/playground/foundation-icons) for the icons
 - [osm-and-geojson](http://github.com/aaronlidman/osm-and-geojson) for converting between osm and geojson
 
-###Development
-- in this directory run `python -m SimpleHTTPServer`
-- in /server run `npm install`, then `node server`
+###Local Development
+- npm install
+- node index.js
 - `dev-template.html` is the launching point for most of the action
     - `dev-template.html` is used for developement while `sample-template.html` should be used making new imports
+    - this is totally aped from [iD](https://github.com/openstreetmap/iD)'s index.html
     - a new template, with it's own settings, is made for each import
-- `npm install` for build dependencies (not needed if you're not building)
 - `make` to build
 - also see [settings documentation](settings_documentation.md)
 
 ###build.py
-- converts a geojson file to a special sqlite database with individuals features as rows for osmly
+- converts a geojson file into a sqlite database with individuals features as rows
     - makes sure geometry is valid, simplifies, seperates easy and difficult items, and gets a bounding box of each item
     - currently only works with polygons, multipolygons
 - dependency: [Shapely](http://toblerity.org/shapely/)
+    - pip install Shapely
 - `python build.py YOURFILE.geojson` creates `YOURFILE.sqlite`
 - options:
     - `--simplify FLOAT` - a simplification tolerance for [shapely's simplify function](http://toblerity.org/shapely/manual.html#object.simplify). (default: 0.0001)
@@ -35,9 +36,9 @@ OSMLY is a browser based importer for collaborative item-by-item reviewing, edit
 
 ###index.js
 - serves each item from the database that was created by `build.py`
-- local server: `node index.js`
-- {{instructions for remote ubuntu setup}}
+- node index.js
 - once running, requests are made against `http://your-ip-address/?db=YOURFILE`
+- {{instructions for remote ubuntu setup}}
 
 ---
 OSMLY was written in the [Huntington Beach Central Library](http://www.flickr.com/search/?w=88017382@N00&q=huntington%20beach%20central%20library). Everyday I'd start at the lower deck and move up as the day progressed, always on the top level by sunset. I owe that place big time.
