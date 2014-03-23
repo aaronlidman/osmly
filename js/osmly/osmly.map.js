@@ -138,6 +138,7 @@ osmly.map = function() {
                     feature.properties._id = index;
                     layer._popup._content = popup;
                     layer.bindLabel(label);
+                    index++;
                 }
             },
             pointToLayer: function(feature, latlng) {
