@@ -40,7 +40,7 @@ osmly.import = (function() {
         $(document).on('click', '.merge', function(){
             // not sure why I can't do $('li').on...
             imp.mergeTags = JSON.parse(this.getAttribute('data-tags'));
-            imp.mergeLayer = this.getAttribute('data-layer');
+            imp.mergeLayer = this.getAttribute('data-layer-id');
             var conflicts = compareTags(imp.mergeTags);
             if (conflicts) {
                 conflictModal(conflicts);
@@ -432,7 +432,14 @@ osmly.import = (function() {
         }
         populateTags(tags);
         CSSModal.close();
-        osmly.map.removeLayer(osmly.map._layers[imp.mergeLayer]);
+        osmly.map.eachLayer(function(layer) {
+            if (typeof layer.feature !== 'undefined' &&
+                typeof layer.feature.properties !== 'undefined' &&
+                typeof layer.feature.properties._id !== 'undefined' &&
+                layer.feature.properties._id == parseInt(imp.mergeLayer) ) {
+                    osmly.map.removeLayer(layer);
+            }
+        });
     }
 
     function buildDelete() {

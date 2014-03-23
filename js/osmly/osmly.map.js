@@ -99,6 +99,7 @@ osmly.map = function() {
     }
 
     function setContext(geojson) {
+        var index = 0;
         map.contextLayer = L.geoJson(geojson, {
             style: osmly.settings.contextStyle,
             onEachFeature: function(feature, layer) {
@@ -123,7 +124,7 @@ osmly.map = function() {
                     }
                     if (feature.geometry.type == 'Point' && osmly.mode.now == 'import') {
                         popup += '<li class="merge"\
-                            data-layer="' + layer._leaflet_id + '"\
+                            data-layer-id="' + index + '"\
                             data-tags=\'' + JSON.stringify(feature.properties) + '\'\
                             style="\
                             margin-top: 10px;\
@@ -134,6 +135,7 @@ osmly.map = function() {
                             cursor: pointer;\
                             ">Merge with import data</li>';
                     }
+                    feature.properties._id = index;
                     layer._popup._content = popup;
                     layer.bindLabel(label);
                 }
