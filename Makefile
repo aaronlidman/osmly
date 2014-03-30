@@ -33,35 +33,36 @@ JS_LIBS = \
 
 all: \
 	clean \
-	osmly.min.js \
-	libs.min.js \
-	osmly.min.css
+	dist/osmly.min.js \
+	dist/libs.min.js \
+	dist/osmly.min.css
 
-osmly.js: $(OSMLY_JS) Makefile
+dist/osmly.js: $(OSMLY_JS) Makefile
 	@rm -f $@
 	cat $(OSMLY_JS) >> $@
 
-osmly.min.js: osmly.js Makefile
+dist/osmly.min.js: dist/osmly.js Makefile
 	@rm -f $@
 	node_modules/.bin/uglifyjs $< -c -m -o $@
 
-libs.js: $(JS_LIBS) Makefile
+dist/libs.js: $(JS_LIBS) Makefile
 	@rm -f $@
 	cat $(JS_LIBS) >> $@
 
-libs.min.js: libs.js Makefile
+dist/libs.min.js: dist/libs.js Makefile
 	@rm -f $@
 	node_modules/.bin/uglifyjs $< -c -m -o $@
-	rm -f libs.js
+	rm -f dist/libs.js
 
-osmly.css: $(CSS) Makefile
+dist/osmly.css: $(CSS) Makefile
 	@rm -f $@
 	cat $(CSS) >> $@
 
-osmly.min.css: osmly.css Makefile
+dist/osmly.min.css: dist/osmly.css Makefile
 	@rm -f $@
 	node_modules/.bin/uglifycss $< > $@
-	rm -rf osmly.css
+	rm -rf dist/osmly.css
 
 clean:
-	rm -rf osmly.js osmly.min.js libs.js libs.min.js osmly.css osmly.min.css
+	rm -rf dist/*.js
+	rm -rf dist/*.css

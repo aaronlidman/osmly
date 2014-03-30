@@ -152,7 +152,7 @@ osmly.map = function() {
         center: osmly.settings.origin,
         layers: [new L.BingLayer('Arzdiw4nlOJzRwOz__qailc8NiR31Tt51dN2D7cm57NrnceZnCpgOkmJhNpGoppU')],
         zoom: osmly.settings.zoom,
-        maxZoom: 20,
+        // maxZoom: 20,
         fadeAnimation: false
     });
 
@@ -247,6 +247,7 @@ osmly.map = function() {
     }
 
     function setContext(geojson) {
+        var index = 0;
         map.contextLayer = L.geoJson(geojson, {
             style: osmly.settings.contextStyle,
             onEachFeature: function(feature, layer) {
@@ -271,7 +272,7 @@ osmly.map = function() {
                     }
                     if (feature.geometry.type == 'Point' && osmly.mode.now == 'import') {
                         popup += '<li class="merge"\
-                            data-layer="' + layer._leaflet_id + '"\
+                            data-layer-id="' + index + '"\
                             data-tags=\'' + JSON.stringify(feature.properties) + '\'\
                             style="\
                             margin-top: 10px;\
@@ -282,8 +283,10 @@ osmly.map = function() {
                             cursor: pointer;\
                             ">Merge with import data</li>';
                     }
+                    feature.properties._id = index;
                     layer._popup._content = popup;
                     layer.bindLabel(label);
+                    index++;
                 }
             },
             pointToLayer: function(feature, latlng) {
@@ -518,7 +521,7 @@ osmly.ui = (function() {
 
     ui.notify = function(string) {
         if (string !== '') string = '<span>' + string + '</span>';
-        string = '<img src="static/loader.gif" />' + string;
+        string = '<img src="http://osmly.com/dist/loader.gif" />' + string;
 
         $('#notify').html(string);
         $('#notify').show();
@@ -861,7 +864,7 @@ osmly.import = (function() {
         $(document).on('click', '.merge', function(){
             // not sure why I can't do $('li').on...
             imp.mergeTags = JSON.parse(this.getAttribute('data-tags'));
-            imp.mergeLayer = this.getAttribute('data-layer');
+            imp.mergeLayer = this.getAttribute('data-layer-id');
             var conflicts = compareTags(imp.mergeTags);
             if (conflicts) {
                 conflictModal(conflicts);
@@ -1253,7 +1256,14 @@ osmly.import = (function() {
         }
         populateTags(tags);
         CSSModal.close();
-        osmly.map.removeLayer(osmly.map._layers[imp.mergeLayer]);
+        osmly.map.eachLayer(function(layer) {
+            if (typeof layer.feature !== 'undefined' &&
+                typeof layer.feature.properties !== 'undefined' &&
+                typeof layer.feature.properties._id !== 'undefined' &&
+                layer.feature.properties._id == parseInt(imp.mergeLayer) ) {
+                    osmly.map.removeLayer(layer);
+            }
+        });
     }
 
     function buildDelete() {
