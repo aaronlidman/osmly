@@ -34,11 +34,18 @@ OSMLY is a browser based importer for collaborative item-by-item reviewing, edit
     - `--simplify FLOAT` - a simplification tolerance for [shapely's simplify function](http://toblerity.org/shapely/manual.html#object.simplify). (default: 0.0001)
     - `--names STRING` - The name property.
 
-###index.js
+###server.js
 - serves each item from the database that was created by `build.py`
-- node index.js
 - once running, requests are made against `http://your-ip-address/?db=YOURFILE`
-- {{instructions for remote ubuntu setup}}
+- for ubuntu:
+```
+sudo apt-get update
+sudo apt-get install -y htop git sqlite3 python-software-properties
+sudo apt-add-repository --yes ppa:chris-lea/node.js
+sudo apt-get update -y
+sudo apt-get install -y nodejs build-essential
+npm install
+```
 
 ---
 OSMLY was written in the [Huntington Beach Central Library](http://www.flickr.com/search/?w=88017382@N00&q=huntington%20beach%20central%20library). Everyday I'd start at the lower deck and move up as the day progressed, always on the top level by sunset. I owe that place big time.
