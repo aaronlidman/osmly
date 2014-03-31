@@ -152,7 +152,7 @@ osmly.map = function() {
         center: osmly.settings.origin,
         layers: [new L.BingLayer('Arzdiw4nlOJzRwOz__qailc8NiR31Tt51dN2D7cm57NrnceZnCpgOkmJhNpGoppU')],
         zoom: osmly.settings.zoom,
-        // maxZoom: 20,
+        maxZoom: 19,
         fadeAnimation: false
     });
 
@@ -168,7 +168,7 @@ osmly.map = function() {
     if (osmly.settings.writeApi.split('dev').length > 1) map.attributionControl.setPrefix('DEV SERVER');
 
     map.osmTiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-        maxZoom: 20,
+        maxZoom: 19,
         maxNativeZoom: 18
     });
 
