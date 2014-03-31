@@ -252,7 +252,7 @@ osmly.import = (function() {
     }
 
     function nextPrep(data) {
-        imp.data = JSON.parse(data);
+        imp.data = data;
         imp.id = imp.data.properties.id;
         imp.bbox = imp.data.properties.bounds;
         imp.isEditable = isEditable(imp.data.geometry);
