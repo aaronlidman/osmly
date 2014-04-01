@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+    <head>
+        <title>LA County Parks Import</title>
+        <meta charset='utf-8'> 
+        <link rel="stylesheet" href="http://osmly.com/dist/osmly.min.css" />
+        <script src="http://osmly.com/dist/libs.min.js"></script>
+        <script src="http://osmly.com/dist/osmly.js"></script>
+    </head>
+    <body>
+        <div id="map"></div>
+        <script type="text/javascript">
+            var region = {
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -119.00939941406249,
+              33.63291573870476
+            ],
+            [
+              -119.00939941406249,
+              34.73935551813357
+            ],
+            [
+              -117.6470947265625,
+              34.73935551813357
+            ],
+            [
+              -117.6470947265625,
+              33.63291573870476
+            ],
+            [
+              -119.00939941406249,
+              33.63291573870476
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+};
+
+            var config = {
+                title: 'Outline the park',
+                instructions: '\
+                <ul>\
+                    <li>Outline the nearby park.</li>\
+                    <li>Pay attention to the tags, especially the \'name\' tag.</li>\
+                    <li>It\'s possible the data is out of date or just wrong; report problems accordingly.</li>\
+                    <li>Yellow features are other OSM features there to help you. You can\'t edit them here but clicking them provides more information. If you know they\'re wrong, go to osm.org and fix them.</li>\
+                </ul>',
+                db: 'http://107.170.40.93:8000/?db=parks',
+                origin: [34.0577, -118.2409],
+                zoom: 10,
+                usePropertyAsTag: ['name'],
+                appendTag: {'leisure': 'park'},
+                context: {
+                    leisure: ['park', 'nature_reserve', 'stadium', 'golf_course', 'dog_park'],
+                    landuse: ['cemetery', 'farm', 'farmland', 'recreation_ground'],
+                    amenity: ['college', 'kindergarten', 'school', 'university', 'grave_yard', 'library', 'townhall']
+                },
+                problems: ['no park here', 'already mapped', 'imagery too poor', 'too difficult'],
+                changesetTags: {
+                    'source': 'LA County GIS Data Portal',
+                    'source_ref': 'http://egis3.lacounty.gov/dataportal/2013/10/10/la-county-land-types/',
+                    'import': 'yes'
+                },
+                region: region
+            };
+
+            osmly.go(config);
+        </script>        
+    </body>
+</html>
