@@ -23,6 +23,11 @@ parser.add_argument(
     '--names',
     help='The name property',
     type=str)
+parser.add_argument(
+    '--geometry',
+    help='Geometry to parse from geojson. Allowed values: point, polygon. Default: polygon',
+    type=str,
+    default='polygon')
 
 args = vars(parser.parse_args())
 
@@ -38,13 +43,16 @@ def isEditable(geo):
         return 'multipolygon'
     if geo.area > MAX_EDITABLE_AREA:
         return 'too large'
-    if geo.area == 0:
+    if geo.geom_type == 'Polygon' and geo.area == 0:
         return 'data problem'
     return ''
 
-
-def trunc_bounds(bounds):
-    return [
+def get_bounds(geo):
+  if geo.geom_type == '':
+    bounds = geo.buffer(0.0015).bounds #TODO make great circle distance
+  else:
+    bounds = geo.bounds
+  return [
         _trunc(bounds[0]),
         _trunc(bounds[1]),
         _trunc(bounds[2]),
@@ -53,6 +61,13 @@ def trunc_bounds(bounds):
 
 def _trunc(dec):
     return float('{0:.5f}'.format(dec))
+
+def allowedGeometry(geo, geom_type):
+  if geom_type == 'polygon' and (geo.geom_type == 'Polygon' or geo.geom_type == 'MultiPolygon'):
+    return True
+  if geom_type == 'point' and geo.geom_type == 'Point':
+    return True
+  return False
 
 data = open(args['source'])
 data = json.load(data)
@@ -71,7 +86,9 @@ count = 0
 for feature in data['features']:
     if feature['geometry']:
         geo = asShape(feature['geometry'])
-        bounds = trunc_bounds(geo.bounds)
+        if allowedGeometry(geo, args['geometry']) == False:
+          continue
+        bounds = get_bounds(geo)
         problem = isEditable(geo)
         name = ''
 
