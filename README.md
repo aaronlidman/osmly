@@ -15,7 +15,9 @@ OSMLY is a browser based importer for collaborative item-by-item reviewing, edit
 
 ###Local Development
 - npm install
-- node index.js
+- cd server/
+- npm install
+- node server.js
 - `dev-template.html` is the launching point for most of the action
     - `dev-template.html` is used for developement while `sample-template.html` should be used making new imports
     - this is totally aped from [iD](https://github.com/openstreetmap/iD)'s index.html
