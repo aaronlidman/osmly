@@ -114,9 +114,9 @@ osmly.import = (function() {
         body.append('\
             <div id="flash">\
                 <div style="position: relative">\
-                    <img class="problem hidden flash" src="http://osmly.com/dist/problem.svg" />\
-                    <img class="right-arrow hidden flash" src="http://osmly.com/dist/right-arrow.svg" />\
-                    <img class="up-arrow hidden flash" src="http://osmly.com/dist/up-arrow.svg" />\
+                    <img class="problem hidden flash" src="dist/problem.svg" />\
+                    <img class="right-arrow hidden flash" src="dist/right-arrow.svg" />\
+                    <img class="up-arrow hidden flash" src="dist/up-arrow.svg" />\
                 </div>\
             </div>\
         ');
