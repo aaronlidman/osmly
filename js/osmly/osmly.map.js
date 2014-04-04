@@ -8,6 +8,8 @@ osmly.map = function() {
         fadeAnimation: false
     });
 
+    L.Icon.Default.imagePath = 'dist/leaflet-images/';
+
     map.on('moveend', function() {
         var coords = map.getCenter().wrap(),
             lat = coords.lat.toFixed(4).toString(),
