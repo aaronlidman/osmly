@@ -8,6 +8,8 @@ osmly.map = function() {
         fadeAnimation: false
     });
 
+    L.Icon.Default.imagePath = 'dist/leaflet-images/';
+
     map.on('moveend', function() {
         var coords = map.getCenter().wrap(),
             lat = coords.lat.toFixed(4).toString(),
@@ -160,8 +162,10 @@ osmly.map = function() {
                         for (var el in layer._layers) {
                             layer._layers[el].editing.enable();
                         }
+                    } else if (geojson.geometry.type == 'Point') {
+                       layer.options.draggable = true;
                     } else {
-                        layer.editing.enable();
+                       layer.editing.enable();
                     }
                 }
             }

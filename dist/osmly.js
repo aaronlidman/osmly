@@ -156,6 +156,8 @@ osmly.map = function() {
         fadeAnimation: false
     });
 
+    L.Icon.Default.imagePath = 'dist/leaflet-images/';
+
     map.on('moveend', function() {
         var coords = map.getCenter().wrap(),
             lat = coords.lat.toFixed(4).toString(),
@@ -308,8 +310,10 @@ osmly.map = function() {
                         for (var el in layer._layers) {
                             layer._layers[el].editing.enable();
                         }
+                    } else if (geojson.geometry.type == 'Point') {
+                       layer.options.draggable = true;
                     } else {
-                        layer.editing.enable();
+                       layer.editing.enable();
                     }
                 }
             }
@@ -521,7 +525,7 @@ osmly.ui = (function() {
 
     ui.notify = function(string) {
         if (string !== '') string = '<span>' + string + '</span>';
-        string = '<img src="http://osmly.com/dist/loader.gif" />' + string;
+        string = '<img src="dist/loader.gif" />' + string;
 
         $('#notify').html(string);
         $('#notify').show();
@@ -938,9 +942,9 @@ osmly.import = (function() {
         body.append('\
             <div id="flash">\
                 <div style="position: relative">\
-                    <img class="problem hidden flash" src="http://osmly.com/dist/problem.svg" />\
-                    <img class="right-arrow hidden flash" src="http://osmly.com/dist/right-arrow.svg" />\
-                    <img class="up-arrow hidden flash" src="http://osmly.com/dist/up-arrow.svg" />\
+                    <img class="problem hidden flash" src="dist/problem.svg" />\
+                    <img class="right-arrow hidden flash" src="dist/right-arrow.svg" />\
+                    <img class="up-arrow hidden flash" src="dist/up-arrow.svg" />\
                 </div>\
             </div>\
         ');
