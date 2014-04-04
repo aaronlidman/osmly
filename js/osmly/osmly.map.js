@@ -160,8 +160,10 @@ osmly.map = function() {
                         for (var el in layer._layers) {
                             layer._layers[el].editing.enable();
                         }
+                    } else if (geojson.geometry.type == 'Point') {
+                       layer.options.draggable = true;
                     } else {
-                        layer.editing.enable();
+                       layer.editing.enable();
                     }
                 }
             }
